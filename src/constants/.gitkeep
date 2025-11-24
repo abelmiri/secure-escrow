@@ -1,0 +1,18 @@
+# Constants Directory
+
+This directory contains application constants, configuration values, and enums.
+
+## Structure
+- Group related constants together
+- Use TypeScript `const` assertions for type safety
+- Export as named exports
+
+## Example
+```
+constants/
+  routes.ts
+  api.ts
+  theme.ts
+  enums.ts
+```
+

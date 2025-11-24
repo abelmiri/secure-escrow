@@ -1,0 +1,20 @@
+# Library/Utilities Directory
+
+This directory contains utility functions, helpers, and shared logic.
+
+## Structure
+- Utility functions should be organized by domain/feature
+- Each utility file should export typed functions
+- Use `.ts` extension (not `.tsx`) for non-component files
+
+## Example
+```
+lib/
+  api/
+    client.ts
+    endpoints.ts
+  utils/
+    format.ts
+    validation.ts
+```
+

@@ -1,6 +1,11 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  
+  /* Material Design Button Colors */
+  --color-first: #d4a574;      /* Light brown */
+  --color-secondary: #9b59b6;   /* Flat purple */
+  --color-third: #3498db;       /* Flat blue */
 }
 
 @media (prefers-color-scheme: dark) {

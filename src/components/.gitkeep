@@ -1,0 +1,23 @@
+# Reusable Components Directory
+
+This directory contains reusable React components built with TypeScript and following Material Design principles.
+
+## Structure
+- Components should be organized by feature or type
+- Each component should have its own folder with:
+  - `ComponentName.tsx` - Main component file
+  - `types.ts` - TypeScript types/interfaces (if needed)
+  - `ComponentName.module.css` - Styles (if using CSS Modules)
+
+## Example
+```
+components/
+  Button/
+    Button.tsx
+    types.ts
+    Button.module.css
+  Card/
+    Card.tsx
+    types.ts
+```
+

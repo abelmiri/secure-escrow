@@ -1,0 +1,17 @@
+# Styles Directory
+
+This directory contains global styles, themes, and Material Design system configurations.
+
+## Structure
+- Global CSS variables and Material Design tokens
+- Theme configuration (when Material UI is added)
+- Shared style utilities
+
+## Example
+```
+styles/
+  theme.ts          # Material Design theme config
+  tokens.css        # CSS custom properties
+  mixins.css        # Reusable CSS patterns
+```
+
