@@ -4,8 +4,12 @@
   
   /* Material Design Button Colors */
   --color-first: #d4a574;      /* Light brown */
-  --color-secondary: #9b59b6;   /* Flat purple */
+  --color-secondary: #8200DB;   /* Flat purple */
   --color-third: #3498db;       /* Flat blue */
+  
+  /* Border Radius */
+  --border-radius-icon: 14px;
+  --border-radius-full: 999px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -23,7 +27,7 @@ body {
 
 body {
   color: var(--foreground);
-  background: var(--background);
+  background: var(--color-secondary);
   font-family: Arial, Helvetica, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

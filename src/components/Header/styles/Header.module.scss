@@ -1,0 +1,38 @@
+.header {
+  height: 64px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.iconContainer {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--border-radius-icon);
+  background: linear-gradient(135deg, #9810fa 0%, #8200db 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0px 4px 6px -4px #ad46ff4d, 0px 10px 15px -3px #ad46ff4d;
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  color: white;
+
+  path {
+    stroke: white;
+  }
+}

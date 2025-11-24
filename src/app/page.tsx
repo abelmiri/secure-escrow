@@ -3,6 +3,7 @@
 import { Container, Paper, Typography, Box } from "@mui/material";
 import HomePageButtons from "@/components/HomePageButtons";
 import UserCard from "@/components/UserCard";
+import LandingInfo from "@/components/LandingInfo";
 import { mockUsers } from "@/lib/users";
 
 export default function HomePage() {
@@ -15,7 +16,9 @@ export default function HomePage() {
   };
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 8, mb: 8 }}>
+    <>
+      <LandingInfo />
+      <Container maxWidth="lg" sx={{ mt: 8, mb: 8 }}>
       <Paper sx={{ p: 4, mb: 4 }}>
         <Typography variant="h3" component="h1" gutterBottom>
           My Material Design System
@@ -55,5 +58,6 @@ export default function HomePage() {
         </Box>
       </Box>
     </Container>
+    </>
   );
 }

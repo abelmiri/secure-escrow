@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import MuiThemeProvider from "./MuiThemeProvider";
+import Header from "@/components/Header";
 
 export const metadata: Metadata = {
   title: "My Material App",
@@ -17,7 +18,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <MuiThemeProvider>{children}</MuiThemeProvider>
+        <MuiThemeProvider>
+          <Header />
+          {children}
+        </MuiThemeProvider>
       </body>
     </html>
   );

@@ -1,0 +1,56 @@
+.landingInfo {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #9810fa 0%, #8200db 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
+}
+
+.contentContainer {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  align-items: center;
+  gap: 48px;
+}
+
+.leftSection {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+.rightSection {
+  width: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.imageContainer {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.landingSafeImage {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .contentContainer {
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .leftSection,
+  .rightSection {
+    width: 100%;
+  }
+}
