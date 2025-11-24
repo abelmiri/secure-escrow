@@ -11,6 +11,10 @@
   /* Border Radius */
   --border-radius-icon: 14px;
   --border-radius-full: 999px;
+  
+  /* Text Colors */
+  --color-text-primary: #364153;
+  --color-text-secondary: #4a5565;
 }
 
 @media (prefers-color-scheme: dark) {

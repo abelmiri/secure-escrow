@@ -1,0 +1,43 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  padding: 32px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  height: 225px;
+}
+
+.title {
+  color: var(--color-text-secondary);
+  font-size: 16px !important;
+  font-weight: 400;
+  margin: 0;
+  text-align: center;
+  user-select: none;
+}
+
+.partnersContainer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 48px !important;
+}
+
+.partnerName {
+  color: var(--color-text-primary);
+  font-size: 24px !important;
+  font-weight: 400;
+  opacity: 50% !important;
+  margin: 0;
+  cursor: pointer;
+  user-select: none;
+  transition: opacity 0.2s ease-in-out;
+
+  &:hover {
+    opacity: 100% !important;
+  }
+}

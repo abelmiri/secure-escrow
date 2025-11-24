@@ -4,6 +4,7 @@ import { Container, Paper, Typography, Box } from "@mui/material";
 import HomePageButtons from "@/components/HomePageButtons";
 import UserCard from "@/components/UserCard";
 import LandingInfo from "@/components/LandingInfo";
+import TrustedPartnersCard from "@/components/TrustedPartnersCard";
 import { mockUsers } from "@/lib/users";
 
 export default function HomePage() {
@@ -18,7 +19,8 @@ export default function HomePage() {
   return (
     <>
       <LandingInfo />
-    <Container maxWidth="lg" sx={{ mt: 8, mb: 8 }}>
+      <TrustedPartnersCard />
+      <Container maxWidth="lg" sx={{ mt: 8, mb: 8 }}>
       <Paper sx={{ p: 4, mb: 4 }}>
         <Typography variant="h3" component="h1" gutterBottom>
           My Material Design System
