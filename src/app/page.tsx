@@ -18,7 +18,7 @@ export default function HomePage() {
   return (
     <>
       <LandingInfo />
-      <Container maxWidth="lg" sx={{ mt: 8, mb: 8 }}>
+    <Container maxWidth="lg" sx={{ mt: 8, mb: 8 }}>
       <Paper sx={{ p: 4, mb: 4 }}>
         <Typography variant="h3" component="h1" gutterBottom>
           My Material Design System

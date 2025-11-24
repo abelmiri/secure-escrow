@@ -4,3 +4,4 @@ export interface LandingHeadingProps {
   secondLine?: string;
 }
 
+

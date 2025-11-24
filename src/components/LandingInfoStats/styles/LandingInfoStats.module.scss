@@ -1,0 +1,39 @@
+.statsContainer {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  @media (min-width: 769px) {
+    padding-inline-end: 20%;
+  }
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.value {
+  color: white;
+  font-size: 30px !important;
+  font-weight: 400;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.label {
+  color: #e9d4ff;
+  font-size: 14px !important;
+  font-weight: 400;
+  line-height: 1.2;
+  margin: 0;
+}
+
+// @media (max-width: 768px) {
+//   .statsContainer {
+//     flex-direction: column;
+//     gap: 24px;
+//   }
+// }

@@ -1,6 +1,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --light-color: #ffffff;
   
   /* Material Design Button Colors */
   --color-first: #d4a574;      /* Light brown */
@@ -28,7 +29,7 @@ body {
 body {
   color: var(--foreground);
   background: var(--color-secondary);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

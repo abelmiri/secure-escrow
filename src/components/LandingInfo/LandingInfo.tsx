@@ -6,6 +6,8 @@ import type { LandingInfoProps } from "./types";
 import TrustedBanner from "@/components/TrustedBanner";
 import LandingHeading from "@/components/LandingHeading";
 import LandingHeadingDescription from "@/components/LandingHeadingDescription";
+import LandingStartButtons from "@/components/LandingStartButtons";
+import LandingInfoStats from "@/components/LandingInfoStats";
 import styles from "./styles/LandingInfo.module.scss";
 
 export default function LandingInfo({ className }: LandingInfoProps) {
@@ -16,6 +18,8 @@ export default function LandingInfo({ className }: LandingInfoProps) {
           <TrustedBanner />
           <LandingHeading />
           <LandingHeadingDescription />
+          <LandingStartButtons />
+          <LandingInfoStats />
         </Box>
         <Box className={styles.rightSection}>
           <Box className={styles.imageContainer}>
