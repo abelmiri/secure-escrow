@@ -1,0 +1,126 @@
+.card {
+  transition: all 0.3s ease-in-out;
+  max-width: 400px;
+  width: 100%;
+  margin: 16px;
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+}
+
+.cardContent {
+  padding: 24px !important;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.avatar {
+  width: 64px;
+  height: 64px;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.userInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.userName {
+  font-weight: 600;
+  margin: 0;
+}
+
+.roleChip {
+  width: fit-content;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon {
+  color: var(--color-third);
+  font-size: 20px;
+}
+
+.statusChip {
+  width: fit-content;
+  margin-top: 8px;
+}
+
+.cardActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px 16px 16px;
+  gap: 8px;
+}
+
+.editButton {
+  color: var(--color-third) !important;
+
+  &:hover {
+    background-color: rgba(52, 152, 219, 0.1) !important;
+  }
+}
+
+.deleteButton {
+  color: #e74c3c !important;
+
+  &:hover {
+    background-color: rgba(231, 76, 60, 0.1) !important;
+  }
+}
+
+.viewButton {
+  background-color: var(--color-first) !important;
+  color: #ffffff !important;
+  margin-left: auto;
+
+  &:hover {
+    background-color: var(--color-first) !important;
+    opacity: 0.9;
+    filter: brightness(0.9);
+  }
+}
+
+@media (max-width: 600px) {
+  .card {
+    margin: 8px;
+    max-width: 100%;
+  }
+
+  .header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .cardActions {
+    flex-wrap: wrap;
+  }
+
+  .viewButton {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 8px;
+  }
+}
+
