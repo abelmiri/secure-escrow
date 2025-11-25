@@ -1,0 +1,211 @@
+---
+alwaysApply: true
+---
+
+# Development Rules for my-app
+
+## Component Development Standards
+
+### 1. TypeScript Requirement
+
+- **ALL components MUST be written in TypeScript** (.tsx for React components, .ts for utilities)
+- Never use JavaScript (.js/.jsx) files for new components
+- Always define proper TypeScript types and interfaces for props, state, and function parameters
+- Use strict TypeScript typing - avoid `any` types unless absolutely necessary
+- Leverage TypeScript's type inference where appropriate
+
+### 2. Next.js Framework
+
+- **ALL components MUST be developed using Next.js conventions**
+- Use Next.js App Router structure (components in `src/app/` or `src/components/`)
+- Leverage Next.js features:
+  - Server Components by default (use 'use client' directive only when needed)
+  - Next.js Image component for images
+  - Next.js Link component for navigation
+  - File-based routing structure
+- Follow Next.js best practices for data fetching, caching, and rendering
+
+### 3. Material Design System
+
+- **ALL components MUST follow Material Design principles**
+- Use Material UI (@mui/material) components and patterns
+- Import Material UI components from `@mui/material`
+- Use the MuiThemeProvider wrapper for theme consistency
+- Follow Material Design guidelines for:
+  - Typography scale
+  - Color system
+  - Spacing and layout (8dp grid system)
+  - Component elevation and shadows
+  - Motion and transitions
+- Ensure components are accessible and follow Material Design accessibility standards
+
+### 4. Component Structure
+
+- Components should be:
+  - Functional components using TypeScript
+  - Properly typed with interfaces for props
+  - Located in appropriate directories (`src/components/` for reusable components, `src/app/` for page components)
+  - Named using PascalCase (e.g., `Button.tsx`, `UserProfile.tsx`)
+  - Each component should have its own directory structure:
+    ```
+    ComponentName/
+      ComponentName.tsx
+      types.ts (TypeScript interfaces and types)
+      styles/
+        ComponentName.module.scss
+      index.ts (for cleaner imports - re-export component and types)
+    ```
+- **ALWAYS create a `types.ts` file** for component-specific TypeScript interfaces and types
+- **ALWAYS create an `index.ts` file** that exports the component and its types for cleaner imports
+- Types should be co-located with components unless shared across multiple components
+
+### 5. Styling with SCSS
+
+- **ALL components MUST use SCSS for styling**
+- Each component MUST have its own SCSS module file located in `styles/` subdirectory
+- SCSS files should be named: `ComponentName.module.scss`
+- Use CSS Modules for scoped styling (import as `styles` object)
+- SCSS files should be placed in `componentName/styles/` directory
+- Follow Material Design spacing and design tokens in SCSS
+- Use SCSS features: variables, nesting, mixins, and media queries
+- Example structure:
+
+  ```typescript
+  // ComponentName.tsx
+  import styles from "./styles/ComponentName.module.scss";
+
+  export default function ComponentName() {
+    return <div className={styles.container}>...</div>;
+  }
+  ```
+
+### 6. Code Quality
+
+- Use ESLint configuration provided by Next.js
+- Follow React best practices (hooks, component composition)
+- Write clean, maintainable, and well-documented code
+- Use meaningful variable and function names
+
+### 7. Package Management
+
+- **ALWAYS use bun or yarn for package management** (prefer bun if available, fallback to yarn)
+- Never use npm directly for installing packages
+- Use `bun add <package>` or `yarn add <package>` for dependencies
+- Use `bun add -d <package>` or `yarn add -D <package>` for dev dependencies
+- Use `bun install` or `yarn install` to install all dependencies
+
+### 8. Navigation and Routing
+
+- **ALWAYS use Next.js App Router** for navigation and routing
+- Use `next/link` Link component for client-side navigation
+- Use `useRouter()` from `next/navigation` for programmatic navigation
+- For dynamic routes, use `[param]` folder structure (e.g., `app/user/[id]/page.tsx`)
+- Handle loading and error states in dynamic route pages
+- Prevent event propagation when nested interactive elements exist:
+  ```typescript
+  const handleAction = (e: React.MouseEvent<HTMLButtonElement>): void => {
+    e.preventDefault();
+    e.stopPropagation();
+    // action logic
+  };
+  ```
+- When making entire cards/components clickable, use `component={Link}` prop on Material UI Card/Paper components
+- Avoid nested Link components - use event handlers with router.push() for nested buttons
+
+### 9. Data Management and Utilities
+
+- **ALWAYS create centralized data/utility files** in `src/lib/` directory
+- Group related data and functions together (e.g., `src/lib/users.ts` for user-related data and functions)
+- Export data arrays/objects and utility functions from lib files
+- Use TypeScript types from component types files when possible
+- Example structure:
+
+  ```typescript
+  // src/lib/resource.ts
+  import type { Resource } from "@/components/Resource/types";
+
+  export const mockResources: Resource[] = [...];
+
+  export function getResourceById(id: string): Resource | undefined {
+    return mockResources.find(r => r.id === id);
+  }
+  ```
+
+### 10. Component Interaction Patterns
+
+- When components need to navigate, pass navigation handlers or use Next.js router directly
+- For clickable cards that contain action buttons:
+  - Make the card itself a Link component
+  - Use event handlers with `e.stopPropagation()` for action buttons inside
+  - Use `router.push()` for programmatic navigation in nested buttons
+- Always provide proper TypeScript types for event handlers:
+  ```typescript
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>): void => {
+    e.preventDefault();
+    e.stopPropagation();
+    // handler logic
+  };
+  ```
+
+## File Naming Conventions
+
+- Components: `ComponentName.tsx`
+- Utilities: `utilityName.ts`
+- Types: `types.ts` (ALWAYS co-located with components in component directory)
+- Styles: `ComponentName.module.scss` in `styles/` subdirectory within component folder
+- Index files: `index.ts` (for cleaner imports - re-export component and types)
+- Data/Utilities: `resourceName.ts` in `src/lib/` directory
+
+## Import Organization
+
+- Group imports: React/Next.js → Third-party → Local components → Types → Styles
+- Use absolute imports with `@/` prefix when available
+
+## Example Component Template
+
+```typescript
+// ComponentName.tsx
+"use client"; // Only if client-side features are needed
+
+import React from "react";
+import type { ComponentNameProps } from "./types";
+import styles from "./styles/ComponentName.module.scss";
+
+export default function ComponentName({ prop1, prop2 }: ComponentNameProps) {
+  // Component implementation following Material Design principles
+  return (
+    <div className={styles.container}>
+      {/* JSX with Material Design components */}
+    </div>
+  );
+}
+```
+
+```typescript
+// types.ts
+export interface ComponentNameProps {
+  prop1: string;
+  prop2: number;
+  optionalProp?: boolean;
+}
+
+export type ComponentNameType = ComponentNameProps["prop1"];
+```
+
+```typescript
+// index.ts
+export { default } from "./ComponentName";
+export type { ComponentNameProps, ComponentNameType } from "./types";
+```
+
+```scss
+// styles/ComponentName.module.scss
+.container {
+  padding: 16px;
+  margin: 8px;
+
+  @media (max-width: 600px) {
+    padding: 12px;
+  }
+}
+```
