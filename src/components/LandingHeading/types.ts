@@ -1,7 +1,5 @@
 export interface LandingHeadingProps {
-  className?: string;
-  firstLine?: string;
-  secondLine?: string;
+  className?: string
+  firstLine?: string
+  secondLine?: string
 }
-
-

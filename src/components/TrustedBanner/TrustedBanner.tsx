@@ -1,9 +1,9 @@
-"use client";
+"use client"
 
-import { Box, Typography } from "@mui/material";
-import type { TrustedBannerProps } from "./types";
-import TrustedBadge from "@/media/svg/TrustedBadge";
-import styles from "./styles/TrustedBanner.module.scss";
+import { Box, Typography } from "@mui/material"
+import type { TrustedBannerProps } from "./types"
+import TrustedBadge from "@/media/svg/TrustedBadge"
+import styles from "./styles/TrustedBanner.module.scss"
 
 export default function TrustedBanner({
   className,
@@ -14,6 +14,5 @@ export default function TrustedBanner({
       <TrustedBadge width={16} height={16} className={styles.icon} />
       <Typography className={styles.text}>{text}</Typography>
     </Box>
-  );
+  )
 }
-

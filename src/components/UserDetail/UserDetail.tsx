@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import {
   Container,
@@ -12,7 +12,7 @@ import {
   Button,
   Card,
   CardContent,
-} from "@mui/material";
+} from "@mui/material"
 import {
   Email as EmailIcon,
   Person as PersonIcon,
@@ -22,10 +22,10 @@ import {
   CalendarToday as CalendarIcon,
   Login as LoginIcon,
   ArrowBack as ArrowBackIcon,
-} from "@mui/icons-material";
-import Link from "next/link";
-import type { UserDetailProps } from "./types";
-import styles from "./styles/UserDetail.module.scss";
+} from "@mui/icons-material"
+import Link from "next/link"
+import type { UserDetailProps } from "./types"
+import styles from "./styles/UserDetail.module.scss"
 
 export default function UserDetail({ user }: UserDetailProps) {
   const formatDate = (date: Date): string => {
@@ -35,16 +35,16 @@ export default function UserDetail({ user }: UserDetailProps) {
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    }).format(date);
-  };
+    }).format(date)
+  }
 
   const formatShortDate = (date: Date): string => {
     return new Intl.DateTimeFormat("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
-    }).format(date);
-  };
+    }).format(date)
+  }
 
   const getInitials = (name: string): string => {
     return name
@@ -52,28 +52,30 @@ export default function UserDetail({ user }: UserDetailProps) {
       .map((n) => n[0])
       .join("")
       .toUpperCase()
-      .slice(0, 2);
-  };
+      .slice(0, 2)
+  }
 
-  const getRoleColor = (role: UserDetailProps["user"]["role"]): "default" | "primary" | "secondary" => {
+  const getRoleColor = (
+    role: UserDetailProps["user"]["role"],
+  ): "default" | "primary" | "secondary" => {
     switch (role) {
       case "admin":
-        return "primary";
+        return "primary"
       case "user":
-        return "default";
+        return "default"
       case "guest":
-        return "secondary";
+        return "secondary"
       default:
-        return "default";
+        return "default"
     }
-  };
+  }
 
   const getDaysSinceJoin = (joinDate: Date): number => {
-    const today = new Date();
-    const diffTime = Math.abs(today.getTime() - joinDate.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays;
-  };
+    const today = new Date()
+    const diffTime = Math.abs(today.getTime() - joinDate.getTime())
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays
+  }
 
   return (
     <Container maxWidth="md" className={styles.container}>
@@ -123,7 +125,11 @@ export default function UserDetail({ user }: UserDetailProps) {
           <Grid item xs={12} md={6}>
             <Card className={styles.infoCard}>
               <CardContent>
-                <Typography variant="h6" gutterBottom className={styles.sectionTitle}>
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  className={styles.sectionTitle}
+                >
                   Contact Information
                 </Typography>
                 <Box className={styles.infoItem}>
@@ -166,7 +172,11 @@ export default function UserDetail({ user }: UserDetailProps) {
           <Grid item xs={12} md={6}>
             <Card className={styles.infoCard}>
               <CardContent>
-                <Typography variant="h6" gutterBottom className={styles.sectionTitle}>
+                <Typography
+                  variant="h6"
+                  gutterBottom
+                  className={styles.sectionTitle}
+                >
                   Account Details
                 </Typography>
                 <Box className={styles.infoItem}>
@@ -217,7 +227,11 @@ export default function UserDetail({ user }: UserDetailProps) {
             <Grid item xs={12}>
               <Card className={styles.infoCard}>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom className={styles.sectionTitle}>
+                  <Typography
+                    variant="h6"
+                    gutterBottom
+                    className={styles.sectionTitle}
+                  >
                     About
                   </Typography>
                   <Typography variant="body1" className={styles.bio}>
@@ -230,6 +244,5 @@ export default function UserDetail({ user }: UserDetailProps) {
         </Grid>
       </Paper>
     </Container>
-  );
+  )
 }
-

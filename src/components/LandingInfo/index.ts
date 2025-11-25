@@ -1,3 +1,2 @@
-export { default } from "./LandingInfo";
-export type { LandingInfoProps } from "./types";
-
+export { default } from "./LandingInfo"
+export type { LandingInfoProps } from "./types"

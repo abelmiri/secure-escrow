@@ -1,6 +1,6 @@
-import { Typography } from "@mui/material";
-import type { LandingHeadingDescriptionProps } from "./types";
-import styles from "./styles/LandingHeadingDescription.module.scss";
+import { Typography } from "@mui/material"
+import type { LandingHeadingDescriptionProps } from "./types"
+import styles from "./styles/LandingHeadingDescription.module.scss"
 
 export default function LandingHeadingDescription({
   className,
@@ -10,6 +10,5 @@ export default function LandingHeadingDescription({
     <Typography className={`${styles.description} ${className || ""}`}>
       {text}
     </Typography>
-  );
+  )
 }
-

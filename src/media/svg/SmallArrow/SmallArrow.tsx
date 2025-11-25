@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import type { SmallArrowProps } from "./types";
+import type { SmallArrowProps } from "./types"
 
 export default function SmallArrow({
   width = 16,
@@ -32,6 +32,5 @@ export default function SmallArrow({
         strokeLinejoin="round"
       />
     </svg>
-  );
+  )
 }
-

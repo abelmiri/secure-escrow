@@ -1,4 +1,3 @@
 export interface LandingInfoProps {
-  className?: string;
+  className?: string
 }
-

@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import { Box, Typography } from "@mui/material";
-import type { LandingInfoStatsProps, StatItem } from "./types";
-import styles from "./styles/LandingInfoStats.module.scss";
+import { Box, Typography } from "@mui/material"
+import type { LandingInfoStatsProps, StatItem } from "./types"
+import styles from "./styles/LandingInfoStats.module.scss"
 
 const defaultStats: LandingInfoStatsProps["stats"] = [
   {
@@ -17,13 +17,13 @@ const defaultStats: LandingInfoStatsProps["stats"] = [
     value: "4.9/5",
     label: "User Rating",
   },
-];
+]
 
 export default function LandingInfoStats({
   className,
   stats = defaultStats,
 }: LandingInfoStatsProps) {
-  const statsToDisplay = (stats ?? defaultStats) as StatItem[];
+  const statsToDisplay = (stats ?? defaultStats) as StatItem[]
 
   return (
     <Box className={`${styles.statsContainer} ${className || ""}`}>
@@ -34,6 +34,5 @@ export default function LandingInfoStats({
         </Box>
       ))}
     </Box>
-  );
+  )
 }
-

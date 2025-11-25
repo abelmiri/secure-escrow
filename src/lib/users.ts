@@ -1,4 +1,4 @@
-import type { User } from "@/components/UserCard/types";
+import type { User } from "@/components/UserCard/types"
 
 export const mockUsers: User[] = [
   {
@@ -41,9 +41,8 @@ export const mockUsers: User[] = [
     department: "Marketing",
     lastLogin: new Date("2024-01-15T16:45:00"),
   },
-];
+]
 
 export function getUserById(id: string): User | undefined {
-  return mockUsers.find((user) => user.id === id);
+  return mockUsers.find((user) => user.id === id)
 }
-

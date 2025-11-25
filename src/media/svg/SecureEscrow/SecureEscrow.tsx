@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import type { SecureEscrowProps } from "./types";
+import type { SecureEscrowProps } from "./types"
 
 export default function SecureEscrow({
   width = 15,
@@ -25,6 +25,5 @@ export default function SecureEscrow({
         strokeLinejoin="round"
       />
     </svg>
-  );
+  )
 }
-

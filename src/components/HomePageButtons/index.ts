@@ -1,2 +1,1 @@
-export { default } from "./HomePageButtons";
-
+export { default } from "./HomePageButtons"

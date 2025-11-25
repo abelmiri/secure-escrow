@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
 import {
   Card,
   CardContent,
@@ -14,15 +14,15 @@ import {
   Box,
   IconButton,
   Tooltip,
-} from "@mui/material";
+} from "@mui/material"
 import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Email as EmailIcon,
   Person as PersonIcon,
-} from "@mui/icons-material";
-import type { UserCardProps } from "./types";
-import styles from "./styles/UserCard.module.scss";
+} from "@mui/icons-material"
+import type { UserCardProps } from "./types"
+import styles from "./styles/UserCard.module.scss"
 
 export default function UserCard({
   user,
@@ -31,51 +31,53 @@ export default function UserCard({
   showActions = true,
   className,
 }: UserCardProps) {
-  const router = useRouter();
-  const [isHovered, setIsHovered] = useState<boolean>(false);
+  const router = useRouter()
+  const [isHovered, setIsHovered] = useState<boolean>(false)
 
   const handleEdit = (e: React.MouseEvent<HTMLButtonElement>): void => {
-    e.preventDefault();
-    e.stopPropagation();
+    e.preventDefault()
+    e.stopPropagation()
     if (onEdit) {
-      onEdit(user.id);
+      onEdit(user.id)
     }
-  };
+  }
 
   const handleDelete = (e: React.MouseEvent<HTMLButtonElement>): void => {
-    e.preventDefault();
-    e.stopPropagation();
+    e.preventDefault()
+    e.stopPropagation()
     if (onDelete) {
-      onDelete(user.id);
+      onDelete(user.id)
     }
-  };
+  }
 
   const handleViewProfile = (e: React.MouseEvent<HTMLButtonElement>): void => {
-    e.preventDefault();
-    e.stopPropagation();
-    router.push(`/user/${user.id}`);
-  };
+    e.preventDefault()
+    e.stopPropagation()
+    router.push(`/user/${user.id}`)
+  }
 
-  const getRoleColor = (role: UserCardProps["user"]["role"]): "default" | "primary" | "secondary" => {
+  const getRoleColor = (
+    role: UserCardProps["user"]["role"],
+  ): "default" | "primary" | "secondary" => {
     switch (role) {
       case "admin":
-        return "primary";
+        return "primary"
       case "user":
-        return "default";
+        return "default"
       case "guest":
-        return "secondary";
+        return "secondary"
       default:
-        return "default";
+        return "default"
     }
-  };
+  }
 
   const formatDate = (date: Date): string => {
     return new Intl.DateTimeFormat("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
-    }).format(date);
-  };
+    }).format(date)
+  }
 
   const getInitials = (name: string): string => {
     return name
@@ -83,8 +85,8 @@ export default function UserCard({
       .map((n) => n[0])
       .join("")
       .toUpperCase()
-      .slice(0, 2);
-  };
+      .slice(0, 2)
+  }
 
   return (
     <Card
@@ -178,6 +180,5 @@ export default function UserCard({
         </CardActions>
       )}
     </Card>
-  );
+  )
 }
-

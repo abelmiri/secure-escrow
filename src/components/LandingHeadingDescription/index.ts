@@ -1,4 +1,2 @@
-export { default } from "./LandingHeadingDescription";
-export type { LandingHeadingDescriptionProps } from "./types";
-
-
+export { default } from "./LandingHeadingDescription"
+export type { LandingHeadingDescriptionProps } from "./types"

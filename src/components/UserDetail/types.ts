@@ -1,6 +1,5 @@
-import type { User } from "@/components/UserCard/types";
+import type { User } from "@/components/UserCard/types"
 
 export interface UserDetailProps {
-  user: User;
+  user: User
 }
-

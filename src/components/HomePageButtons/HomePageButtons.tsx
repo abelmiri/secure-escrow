@@ -1,6 +1,6 @@
-import { Button, Box } from "@mui/material";
-import type { HomePageButtonsProps, ButtonConfig } from "./types";
-import styles from "./styles/HomePageButtons.module.scss";
+import { Button, Box } from "@mui/material"
+import type { HomePageButtonsProps, ButtonConfig } from "./types"
+import styles from "./styles/HomePageButtons.module.scss"
 
 const defaultButtons: HomePageButtonsProps["buttons"] = [
   {
@@ -18,7 +18,7 @@ const defaultButtons: HomePageButtonsProps["buttons"] = [
     variant: "contained",
     colorType: "third",
   },
-];
+]
 
 export default function HomePageButtons({
   buttons = defaultButtons,
@@ -27,17 +27,18 @@ export default function HomePageButtons({
   const getButtonClassName = (colorType: string): string => {
     switch (colorType) {
       case "first":
-        return styles.primaryButton;
+        return styles.primaryButton
       case "secondary":
-        return styles.secondaryButton;
+        return styles.secondaryButton
       case "third":
-        return styles.thirdButton;
+        return styles.thirdButton
       default:
-        return styles.primaryButton;
+        return styles.primaryButton
     }
-  };
+  }
 
-  const buttonsToRender: ButtonConfig[] = (buttons ?? defaultButtons) as ButtonConfig[];
+  const buttonsToRender: ButtonConfig[] = (buttons ??
+    defaultButtons) as ButtonConfig[]
 
   return (
     <Box className={`${styles.buttonContainer} ${className || ""}`}>
@@ -52,6 +53,5 @@ export default function HomePageButtons({
         </Button>
       ))}
     </Box>
-  );
+  )
 }
-

@@ -1,48 +1,48 @@
 .buttonContainer {
-    margin-top: 24px;
-    display: flex;
-    gap: 16px;
+  margin-top: 24px;
+  display: flex;
+  gap: 16px;
 
-    @media (max-width: 600px) {
-        flex-direction: column;
-        gap: 12px;
-    }
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 12px;
+  }
 }
 
 .primaryButton {
-    flex: 1;
-    min-width: 120px;
-    background-color: var(--color-first) !important;
-    color: #ffffff !important;
+  flex: 1;
+  min-width: 120px;
+  background-color: var(--color-first) !important;
+  color: #ffffff !important;
 
-    &:hover {
-        background-color: var(--color-first) !important;
-        opacity: 0.9;
-        filter: brightness(0.9);
-    }
+  &:hover {
+    background-color: var(--color-first) !important;
+    opacity: 0.9;
+    filter: brightness(0.9);
+  }
 }
 
 .secondaryButton {
-    flex: 1;
-    min-width: 120px;
-    border-color: var(--color-secondary) !important;
-    color: var(--color-secondary) !important;
+  flex: 1;
+  min-width: 120px;
+  border-color: var(--color-secondary) !important;
+  color: var(--color-secondary) !important;
 
-    &:hover {
-        background-color: var(--color-secondary) !important;
-        color: #ffffff !important;
-    }
+  &:hover {
+    background-color: var(--color-secondary) !important;
+    color: #ffffff !important;
+  }
 }
 
 .thirdButton {
-    flex: 1;
-    min-width: 120px;
-    background-color: var(--color-third) !important;
-    color: #ffffff !important;
+  flex: 1;
+  min-width: 120px;
+  background-color: var(--color-third) !important;
+  color: #ffffff !important;
 
-    &:hover {
-        background-color: var(--color-third) !important;
-        opacity: 0.9;
-        filter: brightness(0.9);
-    }
+  &:hover {
+    background-color: var(--color-third) !important;
+    opacity: 0.9;
+    filter: brightness(0.9);
+  }
 }

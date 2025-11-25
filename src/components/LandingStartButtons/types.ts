@@ -1,4 +1,3 @@
 export interface LandingStartButtonsProps {
-  className?: string;
+  className?: string
 }
-

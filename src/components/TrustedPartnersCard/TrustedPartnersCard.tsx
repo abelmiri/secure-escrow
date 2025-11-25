@@ -1,8 +1,8 @@
-"use client";
+"use client"
 
-import { Box, Typography } from "@mui/material";
-import type { TrustedPartnersCardProps } from "./types";
-import styles from "./styles/TrustedPartnersCard.module.scss";
+import { Box, Typography } from "@mui/material"
+import type { TrustedPartnersCardProps } from "./types"
+import styles from "./styles/TrustedPartnersCard.module.scss"
 
 const defaultPartners: string[] = [
   "VISA",
@@ -10,7 +10,7 @@ const defaultPartners: string[] = [
   "PayPal",
   "Stripe",
   "American Express",
-];
+]
 
 export default function TrustedPartnersCard({
   className,
@@ -22,12 +22,14 @@ export default function TrustedPartnersCard({
       <Typography className={styles.title}>{title}</Typography>
       <Box className={styles.partnersContainer}>
         {partners.map((partner, index) => (
-          <Typography key={`${partner}-${index}`} className={styles.partnerName}>
+          <Typography
+            key={`${partner}-${index}`}
+            className={styles.partnerName}
+          >
             {partner}
           </Typography>
         ))}
       </Box>
     </Box>
-  );
+  )
 }
-

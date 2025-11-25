@@ -1,7 +1,7 @@
-import { Box } from "@mui/material";
-import type { HeaderProps } from "./types";
-import SecureEscrow from "@/media/svg/SecureEscrow";
-import styles from "./styles/Header.module.scss";
+import { Box } from "@mui/material"
+import type { HeaderProps } from "./types"
+import SecureEscrow from "@/media/svg/SecureEscrow"
+import styles from "./styles/Header.module.scss"
 
 export default function Header({ className }: HeaderProps) {
   return (
@@ -15,6 +15,5 @@ export default function Header({ className }: HeaderProps) {
         />
       </Box>
     </Box>
-  );
+  )
 }
-

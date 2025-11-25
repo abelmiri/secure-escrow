@@ -1,3 +1,2 @@
-export { default } from "./TrustedBanner";
-export type { TrustedBannerProps } from "./types";
-
+export { default } from "./TrustedBanner"
+export type { TrustedBannerProps } from "./types"

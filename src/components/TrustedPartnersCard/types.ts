@@ -1,6 +1,5 @@
 export interface TrustedPartnersCardProps {
-  className?: string;
-  title?: string;
-  partners?: string[];
+  className?: string
+  title?: string
+  partners?: string[]
 }
-

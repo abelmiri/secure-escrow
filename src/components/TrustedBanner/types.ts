@@ -1,5 +1,4 @@
 export interface TrustedBannerProps {
-  className?: string;
-  text?: string;
+  className?: string
+  text?: string
 }
-

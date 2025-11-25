@@ -1,3 +1,2 @@
-export { default } from "./LandingStartButtons";
-export type { LandingStartButtonsProps } from "./types";
-
+export { default } from "./LandingStartButtons"
+export type { LandingStartButtonsProps } from "./types"

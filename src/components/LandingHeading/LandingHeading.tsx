@@ -1,6 +1,6 @@
-import { Typography, Box } from "@mui/material";
-import type { LandingHeadingProps } from "./types";
-import styles from "./styles/LandingHeading.module.scss";
+import { Typography, Box } from "@mui/material"
+import type { LandingHeadingProps } from "./types"
+import styles from "./styles/LandingHeading.module.scss"
 
 export default function LandingHeading({
   className,
@@ -12,7 +12,5 @@ export default function LandingHeading({
       <Typography className={styles.firstLine}>{firstLine}</Typography>
       <Typography className={styles.secondLine}>{secondLine}</Typography>
     </Box>
-  );
+  )
 }
-
-

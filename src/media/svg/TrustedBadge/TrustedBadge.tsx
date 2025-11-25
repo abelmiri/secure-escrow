@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import type { TrustedBadgeProps } from "./types";
+import type { TrustedBadgeProps } from "./types"
 
 export default function TrustedBadge({
   width = 16,
@@ -32,6 +32,5 @@ export default function TrustedBadge({
         strokeLinejoin="round"
       />
     </svg>
-  );
+  )
 }
-

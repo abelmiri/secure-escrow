@@ -1,4 +1,3 @@
 export interface HeaderProps {
-  className?: string;
+  className?: string
 }
-

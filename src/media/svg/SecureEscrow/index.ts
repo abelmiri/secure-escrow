@@ -1,3 +1,2 @@
-export { default } from "./SecureEscrow";
-export type { SecureEscrowProps } from "./types";
-
+export { default } from "./SecureEscrow"
+export type { SecureEscrowProps } from "./types"

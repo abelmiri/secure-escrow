@@ -1,12 +1,12 @@
-import Image from "next/image";
-import { Box } from "@mui/material";
-import type { LandingInfoProps } from "./types";
-import TrustedBanner from "@/components/TrustedBanner";
-import LandingHeading from "@/components/LandingHeading";
-import LandingHeadingDescription from "@/components/LandingHeadingDescription";
-import LandingStartButtons from "@/components/LandingStartButtons";
-import LandingInfoStats from "@/components/LandingInfoStats";
-import styles from "./styles/LandingInfo.module.scss";
+import Image from "next/image"
+import { Box } from "@mui/material"
+import type { LandingInfoProps } from "./types"
+import TrustedBanner from "@/components/TrustedBanner"
+import LandingHeading from "@/components/LandingHeading"
+import LandingHeadingDescription from "@/components/LandingHeadingDescription"
+import LandingStartButtons from "@/components/LandingStartButtons"
+import LandingInfoStats from "@/components/LandingInfoStats"
+import styles from "./styles/LandingInfo.module.scss"
 
 export default function LandingInfo({ className }: LandingInfoProps) {
   return (
@@ -34,6 +34,5 @@ export default function LandingInfo({ className }: LandingInfoProps) {
         </Box>
       </Box>
     </Box>
-  );
+  )
 }
-
