@@ -1,12 +1,14 @@
-"use client"
+import { SVGProps } from "react"
 
-import type { TrustedBadgeProps } from "./types"
+export interface TrustedBadgeProps extends SVGProps<SVGSVGElement> {
+  strokeColor?: string
+}
 
 export default function TrustedBadge({
+  strokeColor = "#E9D4FF",
   width = 16,
   height = 16,
-  className,
-  strokeColor = "#E9D4FF",
+  ...props
 }: TrustedBadgeProps) {
   return (
     <svg
@@ -15,7 +17,7 @@ export default function TrustedBadge({
       viewBox="0 0 16 16"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className={className}
+      {...props}
     >
       <path
         d="M10.318 8.59334L11.328 14.2773C11.3393 14.3443 11.3299 14.4131 11.3011 14.4745C11.2722 14.536 11.2253 14.5871 11.1666 14.6212C11.1079 14.6553 11.0402 14.6706 10.9725 14.6651C10.9049 14.6597 10.8405 14.6337 10.788 14.5907L8.40133 12.7993C8.28611 12.7133 8.14615 12.6668 8.00233 12.6668C7.85851 12.6668 7.71855 12.7133 7.60333 12.7993L5.21266 14.59C5.16021 14.633 5.09591 14.6589 5.02833 14.6644C4.96075 14.6698 4.89311 14.6546 4.83444 14.6206C4.77577 14.5866 4.72885 14.5356 4.69994 14.4742C4.67104 14.4129 4.66152 14.3442 4.67266 14.2773L5.682 8.59334"
@@ -34,3 +36,4 @@ export default function TrustedBadge({
     </svg>
   )
 }
+
