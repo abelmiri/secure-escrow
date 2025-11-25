@@ -7,6 +7,7 @@ import WhyChooseUs from "@/components/Landing/WhyChooseUs/WhyChooseUs"
 import PerfectTransaction from "@/components/Landing/PerfectTransaction/PerfectTransaction"
 import Testimonials from "@/components/Landing/Testimonials/Testimonials"
 import ReadyToStart from "@/components/Landing/ReadyToStart/ReadyToStart"
+import Footer from "@/components/Footer/Footer"
 
 export default function HomePage() {
   return (
@@ -18,6 +19,7 @@ export default function HomePage() {
       <PerfectTransaction />
       <Testimonials />
       <ReadyToStart />
+      <Footer />
     </>
   )
 }
