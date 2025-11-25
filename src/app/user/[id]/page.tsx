@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Container, Typography, CircularProgress, Box } from "@mui/material";
@@ -15,14 +13,14 @@ export default function UserPage() {
 
   useEffect(() => {
     const userId = params?.id as string;
-    
+
     if (!userId) {
       router.push("/");
       return;
     }
 
     const foundUser = getUserById(userId);
-    
+
     if (!foundUser) {
       router.push("/");
       return;

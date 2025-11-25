@@ -1,5 +1,3 @@
-"use client";
-
 import { Button, Box } from "@mui/material";
 import type { HomePageButtonsProps, ButtonConfig } from "./types";
 import styles from "./styles/HomePageButtons.module.scss";

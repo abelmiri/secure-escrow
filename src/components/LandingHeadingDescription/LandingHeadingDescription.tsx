@@ -1,5 +1,3 @@
-"use client";
-
 import { Typography } from "@mui/material";
 import type { LandingHeadingDescriptionProps } from "./types";
 import styles from "./styles/LandingHeadingDescription.module.scss";

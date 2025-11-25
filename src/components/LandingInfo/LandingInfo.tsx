@@ -1,5 +1,3 @@
-"use client";
-
 import Image from "next/image";
 import { Box } from "@mui/material";
 import type { LandingInfoProps } from "./types";

@@ -1,29 +1,32 @@
-import type { Metadata } from "next";
+import type {Metadata} from "next"
 
-import "./globals.css";
+import "./globals.css"
 
-import MuiThemeProvider from "./MuiThemeProvider";
-import Header from "@/components/Header";
+import MuiThemeProvider from "./MuiThemeProvider"
+import Header from "@/components/Header"
+import {ReactNode} from "react"
+import AuthProvider from "@/context/auth/authProvider"
 
 export const metadata: Metadata = {
-  title: "My Material App",
-  description: "Next.js + TypeScript + MUI design system",
-  themeColor: "#8200DB",
-};
+    title: "My Material App",
+    description: "Next.js + TypeScript + MUI design system",
+}
 
 export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
+                                       children,
+                                   }: {
+    children: ReactNode;
 }) {
-  return (
-    <html lang="en">
-      <body>
+    return (
+        <html lang="en">
+        <body>
         <MuiThemeProvider>
-          <Header />
-          {children}
+            <AuthProvider>
+                <Header/>
+                {children}
+            </AuthProvider>
         </MuiThemeProvider>
-      </body>
-    </html>
-  );
+        </body>
+        </html>
+    )
 }
