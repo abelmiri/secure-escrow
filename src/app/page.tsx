@@ -1,9 +1,9 @@
 "use client"
 
-import LandingInfo from "@/components/LandingInfo/LandingInfo"
-import TrustedPartnersCard from "@/components/TrustedPartnersCard/TrustedPartnersCard"
-import HowItWorks from "@/components/HowItWorks/HowItWorks"
-import WhyChooseUs from "@/components/WhyChooseUs/WhyChooseUs"
+import LandingInfo from "@/components/Landing/LandingInfo/LandingInfo"
+import TrustedPartnersCard from "@/components/Landing/TrustedPartnersCard/TrustedPartnersCard"
+import HowItWorks from "@/components/Landing/HowItWorks/HowItWorks"
+import WhyChooseUs from "@/components/Landing/WhyChooseUs/WhyChooseUs"
 
 export default function HomePage() {
   return (

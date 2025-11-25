@@ -1,10 +1,10 @@
 import Image from "next/image"
 import { Box } from "@mui/material"
-import TrustedBanner from "@/components/TrustedBanner/TrustedBanner"
-import LandingHeading from "@/components/LandingHeading/LandingHeading"
-import LandingHeadingDescription from "@/components/LandingHeadingDescription/LandingHeadingDescription"
-import LandingStartButtons from "@/components/LandingStartButtons/LandingStartButtons"
-import LandingInfoStats from "@/components/LandingInfoStats/LandingInfoStats"
+import TrustedBanner from "@/components/Landing/TrustedBanner/TrustedBanner"
+import LandingHeading from "@/components/Landing/LandingHeading/LandingHeading"
+import LandingHeadingDescription from "@/components/Landing/LandingHeadingDescription/LandingHeadingDescription"
+import LandingStartButtons from "@/components/Landing/LandingStartButtons/LandingStartButtons"
+import LandingInfoStats from "@/components/Landing/LandingInfoStats/LandingInfoStats"
 import styles from "./styles/LandingInfo.module.scss"
 
 export default function LandingInfo() {
