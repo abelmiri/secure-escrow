@@ -1,0 +1,114 @@
+.container {
+  padding: 120px 20px;
+  background: linear-gradient(180deg, #FAF5FF 0%, #F3E8FF 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 64px;
+}
+
+.header {
+  text-align: center;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.title {
+  font-size: 36px !important;
+  font-weight: 400 !important;
+  color: #101828;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: 20px !important;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.gridContainer {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  width: 100%;
+  max-width: 1200px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #E5E7EB;
+  border-radius: 24px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0px 4px 6px -4px #0000001A, 0px 10px 15px -3px #0000001A;
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.08);
+  }
+}
+
+.iconWrapper {
+  width: 48px;
+  height: 48px;
+  box-shadow: 0px 4px 6px -4px #0000001A;
+  box-shadow: 0px 10px 15px -3px #0000001A;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px !important;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cardTitle {
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  color: #101828;
+}
+
+.cardDescription {
+  font-size: 14px !important;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.viewAllButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px 10px 6px !important;
+  border: 1px solid #DAB2FF !important;
+  border-radius: 8px !important;
+  color: var(--color-secondary) !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  background-color: transparent !important;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border 0.2s ease;
+
+  &:hover {
+    border: 1px solid var(--color-secondary) !important;
+    background-color: #F3E8FF !important;
+  }
+}
