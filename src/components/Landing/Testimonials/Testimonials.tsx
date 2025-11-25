@@ -1,7 +1,7 @@
-import { Box, Typography } from "@mui/material";
-import StarFilled from "@/media/svg/StarFilled";
-import UserAvatar from "@/media/svg/UserAvatar";
-import styles from "./styles/Testimonials.module.scss";
+import { Box, Typography } from "@mui/material"
+import StarFilled from "@/media/svg/StarFilled"
+import UserAvatar from "@/media/svg/UserAvatar"
+import styles from "./styles/Testimonials.module.scss"
 
 const testimonials = [
   {
@@ -19,7 +19,7 @@ const testimonials = [
     name: "لیلا کریمی",
     title: "فروشنده خودرو",
   },
-];
+]
 
 export default function Testimonials() {
   return (
@@ -41,7 +41,7 @@ export default function Testimonials() {
                 <StarFilled key={i} width={20} height={20} color="#9810FA" />
               ))}
             </Box>
-            
+
             <Typography className={styles.reviewText}>
               "{testimonial.text}"
             </Typography>
@@ -63,5 +63,5 @@ export default function Testimonials() {
         ))}
       </Box>
     </Box>
-  );
+  )
 }

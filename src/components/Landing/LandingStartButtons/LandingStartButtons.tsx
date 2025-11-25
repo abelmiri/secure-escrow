@@ -23,7 +23,7 @@ export default function LandingStartButtons() {
         </Box>
       </Button>
       {/* <Button variant="outlined" className={styles.button}> */}
-        {/* Second button content - to be specified */}
+      {/* Second button content - to be specified */}
       {/* </Button> */}
     </Box>
   )

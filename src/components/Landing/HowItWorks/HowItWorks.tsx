@@ -1,18 +1,18 @@
-import { Box, Typography, Button } from "@mui/material";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import styles from "./styles/HowItWorks.module.scss";
-import BuyerSeller from "@/media/svg/BuyerSeller";
-import DollarSign from "@/media/svg/DollarSign";
-import DeliverCheck from "@/media/svg/DeliverCheck";
-import Badge from "@/media/svg/Badge";
-import { ElementType } from "react";
-import { SVGProps } from "react";
+import { Box, Typography, Button } from "@mui/material"
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
+import styles from "./styles/HowItWorks.module.scss"
+import BuyerSeller from "@/media/svg/BuyerSeller"
+import DollarSign from "@/media/svg/DollarSign"
+import DeliverCheck from "@/media/svg/DeliverCheck"
+import Badge from "@/media/svg/Badge"
+import { ElementType } from "react"
+import { SVGProps } from "react"
 
 interface StepCardProps {
-  number: string;
-  title: string;
-  description: string;
-  Icon: ElementType<SVGProps<SVGSVGElement> & { strokeColor?: string }>;
+  number: string
+  title: string
+  description: string
+  Icon: ElementType<SVGProps<SVGSVGElement> & { strokeColor?: string }>
 }
 
 const steps: StepCardProps[] = [
@@ -40,7 +40,7 @@ const steps: StepCardProps[] = [
     description: "مبلغ پس از تایید خریدار برای فروشنده آزاد می‌شود",
     Icon: Badge,
   },
-];
+]
 
 export default function HowItWorks() {
   return (
@@ -48,7 +48,7 @@ export default function HowItWorks() {
       <Typography variant="h2" className={styles.title}>
         چگونه کار می‌کند
       </Typography>
-      
+
       <Typography variant="h6" className={styles.subtitle}>
         فرایندی ساده، امن و شفاف
       </Typography>
@@ -57,15 +57,13 @@ export default function HowItWorks() {
         {steps.map((step) => (
           <Box key={step.number} className={styles.card}>
             <Box className={styles.badge}>{step.number}</Box>
-            
+
             <Box className={styles.iconContainer}>
               <step.Icon width={32} height={32} strokeColor="white" />
             </Box>
 
-            <Typography className={styles.cardTitle}>
-              {step.title}
-            </Typography>
-            
+            <Typography className={styles.cardTitle}>{step.title}</Typography>
+
             <Typography className={styles.cardDescription}>
               {step.description}
             </Typography>
@@ -73,13 +71,12 @@ export default function HowItWorks() {
         ))}
       </Box>
 
-      <Button 
+      <Button
         className={styles.learnMoreButton}
         endIcon={<ArrowForwardIcon sx={{ transform: "rotate(180deg)" }} />}
       >
         بیشتر درباره فرایند ما بدانید
       </Button>
     </Box>
-  );
+  )
 }
-

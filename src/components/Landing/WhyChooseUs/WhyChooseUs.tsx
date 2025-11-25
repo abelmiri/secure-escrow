@@ -1,13 +1,13 @@
-import { Box, Typography } from "@mui/material";
-import Image from "next/image";
-import Shield from "@/media/svg/Shield";
-import LockIcon from "@/media/svg/LockIcon";
-import BuyerSeller from "@/media/svg/BuyerSeller";
-import CircleVerified from "@/media/svg/CircleVerified";
-import CircleTime from "@/media/svg/CircleTime";
-import DollarSign from "@/media/svg/DollarSign";
-import styles from "./styles/WhyChooseUs.module.scss";
-import laptopImg from "@/media/picture/laptop.png";
+import { Box, Typography } from "@mui/material"
+import Image from "next/image"
+import Shield from "@/media/svg/Shield"
+import LockIcon from "@/media/svg/LockIcon"
+import BuyerSeller from "@/media/svg/BuyerSeller"
+import CircleVerified from "@/media/svg/CircleVerified"
+import CircleTime from "@/media/svg/CircleTime"
+import DollarSign from "@/media/svg/DollarSign"
+import styles from "./styles/WhyChooseUs.module.scss"
+import laptopImg from "@/media/picture/laptop.png"
 
 const features = [
   {
@@ -25,7 +25,7 @@ const features = [
     description: "تیم پشتیبانی ما همیشه آماده پاسخگویی است",
     Icon: BuyerSeller,
   },
-];
+]
 
 const bottomCards = [
   {
@@ -46,7 +46,7 @@ const bottomCards = [
     Icon: CircleTime,
     gradient: "linear-gradient(135deg, #2B7FFF 0%, #0092B8 100%)",
   },
-];
+]
 
 export default function WhyChooseUs() {
   return (
@@ -56,19 +56,20 @@ export default function WhyChooseUs() {
           <Typography variant="h2" className={styles.title}>
             چرا ما را انتخاب کنید
           </Typography>
-          
+
           <Typography className={styles.description}>
-            امن‌ترین و قابل اعتمادترین پلتفرم پرداخت امن، مورد اعتماد هزاران کسب‌وکار در سراسر جهان.
+            امن‌ترین و قابل اعتمادترین پلتفرم پرداخت امن، مورد اعتماد هزاران
+            کسب‌وکار در سراسر جهان.
           </Typography>
 
           <Box className={styles.featuresList}>
             {features.map((feature, index) => (
               <Box key={index} className={styles.featureItem}>
                 <Box className={styles.iconWrapper}>
-                  <feature.Icon 
-                    width={32} 
-                    height={32} 
-                    strokeColor="var(--color-secondary)" 
+                  <feature.Icon
+                    width={32}
+                    height={32}
+                    strokeColor="var(--color-secondary)"
                   />
                 </Box>
                 <Box className={styles.featureContent}>
@@ -96,19 +97,15 @@ export default function WhyChooseUs() {
           </Box>
         </Box>
       </Box>
-      
+
       <Box className={styles.bottomCardsContainer}>
         {bottomCards.map((card, index) => (
           <Box key={index} className={styles.bottomCard}>
-            <Box 
+            <Box
               className={styles.cardIconWrapper}
               style={{ background: card.gradient }}
             >
-              <card.Icon 
-                width={32} 
-                height={32} 
-                strokeColor="white" 
-              />
+              <card.Icon width={32} height={32} strokeColor="white" />
             </Box>
             <Box className={styles.cardContent}>
               <Typography variant="h6" className={styles.cardTitle}>
@@ -122,5 +119,5 @@ export default function WhyChooseUs() {
         ))}
       </Box>
     </Box>
-  );
+  )
 }

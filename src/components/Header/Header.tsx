@@ -1,14 +1,27 @@
-"use client";
+"use client"
 
-import { useState, MouseEvent } from "react";
-import { Box, Typography, Button, Menu, MenuItem, IconButton, Drawer, List, ListItem, ListItemButton, ListItemText, Collapse } from "@mui/material";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import MenuIcon from "@mui/icons-material/Menu";
-import CloseIcon from "@mui/icons-material/Close";
-import ExpandLess from "@mui/icons-material/ExpandLess";
-import ExpandMore from "@mui/icons-material/ExpandMore";
-import SecureEscrow from "@/media/svg/SecureEscrow";
-import styles from "./styles/Header.module.scss";
+import { useState, MouseEvent } from "react"
+import {
+  Box,
+  Typography,
+  Button,
+  Menu,
+  MenuItem,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Collapse,
+} from "@mui/material"
+import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown"
+import MenuIcon from "@mui/icons-material/Menu"
+import CloseIcon from "@mui/icons-material/Close"
+import ExpandLess from "@mui/icons-material/ExpandLess"
+import ExpandMore from "@mui/icons-material/ExpandMore"
+import SecureEscrow from "@/media/svg/SecureEscrow"
+import styles from "./styles/Header.module.scss"
 
 const resources = [
   "وبلاگ",
@@ -17,7 +30,7 @@ const resources = [
   "کارمزدها",
   "امنیت",
   "شرکای تجاری",
-];
+]
 
 const solutions = [
   "اسکرو برای دامنه‌ها",
@@ -26,42 +39,44 @@ const solutions = [
   "معاملات مرحله‌ای",
   "معاملات کارگزاری",
   "نگهداشت عنوان",
-];
+]
 
 export default function Header() {
-  const [anchorElResources, setAnchorElResources] = useState<null | HTMLElement>(null);
-  const [anchorElSolutions, setAnchorElSolutions] = useState<null | HTMLElement>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileResourcesOpen, setMobileResourcesOpen] = useState(false);
-  const [mobileSolutionsOpen, setMobileSolutionsOpen] = useState(false);
+  const [anchorElResources, setAnchorElResources] =
+    useState<null | HTMLElement>(null)
+  const [anchorElSolutions, setAnchorElSolutions] =
+    useState<null | HTMLElement>(null)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [mobileResourcesOpen, setMobileResourcesOpen] = useState(false)
+  const [mobileSolutionsOpen, setMobileSolutionsOpen] = useState(false)
 
   const handleOpenResources = (event: MouseEvent<HTMLElement>) => {
-    setAnchorElResources(event.currentTarget);
-  };
+    setAnchorElResources(event.currentTarget)
+  }
 
   const handleCloseResources = () => {
-    setAnchorElResources(null);
-  };
+    setAnchorElResources(null)
+  }
 
   const handleOpenSolutions = (event: MouseEvent<HTMLElement>) => {
-    setAnchorElSolutions(event.currentTarget);
-  };
+    setAnchorElSolutions(event.currentTarget)
+  }
 
   const handleCloseSolutions = () => {
-    setAnchorElSolutions(null);
-  };
+    setAnchorElSolutions(null)
+  }
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+    setMobileOpen(!mobileOpen)
+  }
 
   const handleMobileResourcesToggle = () => {
-    setMobileResourcesOpen(!mobileResourcesOpen);
-  };
+    setMobileResourcesOpen(!mobileResourcesOpen)
+  }
 
   const handleMobileSolutionsToggle = () => {
-    setMobileSolutionsOpen(!mobileSolutionsOpen);
-  };
+    setMobileSolutionsOpen(!mobileSolutionsOpen)
+  }
 
   return (
     <Box component="header" className={styles.header}>
@@ -79,24 +94,20 @@ export default function Header() {
 
       {/* Desktop Navigation */}
       <Box className={styles.navContainer}>
-        <Button className={styles.startButton}>
-          شروع کنید
-        </Button>
-        
-        <Button className={styles.loginButton}>
-          ورود
-        </Button>
+        <Button className={styles.startButton}>شروع کنید</Button>
 
-        <Typography className={styles.navItem}>
-          تماس با ما
-        </Typography>
+        <Button className={styles.loginButton}>ورود</Button>
 
-        <Box 
-          className={styles.navItem} 
+        <Typography className={styles.navItem}>تماس با ما</Typography>
+
+        <Box
+          className={styles.navItem}
           onClick={handleOpenResources}
-          aria-controls={Boolean(anchorElResources) ? 'resources-menu' : undefined}
+          aria-controls={
+            Boolean(anchorElResources) ? "resources-menu" : undefined
+          }
           aria-haspopup="true"
-          aria-expanded={Boolean(anchorElResources) ? 'true' : undefined}
+          aria-expanded={Boolean(anchorElResources) ? "true" : undefined}
         >
           منابع
           <KeyboardArrowDownIcon fontSize="small" />
@@ -107,26 +118,30 @@ export default function Header() {
           open={Boolean(anchorElResources)}
           onClose={handleCloseResources}
           classes={{ paper: styles.menuPaper, list: styles.menuList }}
-          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+          transformOrigin={{ horizontal: "right", vertical: "top" }}
+          anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         >
           {resources.map((item) => (
-            <MenuItem key={item} onClick={handleCloseResources} className={styles.menuItem}>
+            <MenuItem
+              key={item}
+              onClick={handleCloseResources}
+              className={styles.menuItem}
+            >
               {item}
             </MenuItem>
           ))}
         </Menu>
 
-        <Typography className={styles.navItem}>
-          قیمت گذاری
-        </Typography>
+        <Typography className={styles.navItem}>قیمت گذاری</Typography>
 
-        <Box 
-          className={styles.navItem} 
+        <Box
+          className={styles.navItem}
           onClick={handleOpenSolutions}
-          aria-controls={Boolean(anchorElSolutions) ? 'solutions-menu' : undefined}
+          aria-controls={
+            Boolean(anchorElSolutions) ? "solutions-menu" : undefined
+          }
           aria-haspopup="true"
-          aria-expanded={Boolean(anchorElSolutions) ? 'true' : undefined}
+          aria-expanded={Boolean(anchorElSolutions) ? "true" : undefined}
         >
           راه حل ها
           <KeyboardArrowDownIcon fontSize="small" />
@@ -137,11 +152,15 @@ export default function Header() {
           open={Boolean(anchorElSolutions)}
           onClose={handleCloseSolutions}
           classes={{ paper: styles.menuPaper, list: styles.menuList }}
-          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+          transformOrigin={{ horizontal: "right", vertical: "top" }}
+          anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         >
           {solutions.map((item) => (
-            <MenuItem key={item} onClick={handleCloseSolutions} className={styles.menuItem}>
+            <MenuItem
+              key={item}
+              onClick={handleCloseSolutions}
+              className={styles.menuItem}
+            >
               {item}
             </MenuItem>
           ))}
@@ -189,14 +208,21 @@ export default function Header() {
         <List className={styles.drawerList}>
           <ListItem disablePadding className={styles.drawerItem}>
             <ListItemButton onClick={handleMobileSolutionsToggle}>
-              <ListItemText primary="راه حل ها" className={styles.drawerItemText} />
+              <ListItemText
+                primary="راه حل ها"
+                className={styles.drawerItemText}
+              />
               {mobileSolutionsOpen ? <ExpandLess /> : <ExpandMore />}
             </ListItemButton>
           </ListItem>
           <Collapse in={mobileSolutionsOpen} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
               {solutions.map((item) => (
-                <ListItem key={item} disablePadding className={styles.drawerSubItem}>
+                <ListItem
+                  key={item}
+                  disablePadding
+                  className={styles.drawerSubItem}
+                >
                   <ListItemButton>
                     <ListItemText primary={item} />
                   </ListItemButton>
@@ -207,7 +233,10 @@ export default function Header() {
 
           <ListItem disablePadding className={styles.drawerItem}>
             <ListItemButton>
-              <ListItemText primary="قیمت گذاری" className={styles.drawerItemText} />
+              <ListItemText
+                primary="قیمت گذاری"
+                className={styles.drawerItemText}
+              />
             </ListItemButton>
           </ListItem>
 
@@ -220,7 +249,11 @@ export default function Header() {
           <Collapse in={mobileResourcesOpen} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
               {resources.map((item) => (
-                <ListItem key={item} disablePadding className={styles.drawerSubItem}>
+                <ListItem
+                  key={item}
+                  disablePadding
+                  className={styles.drawerSubItem}
+                >
                   <ListItemButton>
                     <ListItemText primary={item} />
                   </ListItemButton>
@@ -231,7 +264,10 @@ export default function Header() {
 
           <ListItem disablePadding className={styles.drawerItem}>
             <ListItemButton>
-              <ListItemText primary="تماس با ما" className={styles.drawerItemText} />
+              <ListItemText
+                primary="تماس با ما"
+                className={styles.drawerItemText}
+              />
             </ListItemButton>
           </ListItem>
 
@@ -246,5 +282,5 @@ export default function Header() {
         </List>
       </Drawer>
     </Box>
-  );
+  )
 }

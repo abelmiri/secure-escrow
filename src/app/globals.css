@@ -1,6 +1,7 @@
 @font-face {
   font-family: "Dana";
-  src: url("/media/fonts/Dana-fanum-regular.woff2") format("woff2"),
+  src:
+    url("/media/fonts/Dana-fanum-regular.woff2") format("woff2"),
     url("/media/fonts/Dana-fanum-regular.woff") format("woff"),
     url("/media/fonts/Dana-FaNum-Regular.ttf") format("truetype");
   font-weight: 400;
@@ -10,7 +11,8 @@
 
 @font-face {
   font-family: "Dana";
-  src: url("/media/fonts/Dana-fanum-light.woff2") format("woff2"),
+  src:
+    url("/media/fonts/Dana-fanum-light.woff2") format("woff2"),
     url("/media/fonts/Dana-fanum-light.woff") format("woff"),
     url("/media/fonts/Dana-FaNum-Light.ttf") format("truetype");
   font-weight: 300;
@@ -20,7 +22,8 @@
 
 @font-face {
   font-family: "Dana";
-  src: url("/media/fonts/Dana-fanum-medium.woff2") format("woff2"),
+  src:
+    url("/media/fonts/Dana-fanum-medium.woff2") format("woff2"),
     url("/media/fonts/Dana-fanum-medium.woff") format("woff"),
     url("/media/fonts/Dana-FaNum-Medium.ttf") format("truetype");
   font-weight: 500;
@@ -30,7 +33,8 @@
 
 @font-face {
   font-family: "Dana";
-  src: url("/media/fonts/Dana-fanum-bold.woff2") format("woff2"),
+  src:
+    url("/media/fonts/Dana-fanum-bold.woff2") format("woff2"),
     url("/media/fonts/Dana-fanum-bold.woff") format("woff"),
     url("/media/fonts/Dana-FaNum-Bold.ttf") format("truetype");
   font-weight: 700;
@@ -42,15 +46,23 @@
   --background: #ffffff;
   --foreground: #171717;
   --light-color: #ffffff;
-  
+
   /* Material Design Button Colors */
   --color-first: #d4a574; /* Light brown */
   --color-secondary: #8200db; /* Flat purple */
   --color-third: #3498db; /* Flat blue */
 
-  --green-gradient: background: linear-gradient(135deg, #00C950 0%, #009966 100%);
-  --purple-gradient: background: linear-gradient(135deg, #AD46FF 0%, #9810FA 100%);
-  --blue-gradient: background: linear-gradient(135deg, #2B7FFF 0%, #0092B8 100%);
+  --green-gradient: background: linear-gradient(
+      135deg,
+      #00c950 0%,
+      #009966 100%
+    );
+  --purple-gradient: background: linear-gradient(
+      135deg,
+      #ad46ff 0%,
+      #9810fa 100%
+    );
+  --blue-gradient: background: linear-gradient(135deg, #2b7fff 0%, #0092b8 100%);
 
   /* Border Radius */
   --border-radius-icon: 14px;

@@ -1,13 +1,13 @@
-import { Box, Typography, Button } from "@mui/material";
-import EmailIcon from "@mui/icons-material/Email";
-import PhoneIcon from "@mui/icons-material/Phone";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import FacebookIcon from "@mui/icons-material/Facebook";
-import TwitterIcon from "@mui/icons-material/Twitter";
-import LinkedInIcon from "@mui/icons-material/LinkedIn";
-import InstagramIcon from "@mui/icons-material/Instagram";
-import SecureEscrow from "@/media/svg/SecureEscrow";
-import styles from "./styles/Footer.module.scss";
+import { Box, Typography, Button } from "@mui/material"
+import EmailIcon from "@mui/icons-material/Email"
+import PhoneIcon from "@mui/icons-material/Phone"
+import LocationOnIcon from "@mui/icons-material/LocationOn"
+import FacebookIcon from "@mui/icons-material/Facebook"
+import TwitterIcon from "@mui/icons-material/Twitter"
+import LinkedInIcon from "@mui/icons-material/LinkedIn"
+import InstagramIcon from "@mui/icons-material/Instagram"
+import SecureEscrow from "@/media/svg/SecureEscrow"
+import styles from "./styles/Footer.module.scss"
 
 const footerLinks = {
   products: [
@@ -32,7 +32,7 @@ const footerLinks = {
     "حریم خصوصی",
     "قوانین کوکی",
   ],
-};
+}
 
 export default function Footer() {
   return (
@@ -46,23 +46,30 @@ export default function Footer() {
               </Box>
               <Typography className={styles.companyName}>سکیوراسکرو</Typography>
             </Box>
-            
+
             <Typography className={styles.description}>
-              معاملات امنی که می‌توانید به آن اعتماد کنید. محافظت از خریداران و فروشندگان از سال ۲۰۲۰.
+              معاملات امنی که می‌توانید به آن اعتماد کنید. محافظت از خریداران و
+              فروشندگان از سال ۲۰۲۰.
             </Typography>
 
             <Box className={styles.contactInfo}>
               <Box className={styles.contactItem}>
                 <EmailIcon fontSize="small" />
-                <Typography className={styles.contactItemText}>support@secureescrow.com</Typography>
+                <Typography className={styles.contactItemText}>
+                  support@secureescrow.com
+                </Typography>
               </Box>
               <Box className={styles.contactItem}>
                 <PhoneIcon fontSize="small" />
-                <Typography className={styles.contactItemText}>۰۲۱-۸۸۸۸۸۸۸۸</Typography>
+                <Typography className={styles.contactItemText}>
+                  ۰۲۱-۸۸۸۸۸۸۸۸
+                </Typography>
               </Box>
               <Box className={styles.contactItem}>
                 <LocationOnIcon fontSize="small" />
-                <Typography className={styles.contactItemText}>تهران، ایران</Typography>
+                <Typography className={styles.contactItemText}>
+                  تهران، ایران
+                </Typography>
               </Box>
             </Box>
 
@@ -119,14 +126,12 @@ export default function Footer() {
               برای دریافت آخرین اخبار و نکات در خبرنامه ما عضو شوید
             </Typography>
             <Box component="form" className={styles.subscribeForm}>
-              <input 
-                type="email" 
-                placeholder="ایمیل خود را وارد کنید" 
+              <input
+                type="email"
+                placeholder="ایمیل خود را وارد کنید"
                 className={styles.input}
               />
-              <Button className={styles.subscribeButton}>
-                عضویت
-              </Button>
+              <Button className={styles.subscribeButton}>عضویت</Button>
             </Box>
           </Box>
         </Box>
@@ -134,9 +139,10 @@ export default function Footer() {
         <Box className={styles.divider} />
 
         <Typography className={styles.copyright}>
-          © ۲۰۲۵ سکیوراسکرو. تمامی حقوق محفوظ است. سرویس اسکرو دارای مجوز و تحت نظارت.
+          © ۲۰۲۵ سکیوراسکرو. تمامی حقوق محفوظ است. سرویس اسکرو دارای مجوز و تحت
+          نظارت.
         </Typography>
       </Box>
     </Box>
-  );
+  )
 }
