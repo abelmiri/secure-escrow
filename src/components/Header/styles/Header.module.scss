@@ -1,6 +1,6 @@
 .header {
   display: flex;
-  height: 64px;
+  height: 80px;
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(4px);
   position: fixed;
@@ -8,19 +8,29 @@
   left: 0;
   right: 0;
   width: 100%;
-  z-index: 2;
-  display: flex;
-  justify-content: flex-start;
-  gap: 12px;
+  z-index: 100;
+  justify-content: space-between;
   align-items: center;
-  padding: 0 24px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 0 48px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+
+  @media (max-width: 768px) {
+    padding: 0 20px;
+    height: 64px;
+  }
+}
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .iconContainer {
   width: 40px;
   height: 40px;
-  border-radius: var(--border-radius-icon);
+  border-radius: 12px;
   background: linear-gradient(135deg, #9810fa 0%, #8200db 100%);
   display: flex;
   align-items: center;
@@ -29,6 +39,11 @@
   box-shadow:
     0px 4px 6px -4px #ad46ff4d,
     0px 10px 15px -3px #ad46ff4d;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+  }
 }
 
 .icon {
@@ -42,7 +57,160 @@
 }
 
 .title {
-  font-size: 20px !important;
-  font-weight: 400 !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
   color: #101828;
+  letter-spacing: -0.5px;
+}
+
+.navContainer {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: center;
+  gap: 8px;
+
+  @media (max-width: 1024px) {
+    display: none;
+  }
+}
+
+.navItem {
+  padding: 8px 16px;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+  color: #475467;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  &:hover {
+    color: var(--color-secondary);
+    background-color: #f9fafb;
+  }
+}
+
+.activeNavItem {
+  color: var(--color-secondary);
+  background-color: #f9fafb;
+}
+
+.loginButton {
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  color: #475467 !important;
+  padding: 10px 20px !important;
+  border-radius: 10px !important;
+  text-transform: none !important;
+  margin-left: 8px !important;
+
+  &:hover {
+    background-color: #f9fafb !important;
+    color: #101828 !important;
+  }
+}
+
+.startButton {
+  background: var(--color-secondary) !important;
+  color: white !important;
+  padding: 10px 24px !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  font-size: 15px !important;
+  text-transform: none !important;
+  box-shadow: 0px 4px 6px -4px #AD46FF4D, 0px 10px 15px -3px #AD46FF4D !important;
+  transition: all 0.2s ease !important;
+
+  &:hover {
+    background: #7000bd !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(130, 0, 219, 0.2) !important;
+  }
+}
+
+.menuPaper {
+  margin-top: 12px;
+  border-radius: 16px !important;
+  box-shadow: 0 12px 32px -4px rgba(16, 24, 40, 0.1), 0 4px 12px -2px rgba(16, 24, 40, 0.06) !important;
+  border: 1px solid #f2f4f7;
+  overflow: hidden;
+}
+
+.menuList {
+  padding: 8px !important;
+  min-width: 240px;
+}
+
+.menuItem {
+  padding: 10px 12px !important;
+  border-radius: 8px !important;
+  color: #475467 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  margin-bottom: 2px !important;
+
+  &:hover {
+    background-color: #f9fafb !important;
+    color: var(--color-secondary) !important;
+  }
+
+  &:last-child {
+    margin-bottom: 0 !important;
+  }
+}
+
+.mobileMenuButton {
+  display: none !important;
+
+  @media (max-width: 1024px) {
+    display: flex !important;
+  }
+}
+
+.drawerPaper {
+  width: 100%;
+  max-width: 300px;
+  padding: 24px;
+}
+
+.drawerHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.drawerList {
+  width: 100%;
+}
+
+.drawerItem {
+  border-radius: 8px !important;
+  margin-bottom: 8px !important;
+  color: #101828 !important;
+}
+
+.drawerItemText {
+  span {
+    font-weight: 600 !important;
+    font-size: 16px !important;
+  }
+}
+
+.drawerSubItem {
+  padding-right: 32px !important;
+  color: #475467 !important;
+
+  span {
+    font-size: 14px !important;
+  }
+}
+
+.drawerButtons {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
