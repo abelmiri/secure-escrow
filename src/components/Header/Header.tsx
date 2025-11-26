@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, MouseEvent } from "react"
+import Link from "next/link"
 import {
   Box,
   Typography,
@@ -22,14 +23,16 @@ import ExpandLess from "@mui/icons-material/ExpandLess"
 import ExpandMore from "@mui/icons-material/ExpandMore"
 import SecureEscrow from "@/media/svg/SecureEscrow"
 import styles from "./styles/Header.module.scss"
+import loginOAUTH from "@/helpers/auth/loginOAUTH"
 
 const resources = [
-  "وبلاگ",
-  "مرکز راهنما",
-  "مستندات API",
-  "کارمزدها",
-  "امنیت",
-  "شرکای تجاری",
+  { label: "وبلاگ", href: "#" },
+  { label: "مرکز راهنما", href: "#" },
+  { label: "سوالات متداول", href: "/faq" },
+  { label: "مستندات API", href: "#" },
+  { label: "کارمزدها", href: "#" },
+  { label: "امنیت", href: "#" },
+  { label: "شرکای تجاری", href: "#" },
 ]
 
 const solutions = [
@@ -78,27 +81,37 @@ export default function Header() {
     setMobileSolutionsOpen(!mobileSolutionsOpen)
   }
 
+  function login() {
+    loginOAUTH()
+  }
+
   return (
     <Box component="header" className={styles.header}>
       <Box className={styles.rightSection}>
-        <Box className={styles.iconContainer}>
-          <SecureEscrow
-            width={20}
-            height={20}
-            className={styles.icon}
-            strokeColor="white"
-          />
-        </Box>
-        <Typography className={styles.title}>سکیوراسکرو</Typography>
+        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+          <Box className={styles.iconContainer}>
+            <SecureEscrow
+              width={20}
+              height={20}
+              className={styles.icon}
+              strokeColor="white"
+            />
+          </Box>
+          <Typography className={styles.title}>سکیوراسکرو</Typography>
+        </Link>
       </Box>
 
       {/* Desktop Navigation */}
       <Box className={styles.navContainer}>
-        <Button className={styles.startButton}>شروع کنید</Button>
+        <Button className={styles.startButton} onClick={login}>شروع کنید</Button>
 
-        <Button className={styles.loginButton}>ورود</Button>
+        <Button className={styles.loginButton} onClick={login}>ورود</Button>
 
         <Typography className={styles.navItem}>تماس با ما</Typography>
+
+        <Link href="/about" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <Typography className={styles.navItem}>درباره ما</Typography>
+        </Link>
 
         <Box
           className={styles.navItem}
@@ -122,13 +135,14 @@ export default function Header() {
           anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         >
           {resources.map((item) => (
-            <MenuItem
-              key={item}
-              onClick={handleCloseResources}
-              className={styles.menuItem}
-            >
-              {item}
-            </MenuItem>
+            <Link key={item.label} href={item.href} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <MenuItem
+                onClick={handleCloseResources}
+                className={styles.menuItem}
+              >
+                {item.label}
+              </MenuItem>
+            </Link>
           ))}
         </Menu>
 
@@ -190,15 +204,17 @@ export default function Header() {
       >
         <Box className={styles.drawerHeader}>
           <Box className={styles.rightSection}>
-            <Box className={styles.iconContainer}>
-              <SecureEscrow
-                width={20}
-                height={20}
-                className={styles.icon}
-                strokeColor="white"
-              />
-            </Box>
-            <Typography className={styles.title}>سکیوراسکرو</Typography>
+            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }} onClick={handleDrawerToggle}>
+              <Box className={styles.iconContainer}>
+                <SecureEscrow
+                  width={20}
+                  height={20}
+                  className={styles.icon}
+                  strokeColor="white"
+                />
+              </Box>
+              <Typography className={styles.title}>سکیوراسکرو</Typography>
+            </Link>
           </Box>
           <IconButton onClick={handleDrawerToggle}>
             <CloseIcon />
@@ -250,17 +266,30 @@ export default function Header() {
             <List component="div" disablePadding>
               {resources.map((item) => (
                 <ListItem
-                  key={item}
+                  key={item.label}
                   disablePadding
                   className={styles.drawerSubItem}
                 >
-                  <ListItemButton>
-                    <ListItemText primary={item} />
-                  </ListItemButton>
+                  <Link href={item.href} style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
+                    <ListItemButton onClick={handleDrawerToggle}>
+                      <ListItemText primary={item.label} />
+                    </ListItemButton>
+                  </Link>
                 </ListItem>
               ))}
             </List>
           </Collapse>
+
+          <ListItem disablePadding className={styles.drawerItem}>
+            <Link href="/about" style={{ textDecoration: 'none', color: 'inherit', width: '100%' }} onClick={handleDrawerToggle}>
+              <ListItemButton>
+                <ListItemText
+                  primary="درباره ما"
+                  className={styles.drawerItemText}
+                />
+              </ListItemButton>
+            </Link>
+          </ListItem>
 
           <ListItem disablePadding className={styles.drawerItem}>
             <ListItemButton>
@@ -272,10 +301,10 @@ export default function Header() {
           </ListItem>
 
           <Box className={styles.drawerButtons}>
-            <Button className={styles.loginButton} fullWidth>
+            <Button className={styles.loginButton} fullWidth onClick={login}>
               ورود
             </Button>
-            <Button className={styles.startButton} fullWidth>
+            <Button className={styles.startButton} fullWidth onClick={login}>
               شروع کنید
             </Button>
           </Box>
