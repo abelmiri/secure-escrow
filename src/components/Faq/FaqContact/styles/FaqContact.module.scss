@@ -1,0 +1,89 @@
+.container {
+  background-color: #ffffff;
+  padding: 64px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  border-bottom: 1px solid var(--color-text-secondary);
+}
+
+.iconWrapper {
+  margin-bottom: 24px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  font-size: 30px !important;
+  color: #0A0A0A;
+  margin-bottom: 16px !important;
+  font-family: inherit;
+
+  @media (max-width: 768px) {
+    font-size: 24px !important;
+  }
+}
+
+.description {
+  font-size: 20px !important;
+  color: var(--color-text-secondary);
+  margin-bottom: 32px !important;
+  font-family: inherit;
+
+  @media (max-width: 768px) {
+    font-size: 18px !important;
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+.buttonPrimary {
+  background-color: #030213 !important;
+  color: #ffffff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  border: 1px solid #0c111d;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  min-width: 140px;
+
+  &:hover {
+    background-color: #155DFC !important;
+    border-color: #1d2939;
+  }
+}
+
+.buttonSecondary {
+  background-color: #ffffff;
+  color: var(--color-text-secondary) !important;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  border: 1px solid var(--color-text-secondary) !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  min-width: 140px;
+
+  &:hover {
+    background-color: #f9fafb;
+    border-color: #d0d5dd;
+  }
+}

@@ -4,6 +4,7 @@ import "./globals.css"
 
 import MuiThemeProvider from "./MuiThemeProvider"
 import Header from "@/components/Header/Header"
+import Footer from "@/components/Footer/Footer"
 import { ReactNode } from "react"
 import AuthProvider from "@/context/auth/authProvider"
 
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <AuthProvider>
             <Header />
             {children}
+            <Footer />
           </AuthProvider>
         </MuiThemeProvider>
       </body>

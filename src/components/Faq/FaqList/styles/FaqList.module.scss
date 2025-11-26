@@ -1,0 +1,132 @@
+.container {
+  background-color: #f9fafb;
+  padding: 64px 20px;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tabsContainer {
+  background: #f2f4f7;
+  border-radius: 16px; /* Using a smaller radius than 999px for the container to match image style better, or stick to 8px */
+  padding: 4px;
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 48px;
+  border-radius: 10px;
+  
+  @media (max-width: 768px) {
+    width: 100%;
+    overflow-x: auto;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    
+    /* Hide scrollbar */
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+.tab {
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #667085;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  white-space: nowrap;
+
+  &:hover {
+    color: #155dfc;
+  }
+
+  &.active {
+    background: #ffffff;
+    color: #155dfc; /* Updated active color to blue based on image context implied, or keep black? Image shows black text for active tab. Let's use black/dark grey for text */
+    color: #1d2939;
+    box-shadow: 0px 1px 2px rgba(16, 24, 40, 0.06), 0px 1px 3px rgba(16, 24, 40, 0.1);
+  }
+}
+
+.listContainer {
+  width: 100%;
+  max-width: 800px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.accordionItem {
+  background: #ffffff;
+  border: 1px solid #eaecf0;
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: #155dfc;
+  }
+
+  &.open {
+    border-color: #155dfc;
+    box-shadow: 0px 4px 6px -2px rgba(16, 24, 40, 0.03), 0px 12px 16px -4px rgba(16, 24, 40, 0.08);
+  }
+}
+
+.accordionHeader {
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  gap: 16px;
+}
+
+.question {
+  font-size: 18px;
+  font-weight: 500;
+  color: #101828;
+  text-align: right; /* RTL */
+  flex: 1;
+}
+
+.icon {
+  transition: transform 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &.rotate {
+    transform: rotate(180deg);
+  }
+}
+
+.accordionContent {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-in-out, padding 0.3s ease;
+}
+
+.accordionContentInner {
+  padding: 0 24px 24px 24px;
+  color: #475467;
+  font-size: 16px;
+  line-height: 1.6;
+  text-align: right; /* RTL */
+}
+
+.open .accordionContent {
+  max-height: 500px; /* Approximate max height */
+}
+
