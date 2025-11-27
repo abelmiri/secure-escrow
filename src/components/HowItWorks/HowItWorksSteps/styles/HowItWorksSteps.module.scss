@@ -1,0 +1,159 @@
+.stepsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+  padding: 80px 20px;
+  width: 100%;
+  margin: 0 auto;
+  background-color: #F9FAFB;
+}
+
+.stepCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1px solid #eaecf0;
+  border-radius: 24px;
+  overflow: hidden;
+  min-height: 500px;
+  margin: 0 auto;
+  width: 1200px;
+  gap: 40px;
+
+  &:nth-child(even) {
+    flex-direction: row-reverse;
+
+    .imageSection {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    }
+  }
+
+  @media (max-width: 960px) {
+    flex-direction: column !important;
+    min-height: auto;
+    padding-bottom: 40px;
+    gap: 0;
+  }
+}
+
+.contentSection {
+  flex: 1;
+  padding: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  @media (max-width: 960px) {
+    padding: 32px;
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.stepNumber {
+  width: 64px !important;
+  height: 64px !important;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px !important;
+  font-weight: 400;
+  background: linear-gradient(135deg, #155DFC 0%, #1447E6 100%) !important;
+  box-shadow: 0px 4px 6px -4px #0000001A;
+  box-shadow: 0px 10px 15px -3px #0000001A;
+  padding-top: 2px;
+}
+
+.iconWrapper {
+  width: 48px;
+  height: 48px;
+  background: #dbeafe;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #101828;
+  line-height: 1.2;
+
+  @media (max-width: 768px) {
+    font-size: 24px;
+  }
+}
+
+.description {
+  font-size: 18px;
+  line-height: 1.6;
+  color: #475467;
+  margin-bottom: 16px;
+  text-align: justify;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.listItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  color: #344054;
+}
+
+.imageSection {
+  flex: 1;
+  height: 100%;
+  min-height: 500px;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+
+  @media (max-width: 960px) {
+    min-height: 300px;
+  }
+}
+
+.imageCard {
+  background: white;
+  padding: 48px;
+  border-radius: 16px;
+  box-shadow: 0px 25px 50px -12px #00000040;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  width: 80%;
+  max-width: 400px;
+}
+
+.imageIcon {
+  width: 80px;
+  height: 80px;
+  color: #155dfc;
+}
+
+.stepBadge {
+  background: #dbeafe;
+  color: #175cd3;
+  padding: 8px 16px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
+}

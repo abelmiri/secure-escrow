@@ -30,6 +30,7 @@ const resources = [
   { label: "مرکز راهنما", href: "#" },
   { label: "سوالات متداول", href: "/faq" },
   { label: "مستندات API", href: "#" },
+  { label: "چگونه کار می‌کند", href: "/how-it-works" },
   { label: "کارمزدها", href: "#" },
   { label: "امنیت", href: "#" },
   { label: "شرکای تجاری", href: "#" },

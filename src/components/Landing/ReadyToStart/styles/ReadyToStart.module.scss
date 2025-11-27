@@ -8,6 +8,10 @@
   width: 100%;
   text-align: center;
   color: #ffffff;
+
+  &.howItWorks {
+    background: linear-gradient(135deg, #155DFC 0%, #1447E6 50%, #1C398E 100%);
+  }
 }
 
 .contentWrapper {
@@ -56,6 +60,11 @@
   font-size: 14px !important;
   text-transform: none !important;
   gap: 8px;
+
+  &.howItWorks {
+    background-color: #ffffff !important;
+    color: #155DFC !important;
+  }
 
   &:hover {
     background-color: #f3f4f6 !important;
