@@ -19,10 +19,6 @@ function resetData({
   }
 
   if (!isAfterLogin) {
-    clearTimeout(window.refreshTokenTimer)
-  }
-
-  if (!isAfterLogin) {
     if (sendLogoutReq) {
       authActions.logout().finally(() => window.resetData?.({ isAfterLogin }))
     } else {

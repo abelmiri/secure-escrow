@@ -17,10 +17,10 @@ import {
   useState,
 } from "react"
 
-// @ts-expect-error "shit"
 export const authContext = createContext<{
   authState: AuthStateType
   authDispatch: Dispatch<AuthActionType>
+  // @ts-expect-error "shit"
 }>(null)
 
 function AuthProvider({ children }: { children: ReactNode }) {
