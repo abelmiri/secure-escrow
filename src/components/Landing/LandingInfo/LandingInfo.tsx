@@ -3,6 +3,7 @@ import { Box } from "@mui/material"
 import TrustedBanner from "@/components/Landing/TrustedBanner/TrustedBanner"
 import LandingHeading from "@/components/Landing/LandingHeading/LandingHeading"
 import LandingHeadingDescription from "@/components/Landing/LandingHeadingDescription/LandingHeadingDescription"
+import landingSafe from "@/media/picture/landing-safe.png"
 import LandingStartButtons from "@/components/Landing/LandingStartButtons/LandingStartButtons"
 import LandingInfoStats from "@/components/Landing/LandingInfoStats/LandingInfoStats"
 import styles from "./styles/LandingInfo.module.scss"
@@ -21,7 +22,7 @@ export default function LandingInfo() {
         <Box className={styles.rightSection}>
           <Box className={styles.imageContainer}>
             <Image
-              src="/media/picture/landing safe.png"
+              src={landingSafe}
               alt="Landing Safe"
               width={0}
               height={0}
