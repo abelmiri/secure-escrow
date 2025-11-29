@@ -1,8 +1,8 @@
-import React from "react";
-import { Box, Typography } from "@mui/material";
-import CircleCheckIcon from "@/media/svg/CircleCheckIcon";
-import styles from "./styles/TrustAndSafetyProtection.module.scss";
-import CheckedIcon from "@/media/svg/CheckedIcon";
+import React from "react"
+import { Box, Typography } from "@mui/material"
+import CircleCheckIcon from "@/media/svg/CircleCheckIcon"
+import styles from "./styles/TrustAndSafetyProtection.module.scss"
+import CheckedIcon from "@/media/svg/CheckedIcon"
 
 const protections = [
   {
@@ -25,7 +25,7 @@ const protections = [
     description:
       "ما با GDPR، CCPA و سایر مقررات حریم خصوصی مطابقت داریم. اطلاعات شخصی شما هرگز بدون رضایت شما با اشخاص ثالث به اشتراک گذاشته نمی‌شود.",
   },
-];
+]
 
 export default function TrustAndSafetyProtection() {
   return (
@@ -41,15 +41,16 @@ export default function TrustAndSafetyProtection() {
               <CheckedIcon color="#00A63E" width="32" height="32" />
             </Box>
             <Box className={styles.content}>
-            <Typography className={styles.cardTitle}>{protection.title}</Typography>
-            <Typography className={styles.cardDescription}>
-              {protection.description}
-            </Typography>
-          </Box>
+              <Typography className={styles.cardTitle}>
+                {protection.title}
+              </Typography>
+              <Typography className={styles.cardDescription}>
+                {protection.description}
+              </Typography>
+            </Box>
           </Box>
         ))}
       </Box>
     </Box>
-  );
+  )
 }
-

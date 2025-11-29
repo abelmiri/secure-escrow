@@ -1,12 +1,12 @@
-import React from "react";
-import { Box, Typography } from "@mui/material";
-import Shield from "@/media/svg/Shield";
-import LockIcon from "@/media/svg/LockIcon";
-import EyeIcon from "@/media/svg/EyeIcon";
-import CheckedDocumentIcon from "@/media/svg/CheckedDocumentIcon";
-import ServerRacksIcon from "@/media/svg/ServerRacksIcon";
-import Badge from "@/media/svg/Badge";
-import styles from "./styles/TrustAndSafetyFeatures.module.scss";
+import React from "react"
+import { Box, Typography } from "@mui/material"
+import Shield from "@/media/svg/Shield"
+import LockIcon from "@/media/svg/LockIcon"
+import EyeIcon from "@/media/svg/EyeIcon"
+import CheckedDocumentIcon from "@/media/svg/CheckedDocumentIcon"
+import ServerRacksIcon from "@/media/svg/ServerRacksIcon"
+import Badge from "@/media/svg/Badge"
+import styles from "./styles/TrustAndSafetyFeatures.module.scss"
 
 const features = [
   {
@@ -51,7 +51,7 @@ const features = [
     description:
       "ما با PCI DSS برای امنیت پرداخت، GDPR برای حریم خصوصی داده‌ها و مقررات AML/KYC برای تراکنش‌های مالی مطابقت داریم.",
   },
-];
+]
 
 export default function TrustAndSafetyFeatures() {
   return (
@@ -62,7 +62,9 @@ export default function TrustAndSafetyFeatures() {
             <Box className={styles.iconWrapper}>
               <feature.icon {...feature.iconProps} />
             </Box>
-            <Typography className={styles.cardTitle}>{feature.title}</Typography>
+            <Typography className={styles.cardTitle}>
+              {feature.title}
+            </Typography>
             <Typography className={styles.cardDescription}>
               {feature.description}
             </Typography>
@@ -70,6 +72,5 @@ export default function TrustAndSafetyFeatures() {
         ))}
       </Box>
     </Box>
-  );
+  )
 }
-

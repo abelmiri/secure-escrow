@@ -1,12 +1,12 @@
-import React from "react";
-import { Box, Typography } from "@mui/material";
-import CheckedIcon from "@/media/svg/CheckedIcon";
-import BuyerSeller from "@/media/svg/BuyerSeller";
-import DollarSign from "@/media/svg/DollarSign";
-import BoxIcon from "@/media/svg/BoxIcon";
-import CircleCheckIcon from "@/media/svg/CircleCheckIcon";
-import CreditCardIcon from "@/media/svg/CreditCardIcon";
-import styles from "./styles/HowItWorksSteps.module.scss";
+import React from "react"
+import { Box, Typography } from "@mui/material"
+import CheckedIcon from "@/media/svg/CheckedIcon"
+import BuyerSeller from "@/media/svg/BuyerSeller"
+import DollarSign from "@/media/svg/DollarSign"
+import BoxIcon from "@/media/svg/BoxIcon"
+import CircleCheckIcon from "@/media/svg/CircleCheckIcon"
+import CreditCardIcon from "@/media/svg/CreditCardIcon"
+import styles from "./styles/HowItWorksSteps.module.scss"
 
 const steps = [
   {
@@ -84,7 +84,7 @@ const steps = [
     imageIcon: <CreditCardIcon width="80" height="80" color="#155DFC" />,
     stepLabel: "مرحله ۵ از ۵",
   },
-];
+]
 
 export default function HowItWorksSteps() {
   return (
@@ -96,11 +96,11 @@ export default function HowItWorksSteps() {
               <div className={styles.stepNumber}>{step.number}</div>
               <div className={styles.iconWrapper}>{step.icon}</div>
             </div>
-            
+
             <Typography variant="h3" className={styles.title}>
               {step.title}
             </Typography>
-            
+
             <Typography variant="body1" className={styles.description}>
               {step.description}
             </Typography>
@@ -124,5 +124,5 @@ export default function HowItWorksSteps() {
         </div>
       ))}
     </section>
-  );
+  )
 }

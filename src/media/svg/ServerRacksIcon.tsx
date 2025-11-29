@@ -1,7 +1,7 @@
-import { SVGProps } from "react";
+import { SVGProps } from "react"
 
 export interface ServerRacksIconProps extends SVGProps<SVGSVGElement> {
-  strokeColor?: string;
+  strokeColor?: string
 }
 
 export default function ServerRacksIcon({
@@ -62,6 +62,5 @@ export default function ServerRacksIcon({
         strokeLinejoin="round"
       />
     </svg>
-  );
+  )
 }
-

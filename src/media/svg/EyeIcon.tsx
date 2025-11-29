@@ -1,7 +1,7 @@
-import { SVGProps } from "react";
+import { SVGProps } from "react"
 
 export interface EyeIconProps extends SVGProps<SVGSVGElement> {
-  strokeColor?: string;
+  strokeColor?: string
 }
 
 export default function EyeIcon({
@@ -34,6 +34,5 @@ export default function EyeIcon({
         strokeLinejoin="round"
       />
     </svg>
-  );
+  )
 }
-

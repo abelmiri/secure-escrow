@@ -1,7 +1,7 @@
-import { SVGProps } from "react";
+import { SVGProps } from "react"
 
 export interface WarningSignProps extends SVGProps<SVGSVGElement> {
-  strokeColor?: string;
+  strokeColor?: string
 }
 
 export default function WarningSign({
@@ -41,6 +41,5 @@ export default function WarningSign({
         strokeLinejoin="round"
       />
     </svg>
-  );
+  )
 }
-

@@ -1,8 +1,8 @@
-import React from "react";
-import { Box, Typography } from "@mui/material";
-import WarningSign from "@/media/svg/WarningSign";
-import CheckedIcon from "@/media/svg/CheckedIcon";
-import styles from "./styles/TrustAndSafetyTips.module.scss";
+import React from "react"
+import { Box, Typography } from "@mui/material"
+import WarningSign from "@/media/svg/WarningSign"
+import CheckedIcon from "@/media/svg/CheckedIcon"
+import styles from "./styles/TrustAndSafetyTips.module.scss"
 
 const safetyTips = [
   "هرگز پول را خارج از پلتفرم سکیوراسکرو ارسال نکنید",
@@ -11,7 +11,7 @@ const safetyTips = [
   "همیشه برای اقلام فیزیکی از ارسال ردیابی‌شده استفاده کنید",
   "فعالیت مشکوک را فوراً به تیم پشتیبانی ما گزارش دهید",
   "احراز هویت دو مرحله‌ای را در حساب خود فعال کنید",
-];
+]
 
 export default function TrustAndSafetyTips() {
   return (
@@ -39,6 +39,5 @@ export default function TrustAndSafetyTips() {
         ))}
       </Box>
     </Box>
-  );
+  )
 }
-
