@@ -31,6 +31,7 @@ const resources = [
   { label: "سوالات متداول", href: "/faq" },
   { label: "مستندات API", href: "#" },
   { label: "چگونه کار می‌کند", href: "/how-it-works" },
+  { label: "اعتماد و امنیت", href: "/trust-and-safety" },
   { label: "کارمزدها", href: "#" },
   { label: "امنیت", href: "#" },
   { label: "شرکای تجاری", href: "#" },

@@ -1,0 +1,73 @@
+.container {
+  padding: 80px 20px;
+  background: #F9FAFB;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-bottom: 1px solid var(--color-text-secondary);
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 30px !important;
+  font-weight: 400 !important;
+  color: #101828;
+  margin-bottom: 16px !important;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: 20px !important;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.tipsContainer {
+  background: #ffffff;
+  border: 1px solid #eaecf0;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 1200px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+}
+
+.tipItem {
+  display: flex;
+  align-items: center;
+}
+
+.tipIconWrapper {
+  height: 32px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-inline-end: 12px !important;
+  flex-shrink: 0;
+}
+
+.tipText {
+  font-size: 16px !important;
+  line-height: 1.6;
+  color: #101828;
+  flex: 1;
+  padding-top: 4px;
+}
