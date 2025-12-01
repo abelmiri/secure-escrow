@@ -117,10 +117,10 @@ alwaysApply: true
 - Prevent event propagation when nested interactive elements exist:
   ```typescript
   const handleAction = (e: React.MouseEvent<HTMLButtonElement>): void => {
-    e.preventDefault();
-    e.stopPropagation();
+    e.preventDefault()
+    e.stopPropagation()
     // action logic
-  };
+  }
   ```
 - When making entire cards/components clickable, use `component={Link}` prop on Material UI Card/Paper components
 - Avoid nested Link components - use event handlers with router.push() for nested buttons
@@ -131,7 +131,26 @@ alwaysApply: true
 - Group related data and functions together (e.g., `src/lib/users.ts` for user-related data and functions)
 - Export data arrays/objects and utility functions from lib files
 - Define types inline in lib files or import from component files if needed
-- Example structure:
+- **Form Utilities:**
+  - Create reusable form utility functions in `src/lib/formUtils.ts` or similar
+  - Include number formatting functions that can be shared across components
+  - Example structure:
+
+  ```typescript
+  // src/lib/formUtils.ts
+  export const formatNumber = (value: string): string => {
+    const cleaned = value.replace(/[^\d.]/g, "")
+    const parts = cleaned.split(".")
+    const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+    return parts.length > 1 ? `${integerPart}.${parts[1]}` : integerPart
+  }
+
+  export const parseNumber = (value: string): string => {
+    return value.replace(/,/g, "")
+  }
+  ```
+
+- Example structure for other utilities:
 
   ```typescript
   // src/lib/resource.ts
@@ -157,11 +176,100 @@ alwaysApply: true
 - Always provide proper TypeScript types for event handlers:
   ```typescript
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>): void => {
-    e.preventDefault();
-    e.stopPropagation();
+    e.preventDefault()
+    e.stopPropagation()
     // handler logic
-  };
+  }
   ```
+
+### 12. Form Development Standards
+
+- **ALWAYS use Material UI form components** (TextField, Select, FormControl, etc.)
+- Forms MUST be right-to-left (RTL) aligned for Persian content
+- Use SCSS modules to style form fields, NOT inline `sx` props
+- **RTL Form Styling Requirements:**
+  - Labels MUST be positioned on the right side
+  - Input text MUST be right-aligned
+  - Placeholders MUST be right-aligned
+  - Use global CSS selectors to override Material UI defaults:
+    ```scss
+    .field {
+      :global(.MuiInputLabel-root) {
+        right: 26px !important;
+        left: auto !important;
+        transform-origin: top right !important;
+      }
+      :global(.MuiInputLabel-shrink) {
+        transform: translate(-14px, -9px) scale(0.75) !important;
+        right: 0 !important;
+      }
+      :global(.MuiInputBase-input) {
+        text-align: right !important;
+        direction: rtl !important;
+        padding-right: 14px !important;
+        padding-left: 14px !important;
+      }
+      :global(.MuiSelect-select) {
+        text-align: right !important;
+        direction: rtl !important;
+      }
+      :global(.MuiSelect-icon) {
+        right: auto !important;
+        left: 7px !important;
+      }
+    }
+    ```
+- **Number Formatting:**
+  - For numeric input fields (prices, quantities, etc.), implement number formatting with commas
+  - Store numeric values WITHOUT commas in state
+  - Display formatted values WITH commas in the UI
+  - Create utility functions for formatting:
+
+    ```typescript
+    const formatNumber = (value: string): string => {
+      const cleaned = value.replace(/[^\d.]/g, "")
+      const parts = cleaned.split(".")
+      const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+      return parts.length > 1 ? `${integerPart}.${parts[1]}` : integerPart
+    }
+
+    const parseNumber = (value: string): string => {
+      return value.replace(/,/g, "")
+    }
+    ```
+
+  - Use separate handlers for numeric fields:
+    ```typescript
+    const handleNumberChange =
+      (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+        const cleaned = parseNumber(e.target.value)
+        setFormData((prev) => ({ ...prev, [field]: cleaned }))
+      }
+    ```
+  - Display formatted values: `value={formatNumber(formData.price)}`
+
+- **Conditional Form Fields:**
+  - When form fields change based on user selection (e.g., role-based forms), use conditional rendering
+  - Keep all possible form data in a single state object
+  - Use clear conditional blocks for different form variants
+  - Example structure:
+    ```typescript
+    {formData.role === "seller" && (
+      // Seller-specific fields
+    )}
+    {formData.role === "buyer" && (
+      // Buyer-specific fields
+    )}
+    ```
+- **Form State Management:**
+  - Use React useState for form state management
+  - Group related fields in the state object
+  - Use consistent naming: `handleChange` for text fields, `handleSelectChange` for dropdowns, `handleNumberChange` for numeric fields
+  - Always provide proper TypeScript types for handlers
+- **Currency and Number Display:**
+  - Use Persian currency (تومان) instead of dollar signs for Iranian market
+  - Display currency symbol as endAdornment in TextField InputProps
+  - Format numbers with Persian/Arabic numerals when appropriate
 
 ## File Naming Conventions
 
@@ -215,6 +323,7 @@ export default function ComponentName({ prop1, prop2 }: ComponentNameProps) {
 ```
 
 **Note:** For simple components without props, you can omit the props interface entirely:
+
 ```typescript
 // SimpleComponent.tsx
 import { Box } from "@mui/material";
@@ -222,5 +331,158 @@ import styles from "./styles/SimpleComponent.module.scss";
 
 export default function SimpleComponent() {
   return <Box className={styles.container}>Content</Box>;
+}
+```
+
+## Form Component Example
+
+```typescript
+// FormComponent.tsx
+"use client";
+
+import React, { useState } from "react";
+import {
+  Box,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Button,
+} from "@mui/material";
+import styles from "./styles/FormComponent.module.scss";
+
+export default function FormComponent() {
+  const [formData, setFormData] = useState({
+    name: "",
+    role: "seller",
+    price: "0",
+    quantity: "1",
+  });
+
+  const formatNumber = (value: string): string => {
+    const cleaned = value.replace(/[^\d.]/g, "");
+    const parts = cleaned.split(".");
+    const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.length > 1 ? `${integerPart}.${parts[1]}` : integerPart;
+  };
+
+  const parseNumber = (value: string): string => {
+    return value.replace(/,/g, "");
+  };
+
+  const handleChange = (field: string) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: e.target.value }));
+  };
+
+  const handleSelectChange = (field: string) => (
+    e: { target: { value: unknown } }
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: e.target.value as string,
+    }));
+  };
+
+  const handleNumberChange = (field: string) => (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const cleaned = parseNumber(e.target.value);
+    setFormData((prev) => ({ ...prev, [field]: cleaned }));
+  };
+
+  return (
+    <Box className={styles.container}>
+      <TextField
+        label="نام"
+        value={formData.name}
+        onChange={handleChange("name")}
+        fullWidth
+        className={styles.field}
+        variant="outlined"
+      />
+
+      <FormControl fullWidth className={styles.field}>
+        <InputLabel>نقش</InputLabel>
+        <Select
+          value={formData.role}
+          onChange={handleSelectChange("role")}
+          label="نقش"
+        >
+          <MenuItem value="seller">فروشنده</MenuItem>
+          <MenuItem value="buyer">خریدار</MenuItem>
+        </Select>
+      </FormControl>
+
+      <TextField
+        label="قیمت (تومان)"
+        value={formatNumber(formData.price)}
+        onChange={handleNumberChange("price")}
+        fullWidth
+        className={styles.field}
+        variant="outlined"
+        InputProps={{
+          endAdornment: <span style={{ marginLeft: 8 }}>تومان</span>,
+        }}
+      />
+
+      <TextField
+        label="تعداد"
+        value={formatNumber(formData.quantity)}
+        onChange={handleNumberChange("quantity")}
+        fullWidth
+        className={styles.field}
+        variant="outlined"
+      />
+    </Box>
+  );
+}
+```
+
+```scss
+// styles/FormComponent.module.scss
+.container {
+  padding: 32px;
+  background: #ffffff;
+  border-radius: 16px;
+}
+
+.field {
+  margin-bottom: 24px !important;
+
+  &:last-child {
+    margin-bottom: 0 !important;
+  }
+
+  // RTL styling for Material UI fields
+  :global(.MuiInputLabel-root) {
+    right: 26px !important;
+    left: auto !important;
+    transform-origin: top right !important;
+  }
+
+  :global(.MuiInputLabel-shrink) {
+    transform: translate(-14px, -9px) scale(0.75) !important;
+    right: 0 !important;
+  }
+
+  :global(.MuiInputBase-input) {
+    text-align: right !important;
+    direction: rtl !important;
+    padding-right: 14px !important;
+    padding-left: 14px !important;
+  }
+
+  :global(.MuiSelect-select) {
+    text-align: right !important;
+    direction: rtl !important;
+  }
+
+  :global(.MuiSelect-icon) {
+    right: auto !important;
+    left: 7px !important;
+  }
 }
 ```
