@@ -12,7 +12,7 @@ export default function HomePage() {
   return (
     <>
       <LandingInfo />
-      <TrustedPartnersCard />
+      {/* <TrustedPartnersCard /> */}
       <HowItWorks />
       <WhyChooseUs />
       <PerfectTransaction />
