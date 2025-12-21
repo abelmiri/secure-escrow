@@ -139,8 +139,7 @@ export default function Footer() {
         <Box className={styles.divider} />
 
         <Typography className={styles.copyright}>
-          © ۲۰۲۵ امان یار. تمامی حقوق محفوظ است. سرویس اسکرو دارای مجوز و تحت
-          نظارت.
+          © ۱۴۰۴ امان یار. تمامی حقوق محفوظ است. سرویس امان یار تحت مجوز رسمی و نظارت قانونی فعالیت می‌کند.
         </Typography>
       </Box>
     </Box>
