@@ -54,7 +54,7 @@ export default function WhyChooseUs() {
       <Box className={styles.contentWrapper}>
         <Box className={styles.leftSection}>
           <Typography variant="h2" className={styles.title}>
-            چرا ما را انتخاب کنید
+            چرا امان یار انتخابی امن، سریع و شفاف برای شماست؟
           </Typography>
 
           <Typography className={styles.description}>

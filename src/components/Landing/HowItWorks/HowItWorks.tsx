@@ -25,32 +25,41 @@ const steps: StepCardProps[] = [
   {
     number: "۰۲",
     title: "پرداخت خریدار",
-    description: "مبلغ پرداختی به صورت امن در حساب امانی ما نگهداری می‌شود",
+    description: "خریدار مبلغ را پرداخت می‌کند و وجه به صورت امن در حساب امانی نزد بانک نگهداری می‌شود",
     Icon: DollarSign,
   },
   {
     number: "۰۳",
-    title: "تحویل کالا",
-    description: "کالا یا خدمات به خریدار تحویل داده می‌شود",
+    title: "تحویل کالا یا خدمت",
+    description: "کالا یا خدمت از طرف فروشنده به خریدار تحویل  می‌شود",
     Icon: DeliverCheck,
   },
   {
     number: "۰۴",
+    title: "تایید نهایی شروط",
+    description: "تایید نهایی خریدار از دریافت کالا (یا دیگر شروط معامله) پس از بررسی تطابق آن‌ها با شرایط توافق‌شده انجام می‌شود",
+    Icon: Badge,
+  },  
+  {
+    number: "۰۵",
     title: "آزادسازی وجه",
-    description: "مبلغ پس از تایید خریدار برای فروشنده آزاد می‌شود",
+    description: "مبلغ نگهداری شده در حساب امانی پس از تایید نهایی شرایط، به حساب فروشنده آزاد می‌شود",
     Icon: Badge,
   },
+
 ]
 
 export default function HowItWorks() {
   return (
     <Box className={styles.container}>
       <Typography variant="h2" className={styles.title}>
-        چگونه کار می‌کند
+        نحوه انجام معاملات در امان یار
       </Typography>
 
       <Typography variant="h6" className={styles.subtitle}>
         فرایندی ساده، امن و شفاف
+        <br/>
+        با اطمینان کامل از شروع تا پایان، هر مرحله از معامله تحت کنترل شماست 
       </Typography>
 
       <Box className={styles.cardsContainer}>
@@ -75,7 +84,7 @@ export default function HowItWorks() {
         className={styles.learnMoreButton}
         endIcon={<ArrowForwardIcon sx={{ transform: "rotate(180deg)" }} />}
       >
-        بیشتر درباره فرایند ما بدانید
+        مشاهده جزئیات کامل فرآیند
       </Button>
     </Box>
   )

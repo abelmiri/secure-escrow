@@ -9,7 +9,7 @@ import { ReactNode } from "react"
 import AuthProvider from "@/context/auth/authProvider"
 
 export const metadata: Metadata = {
-  title: "امان یار | پلتفرم اسکرو امن و حرفه‌ای",
+  title: "امان یار | امن و حرفه‌ای",
   description: "امان یار - پلتفرم اسکرو مورد اعتمادترین در جهان",
 }
 

@@ -10,38 +10,38 @@ import styles from "./styles/PerfectTransaction.module.scss"
 
 const categories = [
   {
-    title: "نام‌های دامنه",
-    description: "انتقال امن دامنه‌های ویژه و با ارزش",
+    title: "دامنه، وبسایت، اپلیکیشن و کالاهای الکترونیکی",
+    description: "خرید و فروش دامنه‌ها، وبسایت‌ها، اپلیکیشن‌ها و کالاهای الکترونیکی با تضمین امنیت",
     Icon: GlobeIcon,
     iconBg: "linear-gradient(135deg, #00B8DB 0%, #155DFC 100%)", // Blue
   },
   {
-    title: "وسایل نقلیه",
-    description: "خرید و فروش خودرو، موتورسیکلت و قایق",
+    title: "وسایل نقلیه (ماشین و خودرو)",
+    description: "خرید و فروش وسایل نقله شخصی و تجاری با امنیت کامل",
     Icon: TrendingUpIcon,
     iconBg: "linear-gradient(135deg, #AD46FF 0%, #E60076 100%)", // Pink/Purple
   },
   {
-    title: "وب‌سایت و اپلیکیشن",
-    description: "خرید و فروش کامل کسب‌وکارهای دیجیتال",
-    Icon: LightningIcon,
-    iconBg: "linear-gradient(135deg, #00C950 0%, #009966 100%)", // Green
-  },
-  {
     title: "املاک و مستغلات",
-    description: "معاملات امن ملک و زمین",
+    description: "معاملات املاک و مستغلات، با تضمین حفاظت از دارایی‌ها",
     Icon: Shield,
     iconBg: "linear-gradient(135deg, #FF6900 0%, #E7000B 100%)", // Orange
   },
   {
-    title: "کالاهای عمومی",
-    description: "کالاهای با ارزش، جواهرات و کلکسیونی",
+    title: "کالاهای عمومی در شبکه‌های اجتماعی",
+    description: "خرید و فروش کالاهای مختلف از طریق شبکه‌های اجتماعی، با اطمینان از حفاظت از معامله",
     Icon: StarIcon,
     iconBg: "linear-gradient(135deg, #F6339A 0%, #EC003F 100%)", // Pink
   },
   {
-    title: "فروش کسب‌وکار",
-    description: "ادغام و خرید شرکت‌ها و کسب‌وکارهای فعال",
+    title: "طلا، نقره و فلزات گرانبها",
+    description: "خرید و فروش طلا، نقره و فلزات گرانبها، با امنیت بالا و شفافیت",
+    Icon: LightningIcon,
+    iconBg: "linear-gradient(135deg, #00C950 0%, #009966 100%)", // Green
+  },
+    {
+    title: "پرداخت‌های امن برای کسب‌وکارها",
+    description: "انجام پرداخت‌ها و معاملات کسب‌وکارها، با اطمینان از شفافیت",
     Icon: BuyerSeller,
     iconBg: "linear-gradient(135deg, #615FFF 0%, #9810FA 100%)", // Purple
   },
@@ -84,7 +84,7 @@ export default function PerfectTransaction() {
         className={styles.viewAllButton}
         endIcon={<ArrowForwardIcon sx={{ transform: "rotate(180deg)" }} />}
       >
-        مشاهده همه دسته‌بندی‌ها
+        مشاهده دسته‌بندی‌ها
       </Button>
     </Box>
   )
