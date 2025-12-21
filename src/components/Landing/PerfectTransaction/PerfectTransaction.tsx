@@ -11,7 +11,8 @@ import styles from "./styles/PerfectTransaction.module.scss"
 const categories = [
   {
     title: "دامنه، وبسایت، اپلیکیشن و کالاهای الکترونیکی",
-    description: "خرید و فروش دامنه‌ها، وبسایت‌ها، اپلیکیشن‌ها و کالاهای الکترونیکی با تضمین امنیت",
+    description:
+      "خرید و فروش دامنه‌ها، وبسایت‌ها، اپلیکیشن‌ها و کالاهای الکترونیکی با تضمین امنیت",
     Icon: GlobeIcon,
     iconBg: "linear-gradient(135deg, #00B8DB 0%, #155DFC 100%)", // Blue
   },
@@ -29,17 +30,19 @@ const categories = [
   },
   {
     title: "کالاهای عمومی در شبکه‌های اجتماعی",
-    description: "خرید و فروش کالاهای مختلف از طریق شبکه‌های اجتماعی، با اطمینان از حفاظت از معامله",
+    description:
+      "خرید و فروش کالاهای مختلف از طریق شبکه‌های اجتماعی، با اطمینان از حفاظت از معامله",
     Icon: StarIcon,
     iconBg: "linear-gradient(135deg, #F6339A 0%, #EC003F 100%)", // Pink
   },
   {
     title: "طلا، نقره و فلزات گرانبها",
-    description: "خرید و فروش طلا، نقره و فلزات گرانبها، با امنیت بالا و شفافیت",
+    description:
+      "خرید و فروش طلا، نقره و فلزات گرانبها، با امنیت بالا و شفافیت",
     Icon: LightningIcon,
     iconBg: "linear-gradient(135deg, #00C950 0%, #009966 100%)", // Green
   },
-    {
+  {
     title: "پرداخت‌های امن برای کسب‌وکارها",
     description: "انجام پرداخت‌ها و معاملات کسب‌وکارها، با اطمینان از شفافیت",
     Icon: BuyerSeller,

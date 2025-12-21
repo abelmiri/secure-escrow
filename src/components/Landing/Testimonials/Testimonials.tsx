@@ -36,7 +36,7 @@ export default function Testimonials() {
     <Box className={styles.container}>
       <Box className={styles.header}>
         <Typography variant="h2" className={styles.title}>
-        نظرات کاربران | تجربیات کاربران | کاربران ما چه می گویند  
+          نظرات کاربران | تجربیات کاربران | کاربران ما چه می گویند
         </Typography>
         <Typography className={styles.subtitle}>
           مورد اعتماد هزاران مشتری راضی

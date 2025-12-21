@@ -5,12 +5,12 @@ import styles from "./styles/ReadyToStart.module.scss"
 export default function ReadyToStart({ howItWorks }: { howItWorks?: boolean }) {
   const title = howItWorks
     ? "آماده شروع هستید؟"
-    : "آماده شروع معامله امن خود هستید؟"
+    : "شروع معامله با امان یار، انتخابی امن برای خرید و فروش"
   const subtitle = howItWorks
     ? "اولین تراکنش امن خود را در دقایقی بسازید"
-    : "به هزاران خریدار و فروشنده‌ای بپیوندید که برای معاملات با ارزش بالا به امان یار اعتماد کرده‌اند"
-  const buttonText = howItWorks ? "شروع یک معامله" : "شروع کنید"
-  const secondaryButtonText = howItWorks ? "تماس با ما" : "تماس با فروشنده"
+    : "خرید، فروش و انجام تراکنش‌های مطمئن از خودرو و املاک تا کالاهای لوکس و با ارزش"
+  const buttonText = howItWorks ? "شروع یک معامله" : "آغاز معامله"
+  const secondaryButtonText = howItWorks ? "تماس با ما" : ""
   return (
     <Box
       className={`${styles.container} ${howItWorks ? styles.howItWorks : ""}`}
@@ -30,9 +30,11 @@ export default function ReadyToStart({ howItWorks }: { howItWorks?: boolean }) {
             {buttonText}
           </Button>
 
-          <Button className={styles.secondaryButton}>
-            {secondaryButtonText}
-          </Button>
+          {secondaryButtonText && (
+            <Button className={styles.secondaryButton}>
+              {secondaryButtonText}
+            </Button>
+          )}
         </Box>
       </Box>
     </Box>
