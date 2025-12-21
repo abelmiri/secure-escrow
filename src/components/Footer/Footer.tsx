@@ -11,7 +11,7 @@ import styles from "./styles/Footer.module.scss"
 
 const footerLinks = {
   products: [
-    "خدمات اسکرو",
+    "خدمات امان یار",
     "نام‌های دامنه",
     "وب‌سایت‌ها",
     "وسایل نقلیه",
