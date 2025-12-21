@@ -1,6 +1,8 @@
-# Secure Transaction Platform
+# امان یار (Aman Yar) - Secure Transaction Platform
 
-A secure transaction and escrow platform built with Next.js 15 (App Router), TypeScript, and Material UI. This application provides a trusted environment for safe digital transactions.
+امان یار یک پلتفرم امن معاملات و اسکرو ساخته شده با Next.js 15 (App Router)، TypeScript و Material UI. این برنامه محیطی قابل اعتماد برای معاملات دیجیتال امن فراهم می‌کند.
+
+Aman Yar is a secure transaction and escrow platform built with Next.js 15 (App Router), TypeScript, and Material UI. This application provides a trusted environment for safe digital transactions.
 
 ## Tech Stack
 

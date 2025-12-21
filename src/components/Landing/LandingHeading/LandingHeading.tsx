@@ -4,9 +4,9 @@ import styles from "./styles/LandingHeading.module.scss"
 export default function LandingHeading() {
   return (
     <Box className={styles.heading}>
-      <Typography className={styles.firstLine}>تراکنش‌های امن</Typography>
+      <Typography className={styles.firstLine}>با امان یار</Typography>
       <Typography className={styles.secondLine}>
-        که می‌توانید به آن اعتماد کنید
+        همه خرید و فروش های آنلاین خود را انجام دهید
       </Typography>
     </Box>
   )

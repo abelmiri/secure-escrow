@@ -8,7 +8,7 @@ export default function ReadyToStart({ howItWorks }: { howItWorks?: boolean }) {
     : "آماده شروع معامله امن خود هستید؟"
   const subtitle = howItWorks
     ? "اولین تراکنش امن خود را در دقایقی بسازید"
-    : "به هزاران خریدار و فروشنده‌ای بپیوندید که برای معاملات با ارزش بالا به سکیوراسکرو اعتماد کرده‌اند"
+    : "به هزاران خریدار و فروشنده‌ای بپیوندید که برای معاملات با ارزش بالا به امان یار اعتماد کرده‌اند"
   const buttonText = howItWorks ? "شروع یک معامله" : "شروع کنید"
   const secondaryButtonText = howItWorks ? "تماس با ما" : "تماس با فروشنده"
   return (

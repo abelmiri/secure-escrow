@@ -44,7 +44,7 @@ export default function Footer() {
               <Box className={styles.iconContainer}>
                 <SecureEscrow width={20} height={20} strokeColor="white" />
               </Box>
-              <Typography className={styles.companyName}>سکیوراسکرو</Typography>
+              <Typography className={styles.companyName}>امان یار</Typography>
             </Box>
 
             <Typography className={styles.description}>
@@ -139,7 +139,7 @@ export default function Footer() {
         <Box className={styles.divider} />
 
         <Typography className={styles.copyright}>
-          © ۲۰۲۵ سکیوراسکرو. تمامی حقوق محفوظ است. سرویس اسکرو دارای مجوز و تحت
+          © ۲۰۲۵ امان یار. تمامی حقوق محفوظ است. سرویس اسکرو دارای مجوز و تحت
           نظارت.
         </Typography>
       </Box>

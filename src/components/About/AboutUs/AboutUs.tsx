@@ -6,7 +6,7 @@ export default function AboutUs() {
   return (
     <Box className={styles.container}>
       <Typography variant="h1" className={styles.title}>
-        درباره سکیوراسکرو
+        درباره امان یار
       </Typography>
 
       <Typography variant="body1" className={styles.description}>

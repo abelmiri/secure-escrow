@@ -17,7 +17,7 @@ export default function LandingInfo() {
           <LandingHeading />
           <LandingHeadingDescription />
           <LandingStartButtons />
-          <LandingInfoStats />
+          {/* <LandingInfoStats /> */}
         </Box>
         <Box className={styles.rightSection}>
           <Box className={styles.imageContainer}>

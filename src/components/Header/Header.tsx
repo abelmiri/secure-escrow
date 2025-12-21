@@ -107,7 +107,7 @@ export default function Header() {
               strokeColor="white"
             />
           </Box>
-          <Typography className={styles.title}>سکیوراسکرو</Typography>
+          <Typography className={styles.title}>امان یار</Typography>
         </Link>
       </Box>
 
@@ -243,7 +243,7 @@ export default function Header() {
                   strokeColor="white"
                 />
               </Box>
-              <Typography className={styles.title}>سکیوراسکرو</Typography>
+              <Typography className={styles.title}>امان یار</Typography>
             </Link>
           </Box>
           <IconButton onClick={handleDrawerToggle}>

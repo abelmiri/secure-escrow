@@ -13,7 +13,7 @@ export default function AboutStory() {
         </Typography>
 
         <Typography variant="body1" className={styles.text}>
-          سکیوراسکرو در سال ۲۰۱۰ با یک ماموریت ساده تاسیس شد: امن و مطمئن کردن
+          امان یار در سال ۲۰۱۰ با یک ماموریت ساده تاسیس شد: امن و مطمئن کردن
           معاملات آنلاین برای همه. آنچه که با یک تیم کوچک از متخصصان امنیت شروع
           شد، اکنون به پیشروترین سرویس اسکرو در جهان تبدیل شده است.
         </Typography>
@@ -35,7 +35,7 @@ export default function AboutStory() {
       <Box className={styles.imageWrapper}>
         <Image
           src={sticks}
-          alt="جلسه تیم سکیوراسکرو"
+          alt="جلسه تیم امان یار"
           className={styles.image}
           placeholder="blur"
         />

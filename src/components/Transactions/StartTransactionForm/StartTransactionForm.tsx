@@ -1,6 +1,6 @@
-"use client";
+"use client"
 
-import React, { useState } from "react";
+import React, { useState } from "react"
 import {
   Box,
   Typography,
@@ -10,8 +10,8 @@ import {
   FormControl,
   InputLabel,
   Button,
-} from "@mui/material";
-import styles from "./styles/StartTransactionForm.module.scss";
+} from "@mui/material"
+import styles from "./styles/StartTransactionForm.module.scss"
 
 export default function StartTransactionForm() {
   const [formData, setFormData] = useState({
@@ -27,56 +27,55 @@ export default function StartTransactionForm() {
     itemDescription: "",
     // Broker fields
     brokerCommission: "0",
-  });
+  })
 
   const formatNumber = (value: string): string => {
     // Remove all non-digit characters except decimal point
-    const cleaned = value.replace(/[^\d.]/g, "");
+    const cleaned = value.replace(/[^\d.]/g, "")
     // Split by decimal point
-    const parts = cleaned.split(".");
+    const parts = cleaned.split(".")
     // Format integer part with commas
-    const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",")
     // Return formatted number
-    return parts.length > 1 ? `${integerPart}.${parts[1]}` : integerPart;
-  };
+    return parts.length > 1 ? `${integerPart}.${parts[1]}` : integerPart
+  }
 
   const parseNumber = (value: string): string => {
     // Remove commas for storage
-    return value.replace(/,/g, "");
-  };
+    return value.replace(/,/g, "")
+  }
 
-  const handleChange = (field: string) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: e.target.value,
-    }));
-  };
+  const handleChange =
+    (field: string) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: e.target.value,
+      }))
+    }
 
-  const handleNumberChange = (field: string) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const cleaned = parseNumber(e.target.value);
-    setFormData((prev) => ({
-      ...prev,
-      [field]: cleaned,
-    }));
-  };
+  const handleNumberChange =
+    (field: string) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const cleaned = parseNumber(e.target.value)
+      setFormData((prev) => ({
+        ...prev,
+        [field]: cleaned,
+      }))
+    }
 
-  const handleSelectChange = (field: string) => (
-    e: { target: { value: unknown } }
-  ) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: e.target.value as string,
-    }));
-  };
+  const handleSelectChange =
+    (field: string) => (e: { target: { value: unknown } }) => {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: e.target.value as string,
+      }))
+    }
 
   const handleAddItem = () => {
-    console.log("Add item:", formData);
+    console.log("Add item:", formData)
     // Handle form submission here
-  };
+  }
 
   return (
     <Box className={styles.container}>
@@ -357,6 +356,5 @@ export default function StartTransactionForm() {
         </Box>
       </Box>
     </Box>
-  );
+  )
 }
-

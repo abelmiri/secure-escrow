@@ -9,8 +9,8 @@ import { ReactNode } from "react"
 import AuthProvider from "@/context/auth/authProvider"
 
 export const metadata: Metadata = {
-  title: "پلتفرم اسکرو | امن و حرفه‌ای",
-  description: "پلتفرم اسکرو مورد اعتمادترین در جهان",
+  title: "امان یار | پلتفرم اسکرو امن و حرفه‌ای",
+  description: "امان یار - پلتفرم اسکرو مورد اعتمادترین در جهان",
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {

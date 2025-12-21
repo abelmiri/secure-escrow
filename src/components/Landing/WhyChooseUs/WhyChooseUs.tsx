@@ -89,7 +89,7 @@ export default function WhyChooseUs() {
           <Box className={styles.imageContainer}>
             <Image
               src={laptopImg}
-              alt="Secure Escrow on Laptop"
+              alt="امان یار روی لپتاپ"
               fill
               className={styles.image}
               sizes="(max-width: 768px) 100vw, 50vw"
