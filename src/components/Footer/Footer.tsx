@@ -6,7 +6,7 @@ import FacebookIcon from "@mui/icons-material/Facebook"
 import TwitterIcon from "@mui/icons-material/Twitter"
 import LinkedInIcon from "@mui/icons-material/LinkedIn"
 import InstagramIcon from "@mui/icons-material/Instagram"
-import SecureEscrow from "@/media/svg/SecureEscrow"
+import IconSvg from "@/media/svg/IconSvg"
 import styles from "./styles/Footer.module.scss"
 
 const footerLinks = {
@@ -42,14 +42,13 @@ export default function Footer() {
           <Box className={styles.logoSection}>
             <Box className={styles.brand}>
               <Box className={styles.iconContainer}>
-                <SecureEscrow width={20} height={20} strokeColor="white" />
+                <IconSvg width={32} height={32} className={styles.icon} />
               </Box>
               <Typography className={styles.companyName}>امان یار</Typography>
             </Box>
 
             <Typography className={styles.description}>
-              معاملات امنی که می‌توانید به آن اعتماد کنید. محافظت از خریداران و
-              فروشندگان از سال ۲۰۲۰.
+              راه حلی مطمئن برای خرید و فروش اینترنتی.
             </Typography>
 
             <Box className={styles.contactInfo}>
@@ -62,13 +61,13 @@ export default function Footer() {
               <Box className={styles.contactItem}>
                 <PhoneIcon fontSize="small" />
                 <Typography className={styles.contactItemText}>
-                  ۰۲۱-۸۸۸۸۸۸۸۸
+                  09190071219
                 </Typography>
               </Box>
               <Box className={styles.contactItem}>
                 <LocationOnIcon fontSize="small" />
                 <Typography className={styles.contactItemText}>
-                  تهران، ایران
+                  ایران، تهران
                 </Typography>
               </Box>
             </Box>
@@ -120,10 +119,10 @@ export default function Footer() {
         <Box className={styles.bottomSection}>
           <Box className={styles.newsletter}>
             <Typography className={styles.newsletterTitle}>
-              به‌روز باشید
+              به‌روز بمانید
             </Typography>
             <Typography className={styles.newsletterText}>
-              برای دریافت آخرین اخبار و نکات در خبرنامه ما عضو شوید
+              برای دریافت آخرین به‌روزرسانی و نکات در خبرنامه ما عضو شوید
             </Typography>
             <Box component="form" className={styles.subscribeForm}>
               <input
@@ -139,7 +138,8 @@ export default function Footer() {
         <Box className={styles.divider} />
 
         <Typography className={styles.copyright}>
-          © ۱۴۰۴ امان یار. تمامی حقوق محفوظ است. سرویس امان یار تحت مجوز رسمی و نظارت قانونی فعالیت می‌کند.
+          © ۱۴۰۴ امان یار. تمامی حقوق محفوظ است. سرویس امان یار تحت مجوز رسمی و
+          نظارت قانونی فعالیت می‌کند.
         </Typography>
       </Box>
     </Box>

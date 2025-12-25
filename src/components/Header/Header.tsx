@@ -21,7 +21,7 @@ import MenuIcon from "@mui/icons-material/Menu"
 import CloseIcon from "@mui/icons-material/Close"
 import ExpandLess from "@mui/icons-material/ExpandLess"
 import ExpandMore from "@mui/icons-material/ExpandMore"
-import SecureEscrow from "@/media/svg/SecureEscrow"
+import IconSvg from "@/media/svg/IconSvg"
 import styles from "./styles/Header.module.scss"
 import loginOAUTH from "@/helpers/auth/loginOAUTH"
 
@@ -95,16 +95,15 @@ export default function Header() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "8px",
+            gap: "12px",
             textDecoration: "none",
           }}
         >
           <Box className={styles.iconContainer}>
-            <SecureEscrow
-              width={20}
-              height={20}
+            <IconSvg
+              width={32}
+              height={32}
               className={styles.icon}
-              strokeColor="white"
             />
           </Box>
           <Typography className={styles.title}>امان یار</Typography>
@@ -178,7 +177,7 @@ export default function Header() {
           aria-haspopup="true"
           aria-expanded={Boolean(anchorElSolutions) ? "true" : undefined}
         >
-          راه حل ها
+          راهکارها
           <KeyboardArrowDownIcon fontSize="small" />
         </Box>
         <Menu
@@ -236,11 +235,10 @@ export default function Header() {
               onClick={handleDrawerToggle}
             >
               <Box className={styles.iconContainer}>
-                <SecureEscrow
-                  width={20}
-                  height={20}
+                <IconSvg
+                  width={32}
+                  height={32}
                   className={styles.icon}
-                  strokeColor="white"
                 />
               </Box>
               <Typography className={styles.title}>امان یار</Typography>
