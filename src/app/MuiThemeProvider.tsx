@@ -4,6 +4,15 @@ import { ReactNode } from "react"
 
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material"
 
+const baseFontStack = [
+  "Dana",
+  "Arial",
+  "-apple-system",
+  "BlinkMacSystemFont",
+  '"Segoe UI"',
+  "sans-serif",
+].join(",")
+
 const theme = createTheme({
   direction: "rtl",
   palette: {
@@ -16,14 +25,22 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: [
-      "Dana",
-      "Arial",
-      "-apple-system",
-      "BlinkMacSystemFont",
-      '"Segoe UI"',
-      "sans-serif",
-    ].join(","),
+    fontFamily: baseFontStack,
+    allVariants: {
+      fontFamily: baseFontStack,
+    },
+  },
+  components: {
+    MuiCssBaseline: {
+      styleOverrides: {
+        html: {
+          fontFamily: baseFontStack,
+        },
+        body: {
+          fontFamily: baseFontStack,
+        },
+      },
+    },
   },
 })
 
