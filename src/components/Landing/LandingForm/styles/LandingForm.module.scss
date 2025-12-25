@@ -1,0 +1,131 @@
+.formContainer {
+  background-color: rgba(252, 250, 255, 0.95); // 5% transparency (95% opacity)
+  padding: 40px;
+  border-radius: 24px;
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  direction: rtl;
+
+  @media (max-width: 600px) {
+    padding: 24px;
+    border-radius: 16px;
+  }
+}
+
+.row {
+  display: flex;
+  gap: 20px;
+  width: 100%;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+  }
+}
+
+.formControl {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.select {
+  background-color: #f3f4f6;
+  border-radius: 8px !important;
+  height: 56px;
+
+  :global(.MuiOutlinedInput-notchedOutline) {
+    border: 1px solid #D1D5DC;
+  }
+
+  :global(.MuiSelect-icon) {
+    left: 12px !important;
+    right: auto !important;
+  }
+
+  :global(.MuiSelect-select) {
+    padding-left: 40px !important;
+    padding-right: 16px !important;
+    display: flex;
+    align-items: center;
+  }
+}
+
+.placeholder {
+  color: #9ca3af;
+}
+
+.amountSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.amountInput {
+  background-color: #f3f4f6;
+  border-radius: 8px;
+
+  :global(.MuiOutlinedInput-root) {
+    height: 56px;
+    border-radius: 8px;
+    
+    :global(.MuiOutlinedInput-notchedOutline) {
+      border: 1px solid #D1D5DC;
+    }
+  }
+
+  :global(.MuiInputBase-input) {
+    padding: 16px;
+  }
+}
+
+
+.amountHint {
+  font-size: 12px !important;
+  color: #6b7280 !important;
+  margin-top: 4px;
+}
+
+.submitButton {
+  background-color: #00a63e !important;
+  color: white;
+  height: 64px;
+  border-radius: 8px !important;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: none;
+  margin-top: 8px;
+  box-shadow: 0 4px 14px rgba(0, 166, 62, 0.4);
+
+  &:hover {
+    background-color: rgba(0, 166, 62, 0.5) !important;
+  }
+
+  :global(.MuiButton-endIcon) {
+    margin-right: 12px;
+    margin-left: 0;
+  }
+}
+
+.arrowIcon {
+  transform: rotate(180deg); // Pointing left for RTL or keep as is? 
+  // In the image the arrow points to the left because it's RTL context but wait, 
+  // looking at the image, the arrow is next to the text "همین الان شروع کنید" and points to the left.
+  // Actually, standard RTL arrow for "Next" points to left.
+}
+
+.footerText {
+  text-align: center;
+  font-size: 12px !important;
+  color: #6A7282 !important;
+}

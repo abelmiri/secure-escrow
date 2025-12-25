@@ -9,7 +9,7 @@ export default function ReadyToStart({ howItWorks }: { howItWorks?: boolean }) {
   const subtitle = howItWorks
     ? "اولین تراکنش امن خود را در دقایقی بسازید"
     : "خرید، فروش و انجام تراکنش‌های مطمئن از خودرو و املاک تا کالاهای لوکس و با ارزش"
-  const buttonText = howItWorks ? "شروع یک معامله" : "آغاز معامله"
+  const buttonText = howItWorks ? "شروع یک معامله" : "شروع معامله"
   const secondaryButtonText = howItWorks ? "تماس با ما" : ""
   return (
     <Box

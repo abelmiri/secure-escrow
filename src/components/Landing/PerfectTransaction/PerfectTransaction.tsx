@@ -87,7 +87,7 @@ export default function PerfectTransaction() {
         className={styles.viewAllButton}
         endIcon={<ArrowForwardIcon sx={{ transform: "rotate(180deg)" }} />}
       >
-        مشاهده دسته‌بندی‌ها
+        مشاهده تمام دسته‌بندی‌ها
       </Button>
     </Box>
   )
