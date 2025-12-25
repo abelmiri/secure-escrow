@@ -1,0 +1,231 @@
+.container {
+  background-color: white;
+  border-radius: 16px;
+  border: 1px solid #f2f4f7;
+  padding: 24px;
+  margin-top: 24px;
+  direction: rtl;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.1);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  gap: 16px;
+
+  @media (max-width: 600px) {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+  }
+}
+
+.title {
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  color: #101828;
+}
+
+.searchWrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  max-width: 400px;
+
+  @media (max-width: 600px) {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+.filterButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  width: 40px;
+  border: 1px solid #d0d5dd !important;
+  border-radius: 8px !important;
+  //padding: 10px !important;
+}
+
+.searchInput {
+  :global(.MuiOutlinedInput-root) {
+    border-radius: 8px;
+    background-color: #f9fafb;
+    height: 40px;
+
+    :global(.MuiOutlinedInput-notchedOutline) {
+      border-color: #d0d5dd;
+    }
+  }
+
+  :global(.MuiInputBase-input) {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+}
+
+.filtersRow {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 180px;
+}
+
+.filterLabel {
+  font-size: 14px !important;
+  color: #475467 !important;
+  font-weight: 500 !important;
+}
+
+.filterSelect {
+  height: 40px;
+  background-color: #f9fafb;
+  border-radius: 8px !important;
+
+  :global(.MuiOutlinedInput-notchedOutline) {
+    border-color: #d0d5dd;
+  }
+
+  :global(.MuiSelect-icon) {
+    left: 12px !important;
+    right: auto !important;
+  }
+
+  :global(.MuiSelect-select) {
+    padding-left: 40px !important;
+    padding-right: 14px !important;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+  }
+}
+
+.dealsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dealCard {
+  border: 1px solid #f2f4f7;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-color: #eaecf0;
+  }
+}
+
+.dealCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.dealDate {
+  font-size: 12px !important;
+  color: #98a2b3 !important;
+}
+
+.dealBadges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dealId {
+  font-size: 12px !important;
+  color: #98a2b3 !important;
+  font-weight: 500 !important;
+  margin-right: 4px;
+}
+
+.badge {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.roleBadge {
+  background-color: #f9fafb;
+  color: #344054;
+  border: 1px solid #eaecf0;
+}
+
+// Status badges
+.processing {
+  background-color: #f3e8ff;
+  color: #9333ea;
+}
+
+.pending {
+  background-color: #fef9c3;
+  color: #a16207;
+}
+
+.inspection {
+  background-color: #dbeafe;
+  color: #2563eb;
+}
+
+.completed {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.dealCardContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dealInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+}
+
+.dealTitle {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: #101828;
+}
+
+.dealParticipant {
+  font-size: 12px !important;
+  color: #667085 !important;
+}
+
+.dealAmountContainer {
+  text-align: left;
+}
+
+.dealAmount {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  color: #101828;
+}
+
+.currency {
+  font-size: 14px;
+  color: #475467;
+  font-weight: 400;
+  margin-right: 4px;
+}

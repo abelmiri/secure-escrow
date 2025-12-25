@@ -22,6 +22,7 @@ import CloseIcon from "@mui/icons-material/Close"
 import ExpandLess from "@mui/icons-material/ExpandLess"
 import ExpandMore from "@mui/icons-material/ExpandMore"
 import IconSvg from "@/media/svg/IconSvg"
+import useUser from "@/context/auth/hooks/useUser"
 import styles from "./styles/Header.module.scss"
 import loginOAUTH from "@/helpers/auth/loginOAUTH"
 
@@ -47,6 +48,7 @@ const solutions = [
 ]
 
 export default function Header() {
+  const { isLoggedIn } = useUser()
   const [anchorElResources, setAnchorElResources] =
     useState<null | HTMLElement>(null)
   const [anchorElSolutions, setAnchorElSolutions] =
@@ -112,13 +114,21 @@ export default function Header() {
 
       {/* Desktop Navigation */}
       <Box className={styles.navContainer}>
-        <Button className={styles.startButton} onClick={login}>
-          شروع کنید
-        </Button>
+        {!isLoggedIn && (
+          <Button className={styles.startButton} onClick={login}>
+            شروع کنید
+          </Button>
+        )}
 
-        <Button className={styles.loginButton} onClick={login}>
-          ورود
-        </Button>
+        {isLoggedIn ? (
+          <Link href="/dashboard" style={{ textDecoration: "none" }}>
+            <Button className={styles.loginButton}>داشبورد</Button>
+          </Link>
+        ) : (
+          <Button className={styles.loginButton} onClick={login}>
+            ورود
+          </Button>
+        )}
 
         <Typography className={styles.navItem}>تماس با ما</Typography>
 
@@ -344,12 +354,34 @@ export default function Header() {
           </ListItem>
 
           <Box className={styles.drawerButtons}>
-            <Button className={styles.loginButton} fullWidth onClick={login}>
-              ورود
-            </Button>
-            <Button className={styles.startButton} fullWidth onClick={login}>
-              شروع کنید
-            </Button>
+            {isLoggedIn ? (
+              <Link
+                href="/dashboard"
+                style={{ textDecoration: "none", width: "100%" }}
+                onClick={handleDrawerToggle}
+              >
+                <Button className={styles.loginButton} fullWidth>
+                  داشبورد
+                </Button>
+              </Link>
+            ) : (
+              <>
+                <Button
+                  className={styles.loginButton}
+                  fullWidth
+                  onClick={login}
+                >
+                  ورود
+                </Button>
+                <Button
+                  className={styles.startButton}
+                  fullWidth
+                  onClick={login}
+                >
+                  شروع کنید
+                </Button>
+              </>
+            )}
           </Box>
         </List>
       </Drawer>

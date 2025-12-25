@@ -1,0 +1,727 @@
+.mainWrapper {
+  background-color: #f9fafb;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.container {
+  padding: 40px 48px;
+  max-width: 1400px;
+  margin: 0 auto;
+  direction: rtl;
+  padding-top: 120px;
+
+  @media (max-width: 768px) {
+    padding: 24px 20px;
+    padding-top: 100px;
+  }
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #475467;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 32px;
+  width: fit-content;
+
+  &:hover {
+    color: #101828;
+  }
+}
+
+.contentWrapper {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 24px;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: 1fr;
+  }
+
+  @media (max-width: 768px) {
+    gap: 16px;
+  }
+}
+
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.rightColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sectionCard {
+  background-color: #ffffff;
+  border: 1px solid #eaecf0;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.1);
+  margin-bottom: 0;
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
+}
+
+.sectionTitle {
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  margin-block-end: 8px;
+  color: #101828;
+  margin-bottom: 20px !important;
+}
+
+// Required Action Section
+.actionContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.actionText {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.actionIcon {
+  color: #667085;
+  font-size: 20px !important;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.actionMessage {
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  color: #344054;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.acceptButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  background-color: #00A63E !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  font-size: 14px !important;
+  box-shadow: none !important;
+  opacity: 1 !important;
+  transition: opacity 0.2s ease;
+
+  &:hover {
+    opacity: .5 !important;
+  }
+}
+
+.supportButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  border-color: #eaecf0 !important;
+  color: #344054 !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  font-size: 14px !important;
+  background-color: #ffffff !important;
+  box-shadow: none !important;
+
+  &:hover {
+    background-color: #f9fafb !important;
+    border-color: #d0d5dd !important;
+  }
+
+  :global(.MuiButton-startIcon) {
+    margin-right: 0;
+    margin-left: 8px;
+  }
+}
+
+// Transaction Parties Section
+.partiesContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.partyItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #eaecf0;
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+  }
+}
+
+.partyHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0;
+}
+
+.partyLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #344054;
+}
+
+.verifiedBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background-color: #f0fdf4;
+  border-radius: 6px;
+}
+
+.verifiedIcon {
+  color: #00a63e;
+  font-size: 16px !important;
+}
+
+.verifiedText {
+  font-size: 12px;
+  color: #00a63e;
+  font-weight: 600;
+}
+
+.partyName {
+  font-size: 16px;
+  font-weight: 600;
+  color: #101828;
+  margin-top: 8px;
+  line-height: 1.5;
+}
+
+.partyEmail {
+  font-size: 14px;
+  color: #667085;
+  line-height: 1.5;
+}
+
+// Payment Summary Section
+.paymentContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.paymentRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #eaecf0;
+}
+
+.paymentTotal {
+  border-bottom: none;
+  padding-top: 12px;
+  padding-bottom: 0;
+  border-top: 2px solid #eaecf0;
+  margin-top: 4px;
+}
+
+.paymentLabel {
+  font-size: 14px;
+  color: #667085;
+}
+
+.paymentValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: #101828;
+}
+
+.paymentTotal .paymentLabel,
+.paymentTotal .paymentValue {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.paymentStatusBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: #f0fdf4;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.paymentStatusIcon {
+  color: #00a63e;
+  font-size: 20px !important;
+}
+
+.paymentStatusText {
+  font-size: 14px;
+  color: #00a63e;
+  font-weight: 500;
+}
+
+// Transaction Progress Section
+.progressList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.progressItem {
+  display: flex;
+  gap: 16px;
+  padding-bottom: 24px;
+  position: relative;
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+
+  &:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: 11px;
+    top: 28px;
+    bottom: 0;
+    width: 2px;
+    background-color: #f2f4f7;
+  }
+}
+
+.progressIconWrapper {
+  display: flex;
+  align-items: flex-start;
+  padding-top: 4px;
+  z-index: 1;
+}
+
+.progressIconCompleted {
+  color: #00a63e !important;
+  font-size: 24px !important;
+}
+
+.progressIconInProgress {
+  color: #9333ea !important;
+  font-size: 24px !important;
+}
+
+.progressIconPending {
+  color: #d0d5dd !important;
+  font-size: 24px !important;
+}
+
+.progressContent {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+.progressInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.progressTitle {
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  color: #101828;
+}
+
+.progressDescription {
+  font-size: 14px !important;
+  color: #667085 !important;
+  line-height: 1.5;
+}
+
+.progressDate {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  color: #6A7282 !important;
+  white-space: nowrap;
+}
+
+.progressStatus {
+  font-size: 14px;
+  color: #667085;
+  white-space: nowrap;
+}
+
+// Tabs Section
+.tabsContainer {
+  border-bottom: 1px solid #eaecf0;
+  margin-bottom: 24px;
+}
+
+.tabs {
+  min-height: 48px;
+  direction: rtl;
+
+  :global(.MuiTabs-indicator) {
+    background-color: #9333ea;
+    height: 3px;
+  }
+
+  :global(.MuiTabs-flexContainer) {
+    direction: rtl;
+  }
+}
+
+.tab {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #667085 !important;
+  text-transform: none !important;
+  min-height: 48px !important;
+  padding: 12px 16px !important;
+  direction: rtl;
+
+  &.Mui-selected {
+    color: #9333ea !important;
+  }
+}
+
+// Messages Section
+.messagesContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.messagesList {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+
+    &:hover {
+      background: #94a3b8;
+    }
+  }
+}
+
+.messageItem {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background-color: #f9fafb;
+  border-radius: 12px;
+
+  &.messageCurrentUser {
+    background-color: #f3e8ff;
+  }
+}
+
+.messageHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.messageAvatar {
+  width: 40px !important;
+  height: 40px !important;
+  background-color: #9333ea !important;
+  color: #ffffff !important;
+}
+
+.messageInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.messageSender {
+  font-size: 14px;
+  font-weight: 600;
+  color: #101828;
+}
+
+.messageDate {
+  font-size: 12px;
+  color: #667085;
+}
+
+.messageText {
+  font-size: 14px;
+  color: #344054;
+  line-height: 1.6;
+  padding-right: 52px;
+}
+
+.messageInputContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.messageInput {
+  direction: rtl;
+
+  :global(.MuiOutlinedInput-root) {
+    border-radius: 8px;
+    background-color: #ffffff;
+    direction: rtl;
+
+    :global(.MuiOutlinedInput-input) {
+      padding: 12px 16px;
+      font-size: 14px;
+      text-align: right;
+      direction: rtl;
+    }
+
+    :global(.MuiOutlinedInput-notchedOutline) {
+      border-color: #eaecf0;
+    }
+
+    &:hover :global(.MuiOutlinedInput-notchedOutline) {
+      border-color: #d0d5dd;
+    }
+
+    &.Mui-focused :global(.MuiOutlinedInput-notchedOutline) {
+      border-color: #9333ea;
+      border-width: 2px;
+    }
+  }
+}
+
+.sendButton {
+  background-color: #9333ea !important;
+  color: #ffffff !important;
+  padding: 12px 24px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  font-size: 14px !important;
+  align-self: flex-end;
+  width: fit-content;
+
+  &:hover {
+    background-color: #7e22ce !important;
+  }
+}
+
+.noMessages {
+  text-align: center;
+  color: #667085;
+  font-size: 14px;
+  padding: 40px 0;
+}
+
+// Documents Section
+.documentsContainer {
+  padding: 20px 0;
+}
+
+.documentsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.documentItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #f9fafb;
+  border: 1px solid #eaecf0;
+  border-radius: 12px;
+  gap: 16px;
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.documentInfo {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+}
+
+.documentIcon {
+  color: #9333ea;
+  font-size: 32px !important;
+  flex-shrink: 0;
+}
+
+.documentDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.documentName {
+  font-size: 16px;
+  font-weight: 600;
+  color: #101828;
+}
+
+.documentMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.documentType {
+  font-size: 12px;
+  color: #667085;
+  background-color: #f2f4f7;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.documentSize {
+  font-size: 12px;
+  color: #667085;
+}
+
+.documentDate {
+  font-size: 12px;
+  color: #667085;
+}
+
+.documentUploader {
+  font-size: 12px;
+  color: #667085;
+}
+
+.downloadButton {
+  border-color: #eaecf0 !important;
+  color: #344054 !important;
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  font-size: 14px !important;
+  background-color: #ffffff !important;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: #f9fafb !important;
+    border-color: #d0d5dd !important;
+  }
+
+  :global(.MuiButton-startIcon) {
+    margin-right: 0;
+    margin-left: 8px;
+  }
+}
+
+.emptyState {
+  text-align: center;
+  color: #667085;
+  font-size: 14px;
+  padding: 40px 0;
+}
+
+// Details Section
+.detailsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eaecf0;
+
+  &:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+}
+
+.detailLabel {
+  font-size: 14px;
+  color: #667085;
+}
+
+.detailValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: #101828;
+  text-align: left;
+  max-width: 60%;
+  word-wrap: break-word;
+
+  @media (max-width: 600px) {
+    max-width: 100%;
+    text-align: right;
+  }
+}
+
+.detailRowFull {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+
+  .detailValue {
+    max-width: 100%;
+    text-align: right;
+    line-height: 1.6;
+  }
+}
