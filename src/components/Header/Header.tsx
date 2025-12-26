@@ -114,11 +114,7 @@ export default function Header() {
           }}
         >
           <Box className={styles.iconContainer}>
-            {isLoggedIn ? (
-              <Shield width={24} height={24} strokeColor="white" />
-            ) : (
-              <IconSvg width={32} height={32} className={styles.icon} />
-            )}
+            <IconSvg width={32} height={32} className={styles.icon} />
           </Box>
           <Typography className={styles.title}>امان یار</Typography>
         </Link>
