@@ -2,18 +2,17 @@
   background-color: #f9fafb;
   min-height: 100vh;
   width: 100%;
+  border-bottom: 1px solid #000000;
 }
 
 .container {
-  padding: 40px 48px;
   max-width: 1400px;
   margin: 0 auto;
   direction: rtl;
-  padding-top: 120px; // Increased padding to account for fixed header and some space
+  padding: 120px 48px 40px;
 
   @media (max-width: 768px) {
-    padding: 24px 20px;
-    padding-top: 100px;
+    padding: 100px 20px 24px;
   }
 }
 

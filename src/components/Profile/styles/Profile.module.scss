@@ -1,0 +1,33 @@
+.mainWrapper {
+  background-color: #F9FAFB;
+  min-height: 100vh;
+  width: 100%;
+  border-bottom: 1px solid #000000;
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  direction: rtl;
+  padding: 120px 48px 40px;
+
+  @media (max-width: 768px) {
+    padding: 100px 20px 24px;
+  }
+}
+
+.header {
+  margin-bottom: 48px;
+}
+
+.title {
+  font-size: 30px !important;
+  font-weight: 500 !important;
+  color: #101828;
+  margin-bottom: 8px !important;
+}
+
+.subtitle {
+  font-size: 16px !important;
+  color: #4A5565 !important;
+}

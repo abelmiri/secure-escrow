@@ -2,6 +2,7 @@
 
 import { useState, MouseEvent } from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import {
   Box,
   Typography,
@@ -22,7 +23,10 @@ import CloseIcon from "@mui/icons-material/Close"
 import ExpandLess from "@mui/icons-material/ExpandLess"
 import ExpandMore from "@mui/icons-material/ExpandMore"
 import IconSvg from "@/media/svg/IconSvg"
+import Shield from "@/media/svg/Shield"
 import useUser from "@/context/auth/hooks/useUser"
+import authActions from "@/context/auth/authActions"
+import resetDataManager from "@/helpers/storage/resetDataManager"
 import styles from "./styles/Header.module.scss"
 import loginOAUTH from "@/helpers/auth/loginOAUTH"
 
@@ -49,6 +53,7 @@ const solutions = [
 
 export default function Header() {
   const { isLoggedIn } = useUser()
+  const pathname = usePathname()
   const [anchorElResources, setAnchorElResources] =
     useState<null | HTMLElement>(null)
   const [anchorElSolutions, setAnchorElSolutions] =
@@ -89,6 +94,13 @@ export default function Header() {
     loginOAUTH()
   }
 
+  const handleLogout = () => {
+    authActions.logout().then(() => {
+      resetDataManager.resetData()
+      window.location.href = "/"
+    })
+  }
+
   return (
     <Box component="header" className={styles.header}>
       <Box className={styles.rightSection}>
@@ -102,113 +114,116 @@ export default function Header() {
           }}
         >
           <Box className={styles.iconContainer}>
-            <IconSvg
-              width={32}
-              height={32}
-              className={styles.icon}
-            />
+            {isLoggedIn ? (
+              <Shield width={24} height={24} strokeColor="white" />
+            ) : (
+              <IconSvg width={32} height={32} className={styles.icon} />
+            )}
           </Box>
           <Typography className={styles.title}>امان یار</Typography>
         </Link>
+
+        {isLoggedIn && (
+          <Box className={styles.desktopNav}>
+            <Link href="/dashboard" className={styles.navLink}>
+              <Typography
+                className={`${styles.navItem} ${
+                  pathname === "/dashboard" ? styles.activeNavItem : ""
+                }`}
+              >
+                داشبورد
+              </Typography>
+            </Link>
+            <Link href="/transactions/start" className={styles.navLink}>
+              <Typography
+                className={`${styles.navItem} ${
+                  pathname === "/transactions/start" ? styles.activeNavItem : ""
+                }`}
+              >
+                تراکنش جدید
+              </Typography>
+            </Link>
+            <Box
+              className={styles.navItem}
+              onClick={handleOpenResources}
+              aria-controls={
+                Boolean(anchorElResources) ? "resources-menu" : undefined
+              }
+              aria-haspopup="true"
+              aria-expanded={Boolean(anchorElResources) ? "true" : undefined}
+            >
+              منابع
+              <KeyboardArrowDownIcon fontSize="small" />
+            </Box>
+            <Link href="/profile" className={styles.navLink}>
+              <Typography
+                className={`${styles.navItem} ${
+                  pathname === "/profile" ? styles.activeNavItem : ""
+                }`}
+              >
+                پروفایل
+              </Typography>
+            </Link>
+          </Box>
+        )}
       </Box>
 
       {/* Desktop Navigation */}
       <Box className={styles.navContainer}>
-        {!isLoggedIn && (
-          <Button className={styles.startButton} onClick={login}>
-            شروع کنید
-          </Button>
-        )}
-
         {isLoggedIn ? (
-          <Link href="/dashboard" style={{ textDecoration: "none" }}>
-            <Button className={styles.loginButton}>داشبورد</Button>
-          </Link>
-        ) : (
-          <Button className={styles.loginButton} onClick={login}>
-            ورود
+          <Button className={styles.logoutButton} onClick={handleLogout}>
+            خروج
           </Button>
-        )}
+        ) : (
+          <>
+            {!isLoggedIn && (
+              <Button className={styles.startButton} onClick={login}>
+                شروع کنید
+              </Button>
+            )}
 
-        <Typography className={styles.navItem}>تماس با ما</Typography>
+            <Button className={styles.loginButton} onClick={login}>
+              ورود
+            </Button>
 
-        <Link
-          href="/about"
-          style={{ textDecoration: "none", color: "inherit" }}
-        >
-          <Typography className={styles.navItem}>درباره ما</Typography>
-        </Link>
+            <Typography className={styles.navItem}>تماس با ما</Typography>
 
-        <Box
-          className={styles.navItem}
-          onClick={handleOpenResources}
-          aria-controls={
-            Boolean(anchorElResources) ? "resources-menu" : undefined
-          }
-          aria-haspopup="true"
-          aria-expanded={Boolean(anchorElResources) ? "true" : undefined}
-        >
-          منابع
-          <KeyboardArrowDownIcon fontSize="small" />
-        </Box>
-        <Menu
-          id="resources-menu"
-          anchorEl={anchorElResources}
-          open={Boolean(anchorElResources)}
-          onClose={handleCloseResources}
-          classes={{ paper: styles.menuPaper, list: styles.menuList }}
-          transformOrigin={{ horizontal: "right", vertical: "top" }}
-          anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-        >
-          {resources.map((item) => (
             <Link
-              key={item.label}
-              href={item.href}
+              href="/about"
               style={{ textDecoration: "none", color: "inherit" }}
             >
-              <MenuItem
-                onClick={handleCloseResources}
-                className={styles.menuItem}
-              >
-                {item.label}
-              </MenuItem>
+              <Typography className={styles.navItem}>درباره ما</Typography>
             </Link>
-          ))}
-        </Menu>
 
-        <Typography className={styles.navItem}>قیمت گذاری</Typography>
-
-        <Box
-          className={styles.navItem}
-          onClick={handleOpenSolutions}
-          aria-controls={
-            Boolean(anchorElSolutions) ? "solutions-menu" : undefined
-          }
-          aria-haspopup="true"
-          aria-expanded={Boolean(anchorElSolutions) ? "true" : undefined}
-        >
-          راهکارها
-          <KeyboardArrowDownIcon fontSize="small" />
-        </Box>
-        <Menu
-          id="solutions-menu"
-          anchorEl={anchorElSolutions}
-          open={Boolean(anchorElSolutions)}
-          onClose={handleCloseSolutions}
-          classes={{ paper: styles.menuPaper, list: styles.menuList }}
-          transformOrigin={{ horizontal: "right", vertical: "top" }}
-          anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-        >
-          {solutions.map((item) => (
-            <MenuItem
-              key={item}
-              onClick={handleCloseSolutions}
-              className={styles.menuItem}
+            <Box
+              className={styles.navItem}
+              onClick={handleOpenResources}
+              aria-controls={
+                Boolean(anchorElResources) ? "resources-menu" : undefined
+              }
+              aria-haspopup="true"
+              aria-expanded={Boolean(anchorElResources) ? "true" : undefined}
             >
-              {item}
-            </MenuItem>
-          ))}
-        </Menu>
+              منابع
+              <KeyboardArrowDownIcon fontSize="small" />
+            </Box>
+
+            <Typography className={styles.navItem}>قیمت گذاری</Typography>
+
+            <Box
+              className={styles.navItem}
+              onClick={handleOpenSolutions}
+              aria-controls={
+                Boolean(anchorElSolutions) ? "solutions-menu" : undefined
+              }
+              aria-haspopup="true"
+              aria-expanded={Boolean(anchorElSolutions) ? "true" : undefined}
+            >
+              راهکارها
+              <KeyboardArrowDownIcon fontSize="small" />
+            </Box>
+          </>
+        )}
       </Box>
 
       {/* Mobile Menu Button */}
@@ -221,6 +236,51 @@ export default function Header() {
       >
         <MenuIcon />
       </IconButton>
+
+      <Menu
+        id="resources-menu"
+        anchorEl={anchorElResources}
+        open={Boolean(anchorElResources)}
+        onClose={handleCloseResources}
+        classes={{ paper: styles.menuPaper, list: styles.menuList }}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+      >
+        {resources.map((item) => (
+          <Link
+            key={item.label}
+            href={item.href}
+            style={{ textDecoration: "none", color: "inherit" }}
+          >
+            <MenuItem
+              onClick={handleCloseResources}
+              className={styles.menuItem}
+            >
+              {item.label}
+            </MenuItem>
+          </Link>
+        ))}
+      </Menu>
+
+      <Menu
+        id="solutions-menu"
+        anchorEl={anchorElSolutions}
+        open={Boolean(anchorElSolutions)}
+        onClose={handleCloseSolutions}
+        classes={{ paper: styles.menuPaper, list: styles.menuList }}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+      >
+        {solutions.map((item) => (
+          <MenuItem
+            key={item}
+            onClick={handleCloseSolutions}
+            className={styles.menuItem}
+          >
+            {item}
+          </MenuItem>
+        ))}
+      </Menu>
 
       {/* Mobile Drawer */}
       <Drawer
@@ -245,11 +305,7 @@ export default function Header() {
               onClick={handleDrawerToggle}
             >
               <Box className={styles.iconContainer}>
-                <IconSvg
-                  width={32}
-                  height={32}
-                  className={styles.icon}
-                />
+                <IconSvg width={32} height={32} className={styles.icon} />
               </Box>
               <Typography className={styles.title}>امان یار</Typography>
             </Link>
