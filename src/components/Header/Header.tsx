@@ -31,15 +31,15 @@ import styles from "./styles/Header.module.scss"
 import loginOAUTH from "@/helpers/auth/loginOAUTH"
 
 const resources = [
-  { label: "وبلاگ", href: "#" },
-  { label: "مرکز راهنما", href: "#" },
   { label: "سوالات متداول", href: "/faq" },
-  { label: "مستندات API", href: "#" },
-  { label: "چگونه کار می‌کند", href: "/how-it-works" },
   { label: "اعتماد و امنیت", href: "/trust-and-safety" },
-  { label: "کارمزدها", href: "#" },
-  { label: "امنیت", href: "#" },
+  { label: "نحوه‌ی عملکرد", href: "/how-it-works" },
   { label: "درباره ما", href: "about" },
+  // { label: "وبلاگ", href: "#" },
+  // { label: "مرکز راهنما", href: "#" },
+  // { label: "مستندات API", href: "#" },
+  // { label: "کارمزدها", href: "#" },
+  // { label: "امنیت", href: "#" },
 ]
 
 const solutions = [
