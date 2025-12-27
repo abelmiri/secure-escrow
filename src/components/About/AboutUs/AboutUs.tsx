@@ -10,8 +10,7 @@ export default function AboutUs() {
       </Typography>
 
       <Typography variant="body1" className={styles.description}>
-        ایجاد اعتماد در معاملات آنلاین از سال ۲۰۱۰. ما مورد اعتمادترین سرویس
-        اسکرو در جهان هستیم.
+        امان یار؛ راهکاری حرفه‌ای و قابل ‌اعتماد برای پرداخت امن در معاملات
       </Typography>
     </Box>
   )

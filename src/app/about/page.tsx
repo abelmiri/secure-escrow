@@ -8,7 +8,7 @@ export default function AboutPage() {
     <main>
       <AboutUs />
       <AboutStory />
-      <AboutStats />
+      {/*<AboutStats />*/}
     </main>
   )
 }

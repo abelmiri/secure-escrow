@@ -39,7 +39,7 @@ const resources = [
   { label: "اعتماد و امنیت", href: "/trust-and-safety" },
   { label: "کارمزدها", href: "#" },
   { label: "امنیت", href: "#" },
-  { label: "شرکای تجاری", href: "#" },
+  { label: "درباره ما", href: "about" },
 ]
 
 const solutions = [
@@ -96,7 +96,7 @@ export default function Header() {
 
   const handleLogout = () => {
     authActions.logout().then(() => {
-      resetDataManager.resetData()
+      resetDataManager.resetData({ isAfterLogin: true, sendLogoutReq: true })
       window.location.href = "/"
     })
   }

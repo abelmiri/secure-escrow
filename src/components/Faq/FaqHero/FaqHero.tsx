@@ -16,7 +16,7 @@ export default function FaqHero({ searchTerm, onSearchChange }: FaqHeroProps) {
       </Typography>
 
       <Typography variant="body1" className={styles.description}>
-        پاسخ سوالات متداول درباره سرویس‌های اسکرو را پیدا کنید
+        پاسخ به سوالات متداول درباره سرویس‌های امان یار
       </Typography>
 
       <Box className={styles.searchContainer}>
