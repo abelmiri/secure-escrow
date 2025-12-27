@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Box,
   Typography,
@@ -15,6 +15,7 @@ import LocalPhoneOutlinedIcon from "@mui/icons-material/LocalPhoneOutlined"
 import MailOutlineIcon from "@mui/icons-material/MailOutline"
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined"
 import styles from "./styles/ProfileUserForm.module.scss"
+import useUser from "@/context/auth/hooks/useUser"
 
 const CustomCheckIcon = ({
   className,
@@ -55,6 +56,7 @@ const CustomCheckIcon = ({
 )
 
 export default function ProfileUserForm() {
+  const { user, isLoggedIn } = useUser()
   const [formData, setFormData] = useState({
     firstName: "احمدی",
     lastName: "محمد",
@@ -68,12 +70,26 @@ export default function ProfileUserForm() {
     address: "خیابان ولیعصر، نرسیده به میدان ونک، پلاک ۱۲۳",
   })
 
+  useEffect(() => {
+    if (isLoggedIn && user) {
+      setFormData((prev) => ({
+        ...prev,
+        firstName: user.last_name || "",
+        lastName: user.first_name || "",
+        nationalId: user.national_code || "",
+        mobile: user.mobile_number || "",
+        email: user.email || "",
+      }))
+    }
+  }, [isLoggedIn, user])
+
   const [errors, setErrors] = useState<Record<string, string>>({})
 
   const validate = (name: string, value: string) => {
     let error = ""
     switch (name) {
       case "nationalId":
+        if (!value) break
         if (
           !/^\d{10}$/.test(
             value.replace(/[۰-۹]/g, (d) =>
@@ -85,8 +101,9 @@ export default function ProfileUserForm() {
         }
         break
       case "mobile":
+        if (!value) break
         if (
-          !/^09\d{9}$/.test(
+          !/^(09|\+989)\d{9}$/.test(
             value.replace(/[۰-۹]/g, (d) =>
               String.fromCharCode(d.charCodeAt(0) - 1728),
             ),

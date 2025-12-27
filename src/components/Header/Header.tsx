@@ -95,10 +95,8 @@ export default function Header() {
   }
 
   const handleLogout = () => {
-    authActions.logout().then(() => {
-      resetDataManager.resetData({ isAfterLogin: true, sendLogoutReq: true })
-      window.location.href = "/"
-    })
+    resetDataManager.resetData({ isAfterLogin: true, sendLogoutReq: true })
+    window.location.href = "/"
   }
 
   return (
