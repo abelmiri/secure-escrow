@@ -43,14 +43,14 @@
   width: 40px;
   height: 40px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #9810fa 0%, #8200db 100%);
+  background: var(--color-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   box-shadow:
-    0 4px 6px -4px #ad46ff4d,
-    0 10px 15px -3px #ad46ff4d;
+    0 4px 6px -4px rgba(70, 73, 255, 0.3),
+    0 10px 15px -3px rgba(70, 73, 255, 0.3);
 }
 
 .icon {
@@ -61,7 +61,7 @@
 
 .companyName {
   font-size: 20px !important;
-  font-weight: 500 !important;
+  font-weight: 700 !important;
   color: #101828;
 }
 
@@ -191,7 +191,7 @@
   outline: none;
   background-color: white;
   transition: border-color 0.2s;
-  font-family: "Dana", Arial, sans-serif !important;
+  font-family: "Yekan", Arial, sans-serif !important;
 
   &:focus {
     border-color: var(--color-secondary);
@@ -199,7 +199,7 @@
 }
 
 .subscribeButton {
-  background-color: #9810fa !important;
+  background-color: var(--color-secondary) !important;
   color: white !important;
   padding: 10px 24px !important;
   border-radius: 10px !important;
@@ -208,7 +208,7 @@
   text-transform: none !important;
 
   &:hover {
-    background-color: #8200db !important;
+    background-color: var(--color-secondary-transparent) !important;
   }
 }
 

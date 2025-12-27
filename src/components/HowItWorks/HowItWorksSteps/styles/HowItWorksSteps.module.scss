@@ -18,7 +18,7 @@
   overflow: hidden;
   min-height: 500px;
   margin: 0 auto;
-  width: 1200px;
+  max-width: 1200px;
   gap: 40px;
 
   &:nth-child(even) {

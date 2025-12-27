@@ -5,7 +5,7 @@ export interface TrustedBadgeProps extends SVGProps<SVGSVGElement> {
 }
 
 export default function TrustedBadge({
-  strokeColor = "#E9D4FF",
+  strokeColor = "#d4e2ff",
   width = 16,
   height = 16,
   ...props

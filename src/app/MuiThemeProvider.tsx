@@ -5,7 +5,7 @@ import { ReactNode } from "react"
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material"
 
 const baseFontStack = [
-  "Dana",
+  "Yekan",
   "Arial",
   "-apple-system",
   "BlinkMacSystemFont",

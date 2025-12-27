@@ -9,7 +9,7 @@
 
 .title {
   font-size: 36px !important;
-  font-weight: 400 !important;
+  font-weight: 600 !important;
   color: #101828;
   margin-bottom: 20px !important;
   text-align: center;
@@ -17,7 +17,7 @@
 
 .subtitle {
   font-size: 20px !important;
-  font-weight: 400 !important;
+  font-weight: 500 !important;
   opacity: 0.9;
   color: var(--color-text-secondary);
   margin-bottom: 64px !important;
@@ -65,7 +65,7 @@
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background-color: #9810fa;
+  background-color: var(--color-secondary);
   color: white;
   display: flex;
   align-items: center;
@@ -77,14 +77,14 @@
 .iconContainer {
   width: 80px;
   height: 80px;
-  background-color: #9810fa;
+  background-color: var(--color-secondary);
   border-radius: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 24px !important;
-  box-shadow: 0px 4px 6px -4px #ad46ff4d;
-  box-shadow: 0px 10px 15px -3px #ad46ff4d;
+  box-shadow: 0px 4px 6px -4px rgba(70, 95, 255, 0.3);
+  box-shadow: 0px 10px 15px -3px rgba(70, 73, 255, 0.3);
 }
 
 .cardTitle {
@@ -105,10 +105,10 @@
   align-items: center;
   gap: 8px;
   padding: 10px 16px 10px 6px !important;
-  border: 1px solid #dab2ff !important;
+  border: 1px solid #b2c4ff !important;
   border-radius: 8px !important;
   color: var(--color-secondary) !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
   font-size: 14px !important;
   background-color: transparent !important;
   cursor: pointer;
@@ -118,7 +118,7 @@
 
   &:hover {
     border: 1px solid var(--color-secondary) !important;
-    background-color: #f3e8ff !important;
+    background-color: #d6ddff !important;
   }
 }
 

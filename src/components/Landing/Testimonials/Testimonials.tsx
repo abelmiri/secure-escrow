@@ -48,7 +48,7 @@ export default function Testimonials() {
           <Box key={index} className={styles.card}>
             <Box className={styles.stars}>
               {[...Array(5)].map((_, i) => (
-                <StarFilled key={i} width={20} height={20} color="#9810FA" />
+                <StarFilled key={i} width={20} height={20} color="var(--color-secondary)" />
               ))}
             </Box>
 

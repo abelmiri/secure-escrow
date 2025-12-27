@@ -1,6 +1,6 @@
 .container {
   padding: 80px 20px;
-  background: linear-gradient(135deg, #9f49ff 0%, #8200db 100%);
+  background: linear-gradient(135deg, #3E58FF 18.27%, #664BFF 80.88%, #3E58FF 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -10,7 +10,7 @@
   color: #ffffff;
 
   &.howItWorks {
-    background: linear-gradient(135deg, #155dfc 0%, #1447e6 50%, #1c398e 100%);
+    background: linear-gradient(135deg, #3E58FF 18.27%, #664BFF 80.88%, #3E58FF 100%);
   }
 }
 
@@ -24,8 +24,8 @@
 
 .title {
   font-size: 48px !important;
-  font-weight: 400 !important;
-  line-height: 1.2 !important;
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
   color: #ffffff !important;
 
   @media (max-width: 768px) {
