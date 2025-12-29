@@ -73,7 +73,9 @@ export default function ProfileUserVerification() {
   return (
     <Box className={styles.container}>
       <Box className={styles.header}>
-        <Typography className={styles.title}>وضعیت تایید اطلاعات کاربری</Typography>
+        <Typography className={styles.title}>
+          وضعیت تایید اطلاعات کاربری
+        </Typography>
         <Typography className={styles.subtitle}>
           برای انجام معاملات لطفا اطلاعات کاربری خود را تایید کنید
         </Typography>
@@ -85,8 +87,12 @@ export default function ProfileUserVerification() {
             <Box className={styles.itemRight}>
               {item.icon}
               <Box className={styles.itemContent}>
-                <Typography className={styles.itemTitle}>{item.title}</Typography>
-                <Typography className={styles.itemDescription}>{item.description}</Typography>
+                <Typography className={styles.itemTitle}>
+                  {item.title}
+                </Typography>
+                <Typography className={styles.itemDescription}>
+                  {item.description}
+                </Typography>
               </Box>
             </Box>
             <Box className={styles.itemLeft}>

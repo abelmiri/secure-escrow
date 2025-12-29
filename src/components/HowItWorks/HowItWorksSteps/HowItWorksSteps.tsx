@@ -108,7 +108,12 @@ export default function HowItWorksSteps() {
             <div className={styles.list}>
               {step.checklist.map((item, idx) => (
                 <div key={idx} className={styles.listItem}>
-                  <CheckedIcon color="#00A63E" width="20" height="20" className={styles.checkedIcon}/>
+                  <CheckedIcon
+                    color="#00A63E"
+                    width="20"
+                    height="20"
+                    className={styles.checkedIcon}
+                  />
                   <span>{item}</span>
                 </div>
               ))}

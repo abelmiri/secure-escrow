@@ -18,16 +18,21 @@ function resetData({
     configResetData()
   }
 
-  if (!isAfterLogin) {
-    if (sendLogoutReq) {
-      authActions.logout().finally(() => window.resetData?.({ isAfterLogin }))
+  return new Promise<void>((resolve) => {
+    if (!isAfterLogin) {
+      if (sendLogoutReq) {
+        return authActions
+          .logout()
+          .finally(() => window.resetData?.({ isAfterLogin }))
+      } else {
+        window.resetData?.({ isAfterLogin })
+        resolve()
+      }
     } else {
       window.resetData?.({ isAfterLogin })
+      resolve()
     }
-  } else {
-    window.resetData?.({ isAfterLogin })
-    // authEvents.userLogin()
-  }
+  })
 }
 
 function setResetDataListener({

@@ -36,7 +36,7 @@ export default function Testimonials() {
     <Box className={styles.container}>
       <Box className={styles.header}>
         <Typography variant="h2" className={styles.title}>
-           کاربران ما چه می گویند
+          کاربران ما چه می گویند
         </Typography>
         <Typography className={styles.subtitle}>
           مورد اعتماد هزاران مشتری راضی
@@ -48,7 +48,12 @@ export default function Testimonials() {
           <Box key={index} className={styles.card}>
             <Box className={styles.stars}>
               {[...Array(5)].map((_, i) => (
-                <StarFilled key={i} width={20} height={20} color="var(--color-secondary)" />
+                <StarFilled
+                  key={i}
+                  width={20}
+                  height={20}
+                  color="var(--color-secondary)"
+                />
               ))}
             </Box>
 

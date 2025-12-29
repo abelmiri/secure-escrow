@@ -23,9 +23,7 @@ import CloseIcon from "@mui/icons-material/Close"
 import ExpandLess from "@mui/icons-material/ExpandLess"
 import ExpandMore from "@mui/icons-material/ExpandMore"
 import IconSvg from "@/media/svg/IconSvg"
-import Shield from "@/media/svg/Shield"
 import useUser from "@/context/auth/hooks/useUser"
-import authActions from "@/context/auth/authActions"
 import resetDataManager from "@/helpers/storage/resetDataManager"
 import styles from "./styles/Header.module.scss"
 import loginOAUTH from "@/helpers/auth/loginOAUTH"
@@ -95,8 +93,11 @@ export default function Header() {
   }
 
   const handleLogout = () => {
-    resetDataManager.resetData({ isAfterLogin: true, sendLogoutReq: true })
-    window.location.href = "/"
+    resetDataManager
+      .resetData({ isAfterLogin: false, sendLogoutReq: true })
+      .then(() => {
+        window.location.href = "/"
+      })
   }
 
   return (

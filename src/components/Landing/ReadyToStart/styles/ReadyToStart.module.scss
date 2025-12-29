@@ -1,6 +1,11 @@
 .container {
   padding: 80px 20px;
-  background: linear-gradient(135deg, #3E58FF 18.27%, #664BFF 80.88%, #3E58FF 100%);
+  background: linear-gradient(
+    135deg,
+    #3e58ff 18.27%,
+    #664bff 80.88%,
+    #3e58ff 100%
+  );
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -10,7 +15,12 @@
   color: #ffffff;
 
   &.howItWorks {
-    background: linear-gradient(135deg, #3E58FF 18.27%, #664BFF 80.88%, #3E58FF 100%);
+    background: linear-gradient(
+      135deg,
+      #3e58ff 18.27%,
+      #664bff 80.88%,
+      #3e58ff 100%
+    );
   }
 }
 

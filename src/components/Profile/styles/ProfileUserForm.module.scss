@@ -32,7 +32,7 @@
   margin-bottom: 48px;
   justify-content: flex-end;
   padding-bottom: 32px;
-  border-bottom: 1px solid #0000001A;
+  border-bottom: 1px solid #0000001a;
 }
 
 .avatarWrapper {
@@ -42,8 +42,8 @@
 .avatar {
   width: 100px !important;
   height: 100px !important;
-  background-color: #F4EBFF !important;
-  color: #9E77ED !important;
+  background-color: #f4ebff !important;
+  color: #9e77ed !important;
   font-size: 40px !important;
 }
 
@@ -59,7 +59,7 @@
   justify-content: center;
   background-color: transparent !important;
   border: 1px solid rgba(0, 0, 0, 0.1) !important;
-  color: #0A0A0A !important;
+  color: #0a0a0a !important;
   border-radius: 8px !important;
   text-transform: none !important;
   font-weight: 500 !important;
@@ -101,7 +101,7 @@
 
   &.hasBorder {
     padding-bottom: 24px;
-    border-bottom: 1px solid #0000001A;
+    border-bottom: 1px solid #0000001a;
     margin-bottom: 24px;
   }
 }
@@ -116,7 +116,7 @@
 .label {
   font-size: 14px !important;
   font-weight: 500 !important;
-  color: #0A0A0A;
+  color: #0a0a0a;
 }
 
 .verifiedBadge {
@@ -125,28 +125,28 @@
   gap: 6px;
   background-color: #ffffff;
   border-radius: 10px;
-  color: #00A63E;
+  color: #00a63e;
   font-size: 14px !important;
   font-weight: 500;
 }
 
 .inputField {
   :global(.MuiOutlinedInput-root) {
-    background-color: #F3F3F5;
+    background-color: #f3f3f5;
     border-radius: 10px;
     border: none;
     transition: all 0.2s ease;
     padding-left: 0 !important;
 
     &:hover {
-      background-color: #EAECF0;
+      background-color: #eaecf0;
     }
 
     &.Mui-focused {
       background-color: #ffffff;
-      box-shadow: 0 0 0 4px #F4EBFF;
+      box-shadow: 0 0 0 4px #f4ebff;
       :global(.MuiOutlinedInput-notchedOutline) {
-        border: 1px solid #D6BBFB;
+        border: 1px solid #d6bbfb;
       }
     }
 
@@ -180,7 +180,7 @@
 
 .helperText {
   font-size: 14px !important;
-  color: #6A7282;
+  color: #6a7282;
   margin-top: 6px !important;
 }
 

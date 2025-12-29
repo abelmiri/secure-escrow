@@ -44,50 +44,58 @@ export default function Dashboard() {
     <Box className={styles.mainWrapper}>
       <Box className={styles.container}>
         <Box className={styles.header}>
-        <Box className={styles.headerRight}>
-          <Typography variant="h1" className={styles.title}>
-            داشبورد
-          </Typography>
-          <Typography className={styles.subtitle}>
-            خوش آمدید! نمای کلی معاملات شما در داشبورد قابل مشاهده است.
-          </Typography>
-        </Box>
-        <Button
-          variant="contained"
-          className={styles.newTransactionButton}
-        >
-          <AddIcon sx={{ marginLeft: "8px" }} />
-          معامله جدید
-        </Button>
-      </Box>
-
-      <Box className={styles.statsGrid}>
-        {stats.map((stat, index) => (
-          <Box key={index} className={styles.statCard}>
-            <Box className={styles.statIconContainer}>
-               <stat.Icon 
-                  width={40} 
-                  height={40} 
-                  {...({ strokeColor: stat.iconColor, color: stat.iconColor } as any)} 
-               />
-            </Box>
-            <Box className={styles.statInfo}>
-              <Typography className={styles.statTitle}>{stat.title}</Typography>
-              <Typography className={styles.statValue}>{stat.value}</Typography>
-              {stat.change && (
-                <Box className={styles.statChangeContainer}>
-                  <Typography className={styles.statChange}>
-                    {stat.change}
-                    <TrendingUpIcon width={14} height={14} strokeColor="#10b981" />
-                  </Typography>
-                </Box>
-              )}
-            </Box>
+          <Box className={styles.headerRight}>
+            <Typography variant="h1" className={styles.title}>
+              داشبورد
+            </Typography>
+            <Typography className={styles.subtitle}>
+              خوش آمدید! نمای کلی معاملات شما در داشبورد قابل مشاهده است.
+            </Typography>
           </Box>
-        ))}
-      </Box>
+          <Button variant="contained" className={styles.newTransactionButton}>
+            <AddIcon sx={{ marginLeft: "8px" }} />
+            معامله جدید
+          </Button>
+        </Box>
 
-      <DashboardDeals />
+        <Box className={styles.statsGrid}>
+          {stats.map((stat, index) => (
+            <Box key={index} className={styles.statCard}>
+              <Box className={styles.statIconContainer}>
+                <stat.Icon
+                  width={40}
+                  height={40}
+                  {...({
+                    strokeColor: stat.iconColor,
+                    color: stat.iconColor,
+                  } as any)}
+                />
+              </Box>
+              <Box className={styles.statInfo}>
+                <Typography className={styles.statTitle}>
+                  {stat.title}
+                </Typography>
+                <Typography className={styles.statValue}>
+                  {stat.value}
+                </Typography>
+                {stat.change && (
+                  <Box className={styles.statChangeContainer}>
+                    <Typography className={styles.statChange}>
+                      {stat.change}
+                      <TrendingUpIcon
+                        width={14}
+                        height={14}
+                        strokeColor="#10b981"
+                      />
+                    </Typography>
+                  </Box>
+                )}
+              </Box>
+            </Box>
+          ))}
+        </Box>
+
+        <DashboardDeals />
       </Box>
     </Box>
   )

@@ -117,7 +117,7 @@ function verifyOAUTH({
 
       return getProfile({ authDispatch })
         .then(() => {
-          resetDataManager.resetData({ isAfterLogin: true })
+          return resetDataManager.resetData({ isAfterLogin: true })
         })
         .catch((err) => {
           Object.values(COOKIE_VALUES.ACCOUNT).forEach((key) =>

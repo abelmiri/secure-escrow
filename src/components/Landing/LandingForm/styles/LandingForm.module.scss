@@ -45,7 +45,7 @@
   height: 56px;
 
   :global(.MuiOutlinedInput-notchedOutline) {
-    border: 1px solid #D1D5DC;
+    border: 1px solid #d1d5dc;
   }
 
   :global(.MuiSelect-icon) {
@@ -78,9 +78,9 @@
   :global(.MuiOutlinedInput-root) {
     height: 56px;
     border-radius: 8px;
-    
+
     :global(.MuiOutlinedInput-notchedOutline) {
-      border: 1px solid #D1D5DC;
+      border: 1px solid #d1d5dc;
     }
   }
 
@@ -88,7 +88,6 @@
     padding: 16px;
   }
 }
-
 
 .amountHint {
   font-size: 12px !important;
@@ -118,8 +117,8 @@
 }
 
 .arrowIcon {
-  transform: rotate(180deg); // Pointing left for RTL or keep as is? 
-  // In the image the arrow points to the left because it's RTL context but wait, 
+  transform: rotate(180deg); // Pointing left for RTL or keep as is?
+  // In the image the arrow points to the left because it's RTL context but wait,
   // looking at the image, the arrow is next to the text "همین الان شروع کنید" and points to the left.
   // Actually, standard RTL arrow for "Next" points to left.
 }
@@ -127,5 +126,5 @@
 .footerText {
   text-align: center;
   font-size: 12px !important;
-  color: #6A7282 !important;
+  color: #6a7282 !important;
 }

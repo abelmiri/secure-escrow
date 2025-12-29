@@ -28,7 +28,8 @@ export default function DashboardDeals() {
         deal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         deal.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         deal.participant.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesStatus = statusFilter === "همه" || deal.status === statusFilter
+      const matchesStatus =
+        statusFilter === "همه" || deal.status === statusFilter
       const matchesRole = roleFilter === "همه" || deal.role === roleFilter
 
       return matchesSearch && matchesStatus && matchesRole

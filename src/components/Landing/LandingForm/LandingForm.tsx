@@ -76,7 +76,9 @@ export default function LandingForm() {
             displayEmpty
             renderValue={(selected) => {
               if (!selected) {
-                return <span className={styles.placeholder}>دامنه، خودرو...</span>
+                return (
+                  <span className={styles.placeholder}>دامنه، خودرو...</span>
+                )
               }
               return selected as string
             }}

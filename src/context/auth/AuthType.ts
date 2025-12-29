@@ -9,8 +9,10 @@ export interface UserType {
   position_title: string | null
 }
 
-export interface UpdateUserType
-  extends Omit<UserType, "avatar" | "mobile_number" | "username" | "email"> {
+export interface UpdateUserType extends Omit<
+  UserType,
+  "avatar" | "mobile_number" | "username" | "email"
+> {
   avatar: File | string
 }
 

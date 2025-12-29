@@ -104,12 +104,14 @@ export default function TransactionDetail({ id }: { id: string }) {
     }
   }
 
-  const getProgressIcon = (step: typeof deal.progress[0]) => {
+  const getProgressIcon = (step: (typeof deal.progress)[0]) => {
     if (step.status === "completed" || step.icon === "check") {
       return <CustomCheckIcon className={styles.progressIconCompleted} />
     }
     if (step.status === "in_progress" || step.icon === "clock") {
-      return <AccessTimeOutlinedIcon className={styles.progressIconInProgress} />
+      return (
+        <AccessTimeOutlinedIcon className={styles.progressIconInProgress} />
+      )
     }
     return <RadioButtonUncheckedIcon className={styles.progressIconPending} />
   }
@@ -200,66 +202,66 @@ export default function TransactionDetail({ id }: { id: string }) {
             {/* Tabs Section */}
             <Box className={styles.sectionCard}>
               <Box className={styles.tabsContainer}>
-              <Tabs
-                value={tabValue}
-                onChange={handleTabChange}
-                TabIndicatorProps={{ style: { display: "none" } }}
-                sx={{
-                  minHeight: "28px",
-                  height: "28px",
-                  "& .MuiTabs-flexContainer": {
-                    gap: "4px",
-                  },
-                }}
-              >
-                {[
-                  {
-                    label: "جزئیات",
-                    icon: <SecurityOutlinedIcon />,
-                    index: 0,
-                  },
-                  {
-                    label: "اسناد",
-                    icon: <DescriptionOutlinedIcon />,
-                    index: 1,
-                  },
-                  {
-                    label: "پیام‌ها",
-                    icon: <ChatBubbleOutlineIcon />,
-                    index: 2,
-                  },
-                ].map((item) => (
-                  <Tab
-                    key={item.index}
-                    label={item.label}
-                    icon={item.icon}
-                    iconPosition="start"
-                    sx={{
-                      minHeight: "28px",
-                      height: "28px",
-                      padding: "0 16px",
-                      borderRadius: "14px",
-                      fontSize: "14px",
-                      fontWeight: 500,
-                      color: "#667085",
-                      textTransform: "none",
-                      display: "flex",
-                      flexDirection: "row-reverse",
-                      gap: "8px",
-                      "&.Mui-selected": {
-                        backgroundColor: "#ffffff",
-                        color: "#101828",
-                        boxShadow: "0px 1px 3px rgba(16, 24, 40, 0.1)",
-                      },
-                      "& .MuiTab-iconWrapper": {
-                        margin: 0,
-                        fontSize: "20px",
-                      },
-                    }}
-                  />
-                ))}
-              </Tabs>
-            </Box>
+                <Tabs
+                  value={tabValue}
+                  onChange={handleTabChange}
+                  TabIndicatorProps={{ style: { display: "none" } }}
+                  sx={{
+                    minHeight: "28px",
+                    height: "28px",
+                    "& .MuiTabs-flexContainer": {
+                      gap: "4px",
+                    },
+                  }}
+                >
+                  {[
+                    {
+                      label: "جزئیات",
+                      icon: <SecurityOutlinedIcon />,
+                      index: 0,
+                    },
+                    {
+                      label: "اسناد",
+                      icon: <DescriptionOutlinedIcon />,
+                      index: 1,
+                    },
+                    {
+                      label: "پیام‌ها",
+                      icon: <ChatBubbleOutlineIcon />,
+                      index: 2,
+                    },
+                  ].map((item) => (
+                    <Tab
+                      key={item.index}
+                      label={item.label}
+                      icon={item.icon}
+                      iconPosition="start"
+                      sx={{
+                        minHeight: "28px",
+                        height: "28px",
+                        padding: "0 16px",
+                        borderRadius: "14px",
+                        fontSize: "14px",
+                        fontWeight: 500,
+                        color: "#667085",
+                        textTransform: "none",
+                        display: "flex",
+                        flexDirection: "row-reverse",
+                        gap: "8px",
+                        "&.Mui-selected": {
+                          backgroundColor: "#ffffff",
+                          color: "#101828",
+                          boxShadow: "0px 1px 3px rgba(16, 24, 40, 0.1)",
+                        },
+                        "& .MuiTab-iconWrapper": {
+                          margin: 0,
+                          fontSize: "20px",
+                        },
+                      }}
+                    />
+                  ))}
+                </Tabs>
+              </Box>
 
               <TabPanel value={tabValue} index={0}>
                 <Box className={styles.detailsContainer}>
@@ -272,13 +274,17 @@ export default function TransactionDetail({ id }: { id: string }) {
                     </Typography>
                   </Box>
                   <Box className={styles.detailRow}>
-                    <Typography className={styles.detailLabel}>عنوان</Typography>
+                    <Typography className={styles.detailLabel}>
+                      عنوان
+                    </Typography>
                     <Typography className={styles.detailValue}>
                       {deal.title}
                     </Typography>
                   </Box>
                   <Box className={styles.detailRow}>
-                    <Typography className={styles.detailLabel}>وضعیت</Typography>
+                    <Typography className={styles.detailLabel}>
+                      وضعیت
+                    </Typography>
                     <Typography className={styles.detailValue}>
                       {deal.status}
                     </Typography>
@@ -376,11 +382,15 @@ export default function TransactionDetail({ id }: { id: string }) {
                         const getDocumentIcon = () => {
                           if (doc.type === "PDF") {
                             return (
-                              <PictureAsPdfIcon className={styles.documentIcon} />
+                              <PictureAsPdfIcon
+                                className={styles.documentIcon}
+                              />
                             )
                           }
                           if (doc.type === "ZIP") {
-                            return <FolderZipIcon className={styles.documentIcon} />
+                            return (
+                              <FolderZipIcon className={styles.documentIcon} />
+                            )
                           }
                           return (
                             <InsertDriveFileIcon
