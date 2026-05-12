@@ -8,6 +8,7 @@ import CircleCheckIcon from "@/media/svg/CircleCheckIcon"
 import TrendingUpIcon from "@/media/svg/TrendingUpIcon"
 import DashboardDeals from "./DashboardDeals/DashboardDeals"
 import styles from "./styles/Dashboard.module.scss"
+import Link from "next/link"
 
 const stats = [
   {
@@ -52,10 +53,12 @@ export default function Dashboard() {
               خوش آمدید! نمای کلی معاملات شما در داشبورد قابل مشاهده است.
             </Typography>
           </Box>
-          <Button variant="contained" className={styles.newTransactionButton}>
-            <AddIcon sx={{ marginLeft: "8px" }} />
-            معامله جدید
-          </Button>
+          <Link href="/transactions/create">
+            <Button variant="contained" className={styles.newTransactionButton}>
+              <AddIcon sx={{ marginLeft: "8px" }} />
+              <Typography>معامله جدید</Typography>
+            </Button>
+          </Link>
         </Box>
 
         <Box className={styles.statsGrid}>
