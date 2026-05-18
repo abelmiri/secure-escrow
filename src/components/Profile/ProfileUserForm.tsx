@@ -56,26 +56,26 @@ const CustomCheckIcon = ({
 )
 
 export default function ProfileUserForm() {
-  const { user, isLoggedIn } = useUser()
+  const { user, isLoggedIn, updateUser } = useUser()
   const [formData, setFormData] = useState({
-    firstName: "احمدی",
-    lastName: "محمد",
-    nationalId: "۱۲۳۴۵۶۷۸۹۰",
-    mobile: "۰۹۱۲۳۴۵۶۷۸۹",
-    email: "mohammad.ahmadi@example.com",
-    sheba: "IR۱۲۳۴۵۶۷۸۹۰۱۲۳۴۵۶۷۸۹۰۱۲۳۴",
-    city: "تهران",
-    province: "تهران",
-    postalCode: "۱۲۳۴۵۶۷۸۹۰",
-    address: "خیابان ولیعصر، نرسیده به میدان ونک، پلاک ۱۲۳",
+    firstName: "",
+    lastName: "",
+    nationalId: "",
+    mobile: "",
+    email: "",
+    sheba: "",
+    city: "",
+    province: "",
+    postalCode: "",
+    address: "",
   })
 
   useEffect(() => {
     if (isLoggedIn && user) {
       setFormData((prev) => ({
         ...prev,
-        firstName: user.last_name || "",
-        lastName: user.first_name || "",
+        firstName: user.first_name || "",
+        lastName: user.last_name || "",
         nationalId: user.national_code || "",
         mobile: user.mobile_number || "",
         email: user.email || "",
@@ -159,8 +159,19 @@ export default function ProfileUserForm() {
       if (error) newErrors[key] = error
     })
 
+    const mapToApi = () => {
+      return {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        national_code: formData.nationalId,
+        position_title: null,
+        avatar: "",
+      }
+    }
+
     if (Object.keys(newErrors).length === 0) {
-      console.log("Form submitted:", formData)
+      const payload = mapToApi()
+      updateUser({ data: payload }).then()
       // Add success logic here
     } else {
       setErrors(newErrors)

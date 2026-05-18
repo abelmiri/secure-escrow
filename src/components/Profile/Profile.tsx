@@ -6,6 +6,7 @@ import ProfileUserVerification from "./ProfileUserVerification"
 import styles from "./styles/Profile.module.scss"
 
 export default function Profile() {
+
   return (
     <Box className={styles.mainWrapper}>
       <Box className={styles.container}>
