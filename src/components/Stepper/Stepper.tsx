@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import { Box, Typography } from "@mui/material"
+import { Box } from "@mui/material"
 import styles from "./styles/Stepper.module.scss"
 
 type Step = {
@@ -17,13 +17,10 @@ type Props = {
 const defaultSteps: Step[] = [
   { id: 1, label: "جزئیات و مبلغ" },
   { id: 2, label: "اطلاعات طرفین و اسناد" },
-  { id: 3, label: "بررسی و ارسال" }
+  { id: 3, label: "بررسی و ارسال" },
 ]
 
-export default function Stepper({
-  currentStep,
-  steps = defaultSteps
-}: Props) {
+export default function Stepper({ currentStep, steps = defaultSteps }: Props) {
   return (
     <Box className={styles.stepper}>
       {steps.map((step, index) => {
@@ -40,11 +37,9 @@ export default function Stepper({
               {step.id}
             </Box>
 
-            <Typography className={styles.label}>
-              {step.label}
-            </Typography>
+            <Box className={`${styles.label}`}>{step.label}</Box>
 
-            {index !== steps.length - 1 && (
+            {index === 0 && (
               <Box
                 className={`${styles.line} ${
                   step.id < currentStep ? styles.done : ""

@@ -1,65 +1,103 @@
 .stepper {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    direction: rtl;
-    width: 100%;
-    max-width: 800px;
-    margin: 32px auto;
+  display: flex;
+  align-items: center;
+  position: relative;
+  justify-content: space-between;
+  direction: rtl;
+  width: 100%;
+  max-width: 800px;
+  margin: 32px auto;
+  margin-block-end: 82px;
 }
 
 .item {
-    min-width: 33%;
-    display: flex;
-    align-items: center;
-    position: relative;
-    flex: 1;
+  min-width: 33%;
+  display: flex;
+  align-items: center;
+  flex: 1;
+
+  &:nth-child(1) {
+    .circle {
+      right: 0;
+    }
+
+    .label {
+      right: 0;
+      text-align: start;
+    }
+  }
+
+  &:nth-child(2) {
+    .circle {
+      right: 50%;
+      transform: translateX(50%);
+    }
+
+    .label {
+      right: 50%;
+      transform: translateX(50%);
+      text-align: center;
+    }
+  }
+
+  &:nth-child(3) {
+    .circle {
+      left: 0;
+    }
+
+    .label {
+      left: 0;
+      text-align: end;
+    }
+  }
 }
 
 .circle {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: #e5e7eb;
-    color: #555;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    z-index: 1;
-    transition: 0.2s;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #e5e7eb;
+  color: #555;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  z-index: 1;
+  transition: 0.2s;
+  position: absolute;
+  border: 10px solid #F9FAFB;
 }
 
 .active {
-    background: #7c3aed;
-    color: #fff;
+  background: var(--color-secondary);
+  color: #fff;
 }
 
 .done {
-    background: #7c3aed;
-    color: #fff;
-    opacity: 0.7;
+  background: var(--color-secondary-transparent);
+  backdrop-filter: blur(5px);
+  color: #fff;
 }
 
 .label {
-    position: absolute;
-    top: 48px;
-    right: 50%;
-    transform: translateX(50%);
-    font-size: 13px;
-    white-space: nowrap;
+  position: absolute;
+  top: 38px;
+  font-size: 14px;
+  white-space: nowrap;
+  color: #4A5565;
+
 }
 
 .line {
-    position: absolute;
-    top: 18px;
-    right: 46px;
-    width: calc(100% - 58px);
-    height: 3px;
-    background: #e5e7eb;
-    z-index: 0;
+  position: absolute;
+  top: -2px;
+  right: 8px;
+  left: 8px;
+  height: 4px;
+  background: #E5E7EB;
+  z-index: 0;
 }
 
 .line.done {
-    background: #7c3aed;
+  background: var(--color-secondary);;
 }
