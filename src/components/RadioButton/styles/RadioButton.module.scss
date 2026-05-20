@@ -1,0 +1,43 @@
+.container {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 10px;
+  padding: 5px;
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.customRadio {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  background-color: #fff;
+  position: relative;
+
+  &.checked {
+    background-color: red;
+    border-color: red;
+  }
+}
+
+.checkmark {
+  height: 6px;
+  width: 6px;
+  background-color: white;
+  border-radius: 50%;
+  display: block;
+}
+
+.text {
+  font-weight: 400;
+  font-size: 14px;
+  color: #0a0a0a;
+}

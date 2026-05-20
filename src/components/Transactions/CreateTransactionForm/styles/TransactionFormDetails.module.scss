@@ -1,0 +1,72 @@
+.container {
+  display: flex;
+  direction: rtl;
+  flex-direction: column;
+  max-width: 820px;
+  background-color: white;
+  border: 1px solid #00000011;
+  gap: 24px;
+  padding: 24px;
+  border-radius: 14px;
+  margin: auto;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.headerTextGray {
+  font-weight: 400;
+  font-size: 16px;
+  color: #717182;
+}
+
+.headerTextBlack {
+  font-weight: 400;
+  font-size: 16px;
+  color: #0a0a0a;
+}
+
+.roleSelect {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.roleSelectText {
+  font-weight: 400;
+  font-size: 14px;
+  color: #0a0a0a;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 16px;
+  margin-block-start: 16px;
+  justify-content: flex-end;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+.buttonPrimary {
+  background-color: #155dfc !important;
+  color: var(--background);
+  padding: 8px 16px !important;
+  border-radius: 8px !important;
+  font-size: 14px !important;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  min-width: 60px;
+
+  &:hover {
+    background-color: var(--color-secondary) !important;
+  }
+}
