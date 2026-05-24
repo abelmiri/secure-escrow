@@ -7,12 +7,15 @@
 }
 
 .hiddenInput {
-  display: none;
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
 }
 
 .customRadio {
-  height: 16px;
-  width: 16px;
+  height: 18px;
+  width: 18px;
   border-radius: 50%;
   border: 2px solid #ccc;
   display: flex;
@@ -21,11 +24,11 @@
   transition: all 0.2s;
   background-color: #fff;
   position: relative;
+}
 
-  &.checked {
-    background-color: red;
-    border-color: red;
-  }
+.customRadioChecked {
+  border-color: #155dfc !important;
+  background-color: #155dfc !important;
 }
 
 .checkmark {

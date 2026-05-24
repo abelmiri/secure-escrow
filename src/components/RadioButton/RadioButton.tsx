@@ -2,6 +2,8 @@ type RadioButtonProps = {
   title: string
   checked: boolean
   onChange: () => void
+  name?: string
+  value?: string
 }
 
 import styles from "./styles/RadioButton.module.scss"
@@ -10,11 +12,15 @@ export default function RadioButton({
   title,
   checked,
   onChange,
+  name,
+  value,
 }: RadioButtonProps) {
   return (
     <label className={styles.container}>
       <input
         type="radio"
+        name={name}
+        value={value}
         checked={checked}
         onChange={onChange}
         className={styles.hiddenInput}

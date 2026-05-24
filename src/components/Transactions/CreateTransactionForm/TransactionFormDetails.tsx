@@ -39,6 +39,8 @@ export default function TransactionFormDetails() {
           <RadioButton
             key={data.value}
             title={data.title}
+            name="user-role"
+            value={data.value}
             checked={role === data.value}
             onChange={() => setRole(data.value)}
           />
