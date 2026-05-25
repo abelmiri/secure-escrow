@@ -19,7 +19,7 @@ const API_URLS = {
   profile: "v1/auth/profile",
   deals: "v1/deals/u",
   categories: "v1/deals/categories",
-  subCategories: "v1/deals/categories/sub-category",
+  subCategories: ({id}: { id: number}) => `v1/deals/categories/sub-category/${id}` ,
 }
 
 export default API_URLS
