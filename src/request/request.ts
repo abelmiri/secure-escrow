@@ -12,6 +12,7 @@ import type {
 import authActions from "@/context/auth/authActions"
 import { toastManager } from "@/lib/toastManager"
 import { getErrorMessage, toastConstant } from "@/lib/errorHelpers"
+import handleUnauthorized from "@/helpers/auth/handleUnauthorized"
 
 function get({
   url,
@@ -180,7 +181,15 @@ function _serverErrorHandler({ data, status, callback }: RequestErrorType) {
     data.code === "token_not_valid" &&
     refresh_token
   ) {
-    return authActions.refreshToken().then(callback)
+    return authActions
+      .refreshToken()
+      .then(callback)
+      .catch(() => {
+        handleUnauthorized()
+      })
+  } else if (status === 401) {
+    handleUnauthorized()
+    throw { status, data }
   } else {
     throw { status, data }
   }

@@ -17,7 +17,9 @@ const API_URLS = {
   logout: `realms/${OAUTH.REALMS}/protocol/openid-connect/logout`,
 
   profile: "v1/auth/profile",
+  deals: "v1/deals/u",
   categories: "v1/deals/categories",
+  subCategories: "v1/deals/categories/sub-category",
 }
 
 export default API_URLS
