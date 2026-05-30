@@ -7,11 +7,16 @@ export interface UserType {
   national_code: string | null
   avatar: string | null
   position_title: string | null
+  shaba_number: string | null
+  city: string | null
+  province: string | null
+  postal_code: string | null
+  full_address: string | null
 }
 
 export interface UpdateUserType extends Omit<
   UserType,
-  "avatar" | "mobile_number" | "username" | "email"
+  "avatar" | "mobile_number" | "username"
 > {
   avatar: File | string
 }

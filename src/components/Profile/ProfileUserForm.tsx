@@ -79,6 +79,11 @@ export default function ProfileUserForm() {
         nationalId: user.national_code || "",
         mobile: user.mobile_number || "",
         email: user.email || "",
+        sheba: user.shaba_number || "",
+        city: user.city || "",
+        province: user.province || "",
+        postalCode: user.postal_code || "",
+        address: user.full_address || "",
       }))
     }
   }, [isLoggedIn, user])
@@ -164,6 +169,12 @@ export default function ProfileUserForm() {
         first_name: formData.firstName,
         last_name: formData.lastName,
         national_code: formData.nationalId,
+        email: formData.email,
+        shaba_number: formData.sheba,
+        city: formData.city,
+        province: formData.province,
+        postal_code: formData.postalCode,
+        full_address: formData.address,
         position_title: null,
         avatar: "",
       }
