@@ -8,14 +8,16 @@ function headerMaker({ headers }: { headers?: Record<string, string> } = {}) {
 
   const gatewayHeaders: Record<string, string> = {}
 
-  // if (decodedToken) {
-  //   if (decodedToken.sub) {
-  //     gatewayHeaders["X-USER-ID"] = decodedToken.sub
-  //   }
-  //   if (decodedToken.preferred_username) {
-  //     gatewayHeaders["X-USERNAME"] = decodedToken.preferred_username
-  //   }
-  // }
+  const isDev = process.env.NODE_ENV === "development"
+
+  if (decodedToken && isDev) {
+    if (decodedToken.sub) {
+      gatewayHeaders["X-USER-ID"] = decodedToken.sub
+    }
+    if (decodedToken.preferred_username) {
+      gatewayHeaders["X-USERNAME"] = decodedToken.preferred_username
+    }
+  }
 
   return {
     ...(token ? { Authorization: token } : {}),
