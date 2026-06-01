@@ -1,4 +1,5 @@
 import Dashboard from "@/components/Dashboard/Dashboard"
+import AuthGuard from "@/components/Auth/AuthGuard"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 }
 
 export default function DashboardPage() {
-  return <Dashboard />
+  return (
+    <AuthGuard>
+      <Dashboard />
+    </AuthGuard>
+  )
 }

@@ -12,6 +12,7 @@ type DropdownProps = {
   placeholder?: string
   options?: DropdownOption[]
   onChange?: (slug: string) => void
+  disabled?: boolean
 }
 
 export default function Dropdown({
@@ -19,6 +20,7 @@ export default function Dropdown({
   placeholder = "Select an option",
   options = [],
   onChange,
+  disabled = false,
 }: DropdownProps) {
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState<DropdownOption | null>(null)
@@ -59,11 +61,12 @@ export default function Dropdown({
     <div className={styles.container} ref={dropdownRef}>
       {title && <div className={styles.title}>{title}</div>}
 
-      <div className={styles.dropdown}>
+      <div className={`${styles.dropdown} ${disabled ? styles.disabled : ""}`}>
         <button
           type="button"
           className={styles.input}
-          onClick={() => setOpen((prev) => !prev)}
+          onClick={() => !disabled && setOpen((prev) => !prev)}
+          disabled={disabled}
         >
           <span className={selected ? styles.value : styles.placeholder}>
             {selected ? selected.label : placeholder}

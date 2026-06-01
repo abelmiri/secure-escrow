@@ -3,7 +3,9 @@ import RadioButton from "@/components/RadioButton/RadioButton"
 import Dropdown from "@/components/DropDownInput/DropDownInput"
 import ListInput from "@/components/ListInput/ListInput"
 import styles from "./styles/TransactionFormDetails.module.scss"
-import { Button } from "@mui/material"
+import { Button, CircularProgress } from "@mui/material"
+import { useCategories } from "@/hooks/deals/useCategories"
+import { useSubCategories } from "@/hooks/deals/useSubCategories"
 
 const roles = [
   { title: "خریدار", value: "buyer" },
@@ -11,18 +13,19 @@ const roles = [
   { title: "کارگزار (واسط)", value: "broker" },
 ]
 
-const transactionTypes = [
-  { name: "وسایل نقلیه", slug: "vehicles" },
-  { name: "کالا", slug: "goods" },
-  { name: "املاک", slug: "property" },
-]
-
 export default function TransactionFormDetails() {
   const [role, setRole] = useState("buyer")
-  const [transactionType, setTransactionType] = useState("")
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
+    null,
+  )
+  const [selectedSubCategorySlug, setSelectedSubCategorySlug] = useState("")
 
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
+
+  const { categories, isLoading: isCategoriesLoading } = useCategories()
+  const { subCategories, isLoading: isSubCategoriesLoading } =
+    useSubCategories(selectedCategoryId)
 
   return (
     <div className={styles.container}>
@@ -49,22 +52,36 @@ export default function TransactionFormDetails() {
 
       <Dropdown
         title="دسته بندی معامله"
-        placeholder="یک دسته بندی انتخاب کنید"
-        options={transactionTypes.map((item) => ({
+        placeholder={
+          isCategoriesLoading
+            ? "در حال بارگذاری..."
+            : "یک دسته بندی انتخاب کنید"
+        }
+        options={categories.map((item) => ({
           label: item.name,
-          slug: item.slug,
+          slug: item.id.toString(), // We use ID as slug for Dropdown to manage sub-category fetch
         }))}
-        onChange={(slug: string) => setTransactionType(slug)}
+        onChange={(id: string) => {
+          setSelectedCategoryId(Number(id))
+          setSelectedSubCategorySlug("") // Reset sub-category on parent change
+        }}
       />
 
       <Dropdown
         title="نوع دسته بندی"
-        placeholder="زیر دسته بندی انتخاب کنید"
-        options={transactionTypes.map((item) => ({
+        placeholder={
+          isSubCategoriesLoading
+            ? "در حال بارگذاری..."
+            : !selectedCategoryId
+              ? "ابتدا دسته بندی اصلی را انتخاب کنید"
+              : "زیر دسته بندی انتخاب کنید"
+        }
+        options={subCategories.map((item) => ({
           label: item.name,
           slug: item.slug,
         }))}
-        onChange={(slug: string) => setTransactionType(slug)}
+        onChange={(slug: string) => setSelectedSubCategorySlug(slug)}
+        disabled={!selectedCategoryId || isSubCategoriesLoading}
       />
 
       <ListInput

@@ -1,4 +1,5 @@
 import TransactionDetail from "@/components/Dashboard/TransactionDetail/TransactionDetail"
+import AuthGuard from "@/components/Auth/AuthGuard"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -12,5 +13,9 @@ export default async function TransactionPage({
   params: Promise<{ id: string }>
 }) {
   const id = (await params).id
-  return <TransactionDetail id={id} />
+  return (
+    <AuthGuard>
+      <TransactionDetail id={id} />
+    </AuthGuard>
+  )
 }

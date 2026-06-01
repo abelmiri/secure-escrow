@@ -187,7 +187,7 @@ function _serverErrorHandler({ data, status, callback }: RequestErrorType) {
       .catch(() => {
         handleUnauthorized()
       })
-  } else if (status === 401) {
+  } else if (status === 401 || status === 403) {
     handleUnauthorized()
     throw { status, data }
   } else {

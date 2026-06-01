@@ -17,7 +17,7 @@ function useUser() {
     return authActions.updateUser({ data, cancelToken, authDispatch })
   }
 
-  return { user, isLoggedIn, updateUser, authDispatch }
+  return { user, isLoggedIn, updateUser, authDispatch, authState }
 }
 
 export default useUser

@@ -1,4 +1,5 @@
 import Profile from "@/components/Profile/Profile"
+import AuthGuard from "@/components/Auth/AuthGuard"
 import { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -7,5 +8,9 @@ export const metadata: Metadata = {
 }
 
 export default function ProfilePage() {
-  return <Profile />
+  return (
+    <AuthGuard>
+      <Profile />
+    </AuthGuard>
+  )
 }
