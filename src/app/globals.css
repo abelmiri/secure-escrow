@@ -19,6 +19,7 @@
   --color-first: #d4a574; /* Light brown */
   --color-secondary: #3e58ff; /* Bold Blue */
   --color-secondary-transparent: #3e58ffac; /* Bold Blue */
+  --color-secondary-transparent-box: #f0f7ff; /* Bold Blue */
   --color-third: #3498db; /* Flat blue */
 
   --green-gradient: background: linear-gradient(

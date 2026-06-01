@@ -27,6 +27,9 @@ export default function TransactionFormDetails() {
   const [propertyValues, setPropertyValues] = useState<Record<string, any>>({})
   const [escrowAmount, setEscrowAmount] = useState("")
   const [isTotalCost, setIsTotalCost] = useState("yes")
+  const [totalTransactionAmount, setTotalTransactionAmount] = useState("")
+  const [paymentMethod, setPaymentMethod] = useState("")
+  const [paymentDescription, setPaymentDescription] = useState("")
 
   const { categories, isLoading: isCategoriesLoading } = useCategories()
   const selectedCategory = categories.find((c) => c.id === selectedCategoryId)
@@ -208,15 +211,57 @@ export default function TransactionFormDetails() {
                   onChange={() => setIsTotalCost("yes")}
                 />
                 <RadioButton
-                  title="خیر، فقط بخشی از هزینه معامله"
-                  name="is-total-cost"
-                  value="no"
-                  checked={isTotalCost === "no"}
-                  onChange={() => setIsTotalCost("no")}
-                />
+              title="خیر، فقط بخشی از هزینه معامله"
+              name="is-total-cost"
+              value="no"
+              checked={isTotalCost === "no"}
+              onChange={() => setIsTotalCost("no")}
+            />
+          </div>
+        </div>
+
+        {isTotalCost === "no" && (
+          <div className={styles.remainingCostBox}>
+            <div className={styles.fieldWrapper}>
+              <ListInput
+                title="مبلغ نهایی کل معامله (ریال)"
+                placeholder="مجموع کل هزینه معامله"
+                value={totalTransactionAmount}
+                onChange={setTotalTransactionAmount}
+                valueType="number"
+              />
+              <div className={styles.fieldDescription}>
+                مجموع کل هزینه معامله شامل پرداخت اولیه در پلتفرم + پرداخت‌های
+                خارج از حساب امانی
               </div>
             </div>
+
+            <Dropdown
+              title="شیوه پرداخت باقی‌مانده هزینه"
+              placeholder="انتخاب کنید"
+              options={[
+                { label: "پرداخت نقدی/کارت‌به‌کارت", slug: "cash" },
+                {
+                  label: "واریز به حساب امانی در مرحله بعدی",
+                  slug: "next_escrow",
+                },
+                { label: "ارائه چک صیادی", slug: "check" },
+                { label: "تهاتر یا معاوضه", slug: "barter" },
+              ]}
+              onChange={setPaymentMethod}
+              initialSlug={paymentMethod}
+            />
+
+            <ListInput
+              textarea
+              title="توضیحات شیوه پرداخت"
+              placeholder="مثال: باقی مبلغ هنگام تنظیم سند رسمی در دفترخانه دریافت می‌شود"
+              value={paymentDescription}
+              onChange={setPaymentDescription}
+            />
           </div>
+        )}
+      </div>
 
           <div className={styles.buttonGroup}>
             <Button className={styles.buttonPrimary} variant="contained">
