@@ -16,6 +16,8 @@ import MailOutlineIcon from "@mui/icons-material/MailOutline"
 import LocationOnOutlinedIcon from "@mui/icons-material/LocationOnOutlined"
 import styles from "./styles/ProfileUserForm.module.scss"
 import useUser from "@/context/auth/hooks/useUser"
+import Dropdown from "@/components/DropDownInput/DropDownInput"
+import { useLocation } from "@/hooks/auth/useLocation"
 
 const CustomCheckIcon = ({
   className,
@@ -57,6 +59,14 @@ const CustomCheckIcon = ({
 
 export default function ProfileUserForm() {
   const { user, isLoggedIn, updateUser } = useUser()
+  const {
+    provinces,
+    cities,
+    fetchCities,
+    isLoadingProvinces,
+    isLoadingCities,
+  } = useLocation()
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -70,6 +80,10 @@ export default function ProfileUserForm() {
     address: "",
   })
 
+  const [uploadProgress, setUploadProgress] = useState<number | null>(null)
+  const [selectedImage, setSelectedImage] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
+
   useEffect(() => {
     if (isLoggedIn && user) {
       setFormData((prev) => ({
@@ -80,11 +94,15 @@ export default function ProfileUserForm() {
         mobile: user.mobile_number || "",
         email: user.email || "",
         sheba: user.shaba_number || "",
-        city: user.city || "",
-        province: user.province || "",
+        city: user.city?.toString() || "",
+        province: user.province?.toString() || "",
         postalCode: user.postal_code || "",
         address: user.full_address || "",
       }))
+
+      if (user.province) {
+        fetchCities(Number(user.province))
+      }
     }
   }, [isLoggedIn, user])
 
@@ -155,6 +173,18 @@ export default function ProfileUserForm() {
     setErrors((prev) => ({ ...prev, [name]: error }))
   }
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setSelectedImage(file)
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // Perform final validation
@@ -175,15 +205,24 @@ export default function ProfileUserForm() {
         province: formData.province,
         postal_code: formData.postalCode,
         full_address: formData.address,
-        position_title: null,
-        avatar: "",
+        image: selectedImage || undefined,
       }
     }
 
     if (Object.keys(newErrors).length === 0) {
       const payload = mapToApi()
-      updateUser({ data: payload }).then()
-      // Add success logic here
+      setUploadProgress(0)
+      updateUser({
+        data: payload,
+        progress: (p) => setUploadProgress(p),
+      })
+        .then(() => {
+          setUploadProgress(null)
+          setSelectedImage(null)
+        })
+        .catch(() => {
+          setUploadProgress(null)
+        })
     } else {
       setErrors(newErrors)
     }
@@ -250,34 +289,57 @@ export default function ProfileUserForm() {
 
       <Box className={styles.avatarSection}>
         <Box className={styles.uploadInfo}>
-          <Button
-            variant="outlined"
-            className={styles.uploadButton}
-            startIcon={<FileUploadOutlinedIcon />}
-          >
-            آپلود عکس
-          </Button>
+          <input
+            type="file"
+            accept="image/*"
+            id="avatar-upload"
+            style={{ display: "none" }}
+            onChange={handleImageChange}
+          />
+          <label htmlFor="avatar-upload">
+            <Button
+              variant="outlined"
+              component="span"
+              className={styles.uploadButton}
+              startIcon={<FileUploadOutlinedIcon />}
+            >
+              آپلود عکس
+            </Button>
+          </label>
           <Typography className={styles.uploadText}>
             حداکثر حجم ۲ مگابایت
             <br />
             jpg - png
           </Typography>
+          {uploadProgress !== null && (
+            <Box className={styles.progressContainer}>
+              <Box
+                className={styles.progressBar}
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </Box>
+          )}
         </Box>
         <Box className={styles.avatarWrapper}>
-          <Avatar className={styles.avatar}>
-            <PersonOutlineIcon fontSize="inherit" />
+          <Avatar
+            className={styles.avatar}
+            src={imagePreview || user?.image || undefined}
+          >
+            {!imagePreview && !user?.image && (
+              <PersonOutlineIcon fontSize="inherit" />
+            )}
           </Avatar>
         </Box>
       </Box>
 
       <Box className={styles.gridContainer}>
-        {renderField("نام", "lastName")}
-        {renderField("نام خانوادگی", "firstName")}
+        {renderField("نام خانوادگی", "lastName")}
+        {renderField("نام", "firstName")}
         {renderField(
           "کد ملی",
           "nationalId",
           "۱۲۳۴۵۶۷۸۹۰",
-          false,
+          user?.national_code_verified,
           "",
           null,
           true,
@@ -301,7 +363,7 @@ export default function ProfileUserForm() {
           "آدرس ایمیل",
           "email",
           "mohammad.ahmadi@example.com",
-          true,
+          user?.email_verified,
           "",
           <MailOutlineIcon />,
           true,
@@ -313,7 +375,7 @@ export default function ProfileUserForm() {
           "شماره شبا",
           "sheba",
           "IR۱۲۳۴۵۶۷۸۹۰۱۲۳۴۵۶۷۸۹۰۱۲۳۴",
-          true,
+          user?.shaba_number_verified,
           "حساب بانکی باید به نام خودتان باشد",
           null,
           true,
@@ -324,8 +386,40 @@ export default function ProfileUserForm() {
           className={`${styles.gridContainer} ${styles.fullWidth}`}
           style={{ marginBottom: 0 }}
         >
-          {renderField("شهر", "city")}
-          {renderField("استان", "province")}
+          <Dropdown
+            title="استان"
+            placeholder={
+              isLoadingProvinces ? "در حال بارگذاری..." : "انتخاب استان"
+            }
+            options={provinces.map((p) => ({
+              label: p.name,
+              slug: p.id.toString(),
+            }))}
+            initialSlug={formData.province}
+            onChange={(slug) => {
+              setFormData((prev) => ({ ...prev, province: slug, city: "" }))
+              fetchCities(Number(slug))
+            }}
+          />
+          <Dropdown
+            title="شهر"
+            placeholder={
+              !formData.province
+                ? "ابتدا استان را انتخاب کنید"
+                : isLoadingCities
+                  ? "در حال بارگذاری..."
+                  : "انتخاب شهر"
+            }
+            options={cities.map((c) => ({
+              label: c.name,
+              slug: c.id.toString(),
+            }))}
+            initialSlug={formData.city}
+            onChange={(slug) =>
+              setFormData((prev) => ({ ...prev, city: slug }))
+            }
+            disabled={!formData.province}
+          />
         </Box>
 
         {renderField(

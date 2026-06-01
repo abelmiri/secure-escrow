@@ -6,6 +6,7 @@ import { type RefObject, use } from "react"
 interface UpdateUserProps {
   data: Partial<UpdateUserType>
   cancelToken?: RefObject<AbortController | null>
+  progress?: (progress: number) => void
 }
 
 function useUser() {
@@ -13,8 +14,8 @@ function useUser() {
   const { user } = authState || {}
   const isLoggedIn = !!user
 
-  function updateUser({ data, cancelToken }: UpdateUserProps) {
-    return authActions.updateUser({ data, cancelToken, authDispatch })
+  function updateUser({ data, cancelToken, progress }: UpdateUserProps) {
+    return authActions.updateUser({ data, cancelToken, authDispatch, progress })
   }
 
   return { user, isLoggedIn, updateUser, authDispatch, authState }

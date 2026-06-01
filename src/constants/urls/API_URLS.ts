@@ -16,10 +16,14 @@ const API_URLS = {
   getToken: `realms/${OAUTH.REALMS}/protocol/openid-connect/token`,
   logout: `realms/${OAUTH.REALMS}/protocol/openid-connect/logout`,
 
+  province: "v1/auth/province",
+  city: ({ id }: { id: number }) =>
+    `v1/auth/province/${id}/city`,
   profile: "v1/auth/profile",
   deals: "v1/deals/u",
   categories: "v1/deals/categories",
-  subCategories: ({id}: { id: number}) => `v1/deals/categories/sub-category/${id}` ,
+  subCategories: ({ id }: { id: number }) =>
+    `v1/deals/categories/sub-category/${id}`,
 }
 
 export default API_URLS

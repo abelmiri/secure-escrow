@@ -3,11 +3,14 @@ export interface UserType {
   last_name: string
   mobile_number: string
   email: string
+  email_verified: boolean
   username: string
   national_code: string | null
-  avatar: string | null
-  position_title: string | null
+  national_code_verified: boolean
+  image: string | null
   shaba_number: string | null
+  shaba_number_verified: boolean
+  identity_verified: boolean
   city: string | null
   province: string | null
   postal_code: string | null
@@ -16,9 +19,9 @@ export interface UserType {
 
 export interface UpdateUserType extends Omit<
   UserType,
-  "avatar" | "mobile_number" | "username"
+  "image" | "mobile_number" | "username" | "email_verified" | "national_code_verified" | "shaba_number_verified" | "identity_verified"
 > {
-  avatar: File | string
+  image: File | string | null
 }
 
 export interface LoginType {

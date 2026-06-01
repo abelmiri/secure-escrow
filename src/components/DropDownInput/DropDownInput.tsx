@@ -21,12 +21,32 @@ export default function Dropdown({
   options = [],
   onChange,
   disabled = false,
-}: DropdownProps) {
+  initialSlug,
+}: DropdownProps & { initialSlug?: string }) {
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState<DropdownOption | null>(null)
   const [search, setSearch] = useState("")
 
   const dropdownRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    if (
+      initialSlug !== undefined &&
+      initialSlug !== null &&
+      options.length > 0
+    ) {
+      const option = options.find(
+        (opt) => opt.slug.toString() === initialSlug.toString(),
+      )
+      if (option) {
+        setSelected(option)
+      } else {
+        setSelected(null)
+      }
+    } else if (initialSlug === "" || initialSlug === null) {
+      setSelected(null)
+    }
+  }, [initialSlug, options])
 
   const filteredOptions = useMemo(() => {
     return options.filter((option) =>

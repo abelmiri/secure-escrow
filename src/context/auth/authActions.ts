@@ -32,11 +32,37 @@ function updateUser({
   data,
   cancelToken,
   authDispatch,
+  progress,
 }: {
   data: Partial<UpdateUserType>
   cancelToken?: RefObject<AbortController | null>
   authDispatch: Dispatch<SetUserActionType>
+  progress?: (progress: number) => void
 }) {
+  const isFormData = Object.values(data).some((value) => value instanceof File)
+
+  if (isFormData) {
+    const formData = new FormData()
+    Object.keys(data).forEach((key) => {
+      const value = data[key as keyof UpdateUserType]
+      if (value !== undefined && value !== null) {
+        formData.append(key, value as any)
+      }
+    })
+
+    return request
+      .upload({
+        url: API_URLS.profile,
+        data: formData,
+        cancelToken,
+        method: "patch",
+        progress,
+      })
+      .then((user: UserType) => {
+        setUser({ data: { user }, authDispatch })
+      })
+  }
+
   return request
     .patch({ url: API_URLS.profile, data, cancelToken })
     .then((user: UserType) => {

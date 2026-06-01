@@ -3,6 +3,7 @@
 import { Box, Typography, Button } from "@mui/material"
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline"
 import styles from "./styles/ProfileUserVerification.module.scss"
+import useUser from "@/context/auth/hooks/useUser"
 
 const CustomCheckIcon = ({
   className,
@@ -43,30 +44,50 @@ const CustomCheckIcon = ({
 )
 
 export default function ProfileUserVerification() {
+  const { user } = useUser()
+
   const verifications = [
     {
       title: "تایید ایمیل",
-      description: "ایمیل شما تایید شده است",
-      status: "verified",
-      icon: <CustomCheckIcon className={styles.checkIcon} />,
+      description: user?.email_verified
+        ? "ایمیل شما تایید شده است"
+        : "ایمیل شما هنوز تایید نشده است",
+      status: user?.email_verified ? "verified" : "pending",
+      icon: user?.email_verified ? (
+        <CustomCheckIcon className={styles.checkIcon} />
+      ) : (
+        <ErrorOutlineIcon className={styles.warningIcon} />
+      ),
     },
     {
-      title: "تایید موبایل",
+      title: "تایید شماره موبایل",
       description: "شماره موبایل شما تایید شده است",
       status: "verified",
       icon: <CustomCheckIcon className={styles.checkIcon} />,
     },
     {
       title: "تایید شماره شبا",
-      description: "شماره شبا و حساب بانکی شما تایید شده است",
-      status: "verified",
-      icon: <CustomCheckIcon className={styles.checkIcon} />,
+      description: user?.shaba_number_verified
+        ? "شماره شبا شما تایید شده است"
+        : "شماره شبا شما هنوز تایید نشده است",
+      status: user?.shaba_number_verified ? "verified" : "pending",
+      icon: user?.shaba_number_verified ? (
+        <CustomCheckIcon className={styles.checkIcon} />
+      ) : (
+        <ErrorOutlineIcon className={styles.warningIcon} />
+      ),
     },
     {
       title: "تایید هویت",
-      description: "اسناد را برای تایید هویت خود ارسال کنید",
-      status: "pending",
-      icon: <ErrorOutlineIcon className={styles.warningIcon} />,
+      description: user?.identity_verified
+        ? "هویت شما تایید شده است"
+        : "اسناد را برای تایید هویت خود ارسال کنید",
+      status: user?.identity_verified ? "verified" : "pending",
+      icon: user?.identity_verified ? (
+        <CustomCheckIcon className={styles.checkIcon} />
+      ) : (
+        <ErrorOutlineIcon className={styles.warningIcon} />
+      ),
     },
   ]
 

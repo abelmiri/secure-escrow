@@ -8,6 +8,7 @@ import type {
   RequestGetType,
   RequestPatchType,
   RequestPostType,
+  RequestUploadAxiosType,
 } from "@/request/RequestTypes"
 import authActions from "@/context/auth/authActions"
 import { toastManager } from "@/lib/toastManager"
@@ -173,6 +174,79 @@ function del({
     })
 }
 
+function upload({
+  url,
+  subdomain,
+  data,
+  params,
+  cancelToken,
+  dontToast,
+  method,
+  progress,
+}: RequestUploadAxiosType): Promise<any> {
+  const reqUrl = urlMaker({ url, params, subdomain })
+  const isFormData = data instanceof FormData
+
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    xhr.open(method.toUpperCase(), reqUrl)
+
+    const headers = headerMaker() as Record<string, string>
+    Object.keys(headers).forEach((key) => {
+      // Browser sets content-type for FormData automatically
+      if (key.toLowerCase() === "content-type" && isFormData) return
+      xhr.setRequestHeader(key, headers[key])
+    })
+
+    if (progress) {
+      xhr.upload.onprogress = (event) => {
+        if (event.lengthComputable) {
+          const percentComplete = (event.loaded / event.total) * 100
+          progress(percentComplete)
+        }
+      }
+    }
+
+    xhr.onload = () => {
+      let responseData
+      try {
+        responseData = JSON.parse(xhr.responseText)
+      } catch {
+        responseData = xhr.responseText
+      }
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(responseData)
+      } else {
+        _serverErrorHandler({
+          status: xhr.status,
+          data: responseData,
+          callback: () => upload(arguments[0]),
+        })
+          .then(resolve)
+          .catch(reject)
+      }
+    }
+
+    xhr.onerror = () => {
+      try {
+        _networkErrorHandler({ err: "NETWORK_ERROR", dontToast })
+      } catch (err) {
+        reject(err)
+      }
+    }
+
+    if (cancelToken?.current) {
+      cancelToken.current.signal.onabort = () => {
+        xhr.abort()
+        reject("CANCEL")
+      }
+    }
+
+    xhr.send(isFormData ? (data as FormData) : JSON.stringify(data))
+  })
+}
+
 function _serverErrorHandler({ data, status, callback }: RequestErrorType) {
   const refresh_token = getToken({ useRefreshToken: true })
   if (
@@ -232,6 +306,6 @@ function _networkErrorHandler({
   throw err
 }
 
-const request = { get, post, patch, del }
+const request = { get, post, patch, del, upload }
 
 export default request
