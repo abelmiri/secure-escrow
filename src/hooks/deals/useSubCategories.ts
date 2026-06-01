@@ -2,14 +2,19 @@ import { useEffect, useState } from "react"
 import request from "@/request/request"
 import API_URLS from "@/constants/urls/API_URLS"
 
+export interface PropertyOption {
+  value: string
+  label: string
+}
+
 export interface Property {
   name: string
   property_name: string
-  field_type: "string" | "integer" | "boolean" | "select"
+  field_type: "string" | "integer" | "boolean" | "select" | "dropdown"
   unit: string | null
   regex_pattern: string | null
   is_required: boolean
-  options: string[]
+  options: (string | PropertyOption)[]
 }
 
 export interface SubCategoryResponse {
