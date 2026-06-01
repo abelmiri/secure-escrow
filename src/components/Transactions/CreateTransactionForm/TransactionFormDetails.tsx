@@ -8,24 +8,44 @@ import { useCategories } from "@/hooks/deals/useCategories"
 import { useSubCategories } from "@/hooks/deals/useSubCategories"
 
 const roles = [
-  { title: "خریدار", value: "buyer" },
-  { title: "فروشنده", value: "seller" },
+  { title: "خریدار", value: "customer" },
+  { title: "فروشنده", value: "beneficiary" },
   { title: "کارگزار (واسط)", value: "broker" },
 ]
 
 export default function TransactionFormDetails() {
-  const [role, setRole] = useState("buyer")
+  const [role, setRole] = useState("customer")
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
     null,
   )
-  const [selectedSubCategorySlug, setSelectedSubCategorySlug] = useState("")
+  const [selectedSubCategoryId, setSelectedSubCategoryId] = useState<
+    number | null
+  >(null)
 
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
+  const [propertyValues, setPropertyValues] = useState<Record<string, any>>({})
+  const [escrowAmount, setEscrowAmount] = useState("")
+  const [isTotalCost, setIsTotalCost] = useState("yes")
 
   const { categories, isLoading: isCategoriesLoading } = useCategories()
-  const { subCategories, isLoading: isSubCategoriesLoading } =
-    useSubCategories(selectedCategoryId)
+  const selectedCategory = categories.find((c) => c.id === selectedCategoryId)
+  const subCategoriesList = selectedCategory?.sub_categories || []
+
+  const {
+    properties,
+    subCategoryName,
+    subCategoryDescription,
+    isLoading: isPropertiesLoading,
+  } = useSubCategories(selectedSubCategoryId)
+
+  const handlePropertyChange = (propertyName: string, value: any) => {
+    setPropertyValues((prev) => ({ ...prev, [propertyName]: value }))
+  }
+
+  const isHalfWidth = (propertyName: string) => {
+    return propertyName === "quantity" || propertyName === "weight"
+  }
 
   return (
     <div className={styles.container}>
@@ -63,25 +83,23 @@ export default function TransactionFormDetails() {
         }))}
         onChange={(id: string) => {
           setSelectedCategoryId(Number(id))
-          setSelectedSubCategorySlug("") // Reset sub-category on parent change
+          setSelectedSubCategoryId(null) // Reset sub-category on parent change
         }}
       />
 
       <Dropdown
         title="نوع دسته بندی"
         placeholder={
-          isSubCategoriesLoading
-            ? "در حال بارگذاری..."
-            : !selectedCategoryId
-              ? "ابتدا دسته بندی اصلی را انتخاب کنید"
-              : "زیر دسته بندی انتخاب کنید"
+          !selectedCategoryId
+            ? "ابتدا دسته بندی اصلی را انتخاب کنید"
+            : "زیر دسته بندی انتخاب کنید"
         }
-        options={subCategories.map((item) => ({
+        options={subCategoriesList.map((item) => ({
           label: item.name,
-          slug: item.slug,
+          slug: item.id.toString(),
         }))}
-        onChange={(slug: string) => setSelectedSubCategorySlug(slug)}
-        disabled={!selectedCategoryId || isSubCategoriesLoading}
+        onChange={(id: string) => setSelectedSubCategoryId(Number(id))}
+        disabled={!selectedCategoryId}
       />
 
       <ListInput
@@ -101,11 +119,112 @@ export default function TransactionFormDetails() {
         onChange={setDescription}
       />
 
-      <div className={styles.buttonGroup}>
-        <Button className={styles.buttonPrimary} variant="contained">
-          ادامه
-        </Button>
-      </div>
+      {isPropertiesLoading && (
+        <div
+          style={{ display: "flex", justifyContent: "center", padding: "20px" }}
+        >
+          <CircularProgress size={24} />
+        </div>
+      )}
+
+      {!isPropertiesLoading && properties.length > 0 && (
+        <div className={styles.propertiesBox}>
+          <div className={styles.propertiesHeader}>
+            <div className={styles.propertiesTitle}>{subCategoryName}</div>
+            {subCategoryDescription && (
+              <div className={styles.propertiesDescription}>
+                {subCategoryDescription}
+              </div>
+            )}
+          </div>
+
+          <div className={styles.propertiesGrid}>
+            {properties.map((prop) => (
+              <div
+                key={prop.property_name}
+                className={
+                  isHalfWidth(prop.property_name) ? "" : styles.fullWidth
+                }
+              >
+                {prop.field_type === "select" ? (
+                  <Dropdown
+                    title={prop.name}
+                    placeholder={`انتخاب ${prop.name}`}
+                    options={prop.options?.map((opt) => ({
+                      label: opt,
+                      slug: opt,
+                    }))}
+                    onChange={(val) =>
+                      handlePropertyChange(prop.property_name, val)
+                    }
+                  />
+                ) : (
+                  <ListInput
+                    title={prop.name}
+                    placeholder={prop.name}
+                    value={propertyValues[prop.property_name] || ""}
+                    onChange={(val) =>
+                      handlePropertyChange(prop.property_name, val)
+                    }
+                    valueType={
+                      prop.field_type === "integer" ? "number" : "string"
+                    }
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {!isPropertiesLoading && selectedSubCategoryId && (
+        <>
+          <div className={styles.financialSection}>
+            <div className={styles.sectionTitle}>جزئیات مالی معامله</div>
+
+            <div className={styles.fieldWrapper}>
+              <ListInput
+                title="مبلغ واریزی به حساب امانی (ریال)"
+                placeholder="مبلغ واریزی به حساب امانی"
+                value={escrowAmount}
+                onChange={setEscrowAmount}
+                valueType="number"
+              />
+              <div className={styles.fieldDescription}>
+                مبلغی که خریدار در ابتدای کار به حساب امانی واریز می‌کند
+              </div>
+            </div>
+
+            <div className={styles.fieldWrapper}>
+              <div className={styles.radioQuestion}>
+                آیا این مبلغ شامل کل هزینه معامله است؟
+              </div>
+              <div className={styles.radioOptions}>
+                <RadioButton
+                  title="بله، کل هزینه معامله"
+                  name="is-total-cost"
+                  value="yes"
+                  checked={isTotalCost === "yes"}
+                  onChange={() => setIsTotalCost("yes")}
+                />
+                <RadioButton
+                  title="خیر، فقط بخشی از هزینه معامله"
+                  name="is-total-cost"
+                  value="no"
+                  checked={isTotalCost === "no"}
+                  onChange={() => setIsTotalCost("no")}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.buttonGroup}>
+            <Button className={styles.buttonPrimary} variant="contained">
+              ادامه
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   )
 }

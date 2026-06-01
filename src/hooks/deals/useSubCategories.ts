@@ -2,28 +2,40 @@ import { useEffect, useState } from "react"
 import request from "@/request/request"
 import API_URLS from "@/constants/urls/API_URLS"
 
-export interface SubCategory {
+export interface Property {
+  name: string
+  property_name: string
+  field_type: "string" | "integer" | "boolean" | "select"
+  unit: string | null
+  regex_pattern: string | null
+  is_required: boolean
+  options: string[]
+}
+
+export interface SubCategoryResponse {
   id: number
   name: string
   slug: string
+  description: string
+  properties: Property[]
 }
 
-export function useSubCategories(categoryId: number | null) {
-  const [subCategories, setSubCategories] = useState<SubCategory[]>([])
+export function useSubCategories(subCategoryId: number | null) {
+  const [subCategoryData, setSubCategoryData] = useState<SubCategoryResponse | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<any>(null)
 
   useEffect(() => {
-    if (categoryId === null) {
-      setSubCategories([])
+    if (subCategoryId === null) {
+      setSubCategoryData(null)
       return
     }
 
     setIsLoading(true)
     request
-      .get({ url: API_URLS.subCategories({ id: categoryId }) })
-      .then((data) => {
-        setSubCategories(data)
+      .get({ url: API_URLS.subCategories({ id: subCategoryId }) })
+      .then((data: SubCategoryResponse) => {
+        setSubCategoryData(data)
         setError(null)
       })
       .catch((err) => {
@@ -32,7 +44,13 @@ export function useSubCategories(categoryId: number | null) {
       .finally(() => {
         setIsLoading(false)
       })
-  }, [categoryId])
+  }, [subCategoryId])
 
-  return { subCategories, isLoading, error }
+  return { 
+    properties: subCategoryData?.properties || [], 
+    subCategoryName: subCategoryData?.name || "",
+    subCategoryDescription: subCategoryData?.description || "",
+    isLoading, 
+    error 
+  }
 }

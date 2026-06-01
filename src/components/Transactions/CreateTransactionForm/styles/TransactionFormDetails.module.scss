@@ -70,3 +70,89 @@
     background-color: var(--color-secondary) !important;
   }
 }
+
+.propertiesBox {
+  background-color: #fdfaff;
+  border: 1px solid #f3ebff;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 8px;
+}
+
+.propertiesHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.propertiesTitle {
+  color: #9333ea;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.propertiesDescription {
+  color: #667085;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.propertiesGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+.financialSection {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 16px;
+  border-top: 1px solid #f2f4f7;
+  padding-top: 24px;
+}
+
+.sectionTitle {
+  font-weight: 400;
+  font-size: 16px;
+  color: var(--text-color);
+  // margin-bottom: 8px;
+}
+
+.fieldWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldDescription {
+  font-size: 14px;
+  color: #667085;
+  margin-top: -6px;
+}
+
+.radioQuestion {
+  font-weight: 500;
+  font-size: 14px;
+  color: #101828;
+  margin-top: 8px;
+}
+
+.radioOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

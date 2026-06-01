@@ -68,6 +68,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+input,
+textarea {
+  color: #000000 !important;
+}
+
 * {
   box-sizing: border-box;
   padding: 0;
