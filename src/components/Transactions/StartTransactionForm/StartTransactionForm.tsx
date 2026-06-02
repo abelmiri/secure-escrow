@@ -73,7 +73,7 @@ export default function StartTransactionForm() {
     }
 
   const handleAddItem = () => {
-    console.log("Add item:", formData)
+    // console.log("Add item:", formData)
     // Handle form submission here
   }
 

@@ -27,7 +27,6 @@ export function useCategories() {
     request
       .get({ url: API_URLS.categories })
       .then(({ collection }) => {
-        console.log(collection)
         setCategories(collection)
         setError(null)
       })
