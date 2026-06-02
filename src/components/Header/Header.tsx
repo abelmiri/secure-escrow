@@ -96,7 +96,7 @@ export default function Header() {
     resetDataManager
       .resetData({ isAfterLogin: false, sendLogoutReq: true })
       .then(() => {
-        window.location.href = "/"
+        window.location.replace("/")
       })
   }
 

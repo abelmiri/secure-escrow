@@ -21,9 +21,10 @@ function resetData({
   return new Promise<void>((resolve) => {
     if (!isAfterLogin) {
       if (sendLogoutReq) {
-        return authActions
-          .logout()
-          .finally(() => window.resetData?.({ isAfterLogin }))
+        authActions.logout().finally(() => {
+          window.resetData?.({ isAfterLogin })
+          resolve()
+        })
       } else {
         window.resetData?.({ isAfterLogin })
         resolve()

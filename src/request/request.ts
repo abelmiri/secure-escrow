@@ -28,6 +28,9 @@ function get({
     signal: cancelMaker({ cancelToken }),
   })
     .then((res) => {
+      if (res.status === 204) {
+        return null
+      }
       const contentType = res.headers.get("content-type")
       const isJson = !!(
         contentType && contentType.indexOf("application/json") !== -1
@@ -73,6 +76,9 @@ function post({
     signal: cancelMaker({ cancelToken }),
   })
     .then((res) => {
+      if (res.status === 204) {
+        return null
+      }
       const contentType = res.headers.get("content-type")
       const isJson = !!(
         contentType && contentType.indexOf("application/json") !== -1
@@ -118,6 +124,9 @@ function patch({
     signal: cancelMaker({ cancelToken }),
   })
     .then((res) => {
+      if (res.status === 204) {
+        return null
+      }
       const contentType = res.headers.get("content-type")
       const isJson = !!(
         contentType && contentType.indexOf("application/json") !== -1
@@ -153,6 +162,9 @@ function del({
     signal: cancelMaker({ cancelToken }),
   })
     .then((res) => {
+      if (res.status === 204) {
+        return null
+      }
       const contentType = res.headers.get("content-type")
       const isJson = !!(
         contentType && contentType.indexOf("application/json") !== -1
@@ -218,13 +230,15 @@ function upload({
       if (xhr.status >= 200 && xhr.status < 300) {
         resolve(responseData)
       } else {
-        _serverErrorHandler({
-          status: xhr.status,
-          data: responseData,
-          callback: () => upload(arguments[0]),
-        })
-          .then(resolve)
-          .catch(reject)
+        try {
+          _serverErrorHandler({
+            status: xhr.status,
+            data: responseData,
+            callback: () => upload(arguments[0]),
+          })
+        } catch (err) {
+          reject(err)
+        }
       }
     }
 
@@ -249,12 +263,8 @@ function upload({
 
 function _serverErrorHandler({ data, status, callback }: RequestErrorType) {
   if (status === 401 || status === 403) {
-    return authActions
-      .refreshToken()
-      .then(callback)
-      .catch(() => {
-        handleUnauthorized()
-      })
+    handleUnauthorized()
+    throw { status, data }
   } else {
     throw { status, data }
   }

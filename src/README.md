@@ -127,5 +127,3 @@ All code must follow:
 1. **TypeScript**: Strict typing, no `any` types
 2. **Next.js**: App Router conventions and best practices
 3. **Material Design**: Design principles and accessibility standards
-
-See `.cursor/rules/common.mdc` for detailed development guidelines.
