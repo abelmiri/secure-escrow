@@ -248,26 +248,39 @@ function upload({
 }
 
 function _serverErrorHandler({ data, status, callback }: RequestErrorType) {
-  const refresh_token = getToken({ useRefreshToken: true })
-  if (
-    status === 401 &&
-    "code" in data &&
-    data.code === "token_not_valid" &&
-    refresh_token
-  ) {
+  if (status === 401 || status === 403) {
     return authActions
       .refreshToken()
       .then(callback)
       .catch(() => {
         handleUnauthorized()
       })
-  } else if (status === 401 || status === 403) {
-    handleUnauthorized()
-    throw { status, data }
   } else {
     throw { status, data }
   }
 }
+
+// function _serverErrorHandler({ data, status, callback }: RequestErrorType) {
+//   const refresh_token = getToken({ useRefreshToken: true })
+//   if (
+//     status === 401 &&
+//     "code" in data &&
+//     data.code === "token_not_valid" &&
+//     refresh_token
+//   ) {
+//     return authActions
+//       .refreshToken()
+//       .then(callback)
+//       .catch(() => {
+//         handleUnauthorized()
+//       })
+//   } else if (status === 401 || status === 403) {
+//     handleUnauthorized()
+//     throw { status, data }
+//   } else {
+//     throw { status, data }
+//   }
+// }
 
 function _networkErrorHandler({
   err,

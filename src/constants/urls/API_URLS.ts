@@ -16,9 +16,9 @@ const API_URLS = {
   getToken: `realms/${OAUTH.REALMS}/protocol/openid-connect/token`,
   logout: `realms/${OAUTH.REALMS}/protocol/openid-connect/logout`,
 
-  province: "v1/auth/province",
+  province: "v1/base/province",
   city: ({ id }: { id: number }) =>
-    `v1/auth/province/${id}/city`,
+    `v1/base/province/${id}/city`,
   profile: "v1/auth/profile",
   deals: "v1/deals/u",
   categories: "v1/deals/categories",
