@@ -129,7 +129,7 @@ export default function Header() {
                 داشبورد
               </Typography>
             </Link>
-            <Link href="/transactions/start" className={styles.navLink}>
+            <Link href="/transactions/create" className={styles.navLink}>
               <Typography
                 className={`${styles.navItem} ${
                   pathname === "/transactions/create" ? styles.activeNavItem : ""
