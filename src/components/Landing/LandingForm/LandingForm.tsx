@@ -10,21 +10,22 @@ import {
   Button,
   FormControl,
 } from "@mui/material"
+import { useRouter } from "next/navigation"
 import SmallArrow from "@/media/svg/SmallArrow"
+import { useCategories } from "@/hooks/deals/useCategories"
+import {
+  buildTransactionCreateUrl,
+  createPrefillFromLandingForm,
+  saveTransactionPrefill,
+  type LandingRole,
+} from "@/lib/transactionPrefill"
 import styles from "./styles/LandingForm.module.scss"
 
-const productTypes = [
-  "دامنه‌ها",
-  "خدمات قراردادی",
-  "تراکنش‌های مرحله‌ای",
-  "جواهرات",
-  "اشیاء عتیقه",
-  "لوازم الکترونیکی",
-]
-
 export default function LandingForm() {
-  const [role, setRole] = useState("seller")
-  const [productType, setProductType] = useState("")
+  const router = useRouter()
+  const { categories, isLoading: isCategoriesLoading } = useCategories()
+  const [role, setRole] = useState<LandingRole>("seller")
+  const [categoryId, setCategoryId] = useState("")
   const [amount, setAmount] = useState("")
 
   const formatNumber = (value: string): string => {
@@ -50,6 +51,12 @@ export default function LandingForm() {
     setAmount(cleaned)
   }
 
+  const handleSubmit = (): void => {
+    const prefill = createPrefillFromLandingForm({ role, categoryId, amount })
+    saveTransactionPrefill(prefill)
+    router.push(buildTransactionCreateUrl(prefill))
+  }
+
   return (
     <Box className={styles.formContainer}>
       <Box className={styles.row}>
@@ -57,7 +64,7 @@ export default function LandingForm() {
           <Typography className={styles.label}>نقش شما</Typography>
           <Select
             value={role}
-            onChange={(e) => setRole(e.target.value)}
+            onChange={(e) => setRole(e.target.value as LandingRole)}
             className={styles.select}
             displayEmpty
           >
@@ -68,24 +75,32 @@ export default function LandingForm() {
         </FormControl>
 
         <FormControl fullWidth className={styles.formControl}>
-          <Typography className={styles.label}>نوع محصول</Typography>
+          <Typography className={styles.label}>دسته‌بندی معامله</Typography>
           <Select
-            value={productType}
-            onChange={(e) => setProductType(e.target.value)}
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
             className={styles.select}
             displayEmpty
+            disabled={isCategoriesLoading}
             renderValue={(selected) => {
               if (!selected) {
                 return (
-                  <span className={styles.placeholder}>دامنه، خودرو...</span>
+                  <span className={styles.placeholder}>
+                    {isCategoriesLoading
+                      ? "در حال بارگذاری..."
+                      : "یک دسته‌بندی انتخاب کنید"}
+                  </span>
                 )
               }
-              return selected as string
+              const category = categories.find(
+                (item) => item.id.toString() === selected,
+              )
+              return category?.name ?? (selected as string)
             }}
           >
-            {productTypes.map((type) => (
-              <MenuItem key={type} value={type}>
-                {type}
+            {categories.map((category) => (
+              <MenuItem key={category.id} value={category.id.toString()}>
+                {category.name}
               </MenuItem>
             ))}
           </Select>
@@ -116,6 +131,7 @@ export default function LandingForm() {
         fullWidth
         className={styles.submitButton}
         endIcon={<SmallArrow strokeColor="#fff" className={styles.arrowIcon} />}
+        onClick={handleSubmit}
       >
         همین الان شروع کنید
       </Button>

@@ -1,4 +1,7 @@
-import React, { useState } from "react"
+"use client"
+
+import React, { useEffect, useRef, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import RadioButton from "@/components/RadioButton/RadioButton"
 import Dropdown from "@/components/DropDownInput/DropDownInput"
 import ListInput from "@/components/ListInput/ListInput"
@@ -6,6 +9,12 @@ import styles from "./styles/TransactionFormDetails.module.scss"
 import { Button, CircularProgress } from "@mui/material"
 import { useCategories } from "@/hooks/deals/useCategories"
 import { useSubCategories } from "@/hooks/deals/useSubCategories"
+import {
+  clearTransactionPrefill,
+  loadTransactionPrefill,
+  parseTransactionPrefillFromSearchParams,
+  tomanToRial,
+} from "@/lib/transactionPrefill"
 
 const roles = [
   { title: "خریدار", value: "customer" },
@@ -14,6 +23,9 @@ const roles = [
 ]
 
 export default function TransactionFormDetails() {
+  const searchParams = useSearchParams()
+  const prefillAppliedRef = useRef(false)
+
   const [role, setRole] = useState("customer")
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
     null,
@@ -34,6 +46,30 @@ export default function TransactionFormDetails() {
   const { categories, isLoading: isCategoriesLoading } = useCategories()
   const selectedCategory = categories.find((c) => c.id === selectedCategoryId)
   const subCategoriesList = selectedCategory?.sub_categories || []
+
+  useEffect(() => {
+    if (prefillAppliedRef.current) return
+
+    const fromStorage = loadTransactionPrefill()
+    const fromUrl = parseTransactionPrefillFromSearchParams(searchParams)
+    const prefill = { ...fromStorage, ...fromUrl }
+
+    if (prefill.role) {
+      setRole(prefill.role)
+    }
+
+    if (prefill.amount) {
+      setEscrowAmount(tomanToRial(prefill.amount))
+      setIsTotalCost("yes")
+    }
+
+    if (prefill.categoryId) {
+      setSelectedCategoryId(Number(prefill.categoryId))
+    }
+
+    clearTransactionPrefill()
+    prefillAppliedRef.current = true
+  }, [searchParams])
 
   const {
     properties,
@@ -84,6 +120,7 @@ export default function TransactionFormDetails() {
           label: item.name,
           slug: item.id.toString(), // We use ID as slug for Dropdown to manage sub-category fetch
         }))}
+        initialSlug={selectedCategoryId?.toString()}
         onChange={(id: string) => {
           setSelectedCategoryId(Number(id))
           setSelectedSubCategoryId(null) // Reset sub-category on parent change
@@ -101,6 +138,7 @@ export default function TransactionFormDetails() {
           label: item.name,
           slug: item.id.toString(),
         }))}
+        initialSlug={selectedSubCategoryId?.toString()}
         onChange={(id: string) => setSelectedSubCategoryId(Number(id))}
         disabled={!selectedCategoryId}
       />
