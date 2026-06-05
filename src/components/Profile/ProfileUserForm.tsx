@@ -108,57 +108,54 @@ export default function ProfileUserForm() {
 
   const [errors, setErrors] = useState<Record<string, string>>({})
 
+  const REQUIRED_FIELDS = new Set([
+    "firstName",
+    "lastName",
+    "mobile",
+    "nationalId",
+    "sheba",
+  ])
+
+  const normalizeDigits = (value: string): string =>
+    value
+      .replace(/[۰-۹]/g, (d) => String.fromCharCode(d.charCodeAt(0) - 1728))
+      .trim()
+
   const validate = (name: string, value: string) => {
     let error = ""
+
+    if (REQUIRED_FIELDS.has(name) && !value.trim()) {
+      return "این فیلد الزامی است"
+    }
+
     switch (name) {
       case "nationalId":
         if (!value) break
-        if (
-          !/^\d{10}$/.test(
-            value.replace(/[۰-۹]/g, (d) =>
-              String.fromCharCode(d.charCodeAt(0) - 1728),
-            ),
-          )
-        ) {
+        if (!/^\d{10}$/.test(normalizeDigits(value))) {
           error = "کد ملی باید ۱۰ رقم باشد"
         }
         break
       case "mobile":
         if (!value) break
-        if (
-          !/^(09|\+989)\d{9}$/.test(
-            value.replace(/[۰-۹]/g, (d) =>
-              String.fromCharCode(d.charCodeAt(0) - 1728),
-            ),
-          )
-        ) {
+        if (!/^(09|\+989)\d{9}$/.test(normalizeDigits(value))) {
           error = "شماره موبایل معتبر نیست"
         }
         break
       case "email":
+        if (!value.trim()) break
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
           error = "آدرس ایمیل معتبر نیست"
         }
         break
       case "sheba":
-        if (
-          !/^IR\d{24}$/.test(
-            value.replace(/[۰-۹]/g, (d) =>
-              String.fromCharCode(d.charCodeAt(0) - 1728),
-            ),
-          )
-        ) {
+        if (!value) break
+        if (!/^IR\d{24}$/.test(normalizeDigits(value))) {
           error = "شماره شبا باید با IR شروع شده و ۲۴ رقم باشد"
         }
         break
       case "postalCode":
-        if (
-          !/^\d{10}$/.test(
-            value.replace(/[۰-۹]/g, (d) =>
-              String.fromCharCode(d.charCodeAt(0) - 1728),
-            ),
-          )
-        ) {
+        if (!value.trim()) break
+        if (!/^\d{10}$/.test(normalizeDigits(value))) {
           error = "کد پستی باید ۱۰ رقم باشد"
         }
         break
@@ -238,12 +235,16 @@ export default function ProfileUserForm() {
     fullWidth: boolean = false,
     hasBorder: boolean = false,
     isLtr: boolean = false,
+    required: boolean = false,
   ) => (
     <Box
       className={`${styles.fieldWrapper} ${fullWidth ? styles.fullWidth : ""} ${hasBorder ? styles.hasBorder : ""}`}
     >
       <Box className={styles.labelWrapper}>
-        <Typography className={styles.label}>{label}</Typography>
+        <Typography className={styles.label}>
+          {label}
+          {required && <span className={styles.requiredMark}> *</span>}
+        </Typography>
         {verified && (
           <Box className={styles.verifiedBadge}>
             <CustomCheckIcon sx={{ fontSize: 16 }} />
@@ -253,6 +254,7 @@ export default function ProfileUserForm() {
       </Box>
       <TextField
         fullWidth
+        required={required}
         name={name}
         value={formData[name]}
         onChange={handleChange}
@@ -333,8 +335,8 @@ export default function ProfileUserForm() {
       </Box>
 
       <Box className={styles.gridContainer}>
-        {renderField("نام خانوادگی", "lastName")}
-        {renderField("نام", "firstName")}
+        {renderField("نام خانوادگی", "lastName", undefined, undefined, undefined, undefined, false, false, false, true)}
+        {renderField("نام", "firstName", undefined, undefined, undefined, undefined, false, false, false, true)}
         {renderField(
           "کد ملی",
           "nationalId",
@@ -342,6 +344,7 @@ export default function ProfileUserForm() {
           user?.national_code_verified,
           "",
           null,
+          true,
           true,
           true,
           true,
@@ -356,6 +359,7 @@ export default function ProfileUserForm() {
           <LocalPhoneOutlinedIcon />,
           true,
           false,
+          true,
           true,
         )}
 
@@ -379,6 +383,8 @@ export default function ProfileUserForm() {
           "حساب بانکی باید به نام خودتان باشد",
           null,
           true,
+          true,
+          false,
           true,
         )}
 
