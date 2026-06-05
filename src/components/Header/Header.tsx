@@ -132,7 +132,7 @@ export default function Header() {
             <Link href="/transactions/start" className={styles.navLink}>
               <Typography
                 className={`${styles.navItem} ${
-                  pathname === "/transactions/start" ? styles.activeNavItem : ""
+                  pathname === "/transactions/create" ? styles.activeNavItem : ""
                 }`}
               >
                 تراکنش جدید
