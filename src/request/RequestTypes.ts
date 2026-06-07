@@ -7,6 +7,8 @@ interface RequestType {
   params?: Record<string, string | number | null | Array<string>>
   cancelToken?: RefObject<AbortController | null>
   dontToast?: boolean
+  successMessage?: string
+  failMessage?: string
   subdomain?: SubdomainType
 }
 

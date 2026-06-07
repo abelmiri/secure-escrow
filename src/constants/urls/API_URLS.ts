@@ -24,6 +24,8 @@ const API_URLS = {
   categories: "v1/deals/categories",
   subCategories: ({ id }: { id: number }) =>
     `v1/deals/categories/sub-category/${id}`,
+  dealsImage: ({ id }: { id: number }) =>
+    `v1/deals/items/${id}/gallery`,
 }
 
 export default API_URLS

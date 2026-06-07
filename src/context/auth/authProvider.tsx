@@ -4,6 +4,7 @@ import type { AuthActionType, AuthStateType } from "@/context/auth/AuthType"
 import authActions from "@/context/auth/authActions"
 import authReducer, { authInit } from "@/context/auth/authReducer"
 import { getTokenAfterRedirect } from "@/helpers/auth/loginOAUTH"
+import getToken from "@/request/getToken"
 import parseQueryString from "@/helpers/query-param/parseQueryString"
 import resetDataManager from "@/helpers/storage/resetDataManager"
 import {
@@ -63,7 +64,7 @@ function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    if (authState?.user) {
+    if (authState?.user || getToken()) {
       authActions.getProfile({ authDispatch, cancelToken })
     }
   }, [])

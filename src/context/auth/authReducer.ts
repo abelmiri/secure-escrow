@@ -4,11 +4,11 @@ import type { AuthActionType, AuthStateType } from "@/context/auth/AuthType"
 import clearLocalStorage from "@/helpers/storage/clearLocalStorage"
 import cookieHelper from "@/helpers/storage/cookieHelper"
 
-const initialState: AuthStateType = { isLoading: false, user: null }
+const initialState: AuthStateType = { isLoading: true, user: null }
 
 export function authInit({ isReset }: { isReset: boolean }) {
   if (isReset) {
-    return initialState
+    return { ...initialState, isLoading: false }
   } else {
     if (typeof window !== "undefined") {
       const token = cookieHelper.getItem(COOKIE_VALUES.ACCOUNT.token)
@@ -18,14 +18,19 @@ export function authInit({ isReset }: { isReset: boolean }) {
       const user = localStorage.getItem(LOCAL_STORAGE_VALUES.ACCOUNT.user)
       if (token && refresh_token && user) {
         try {
-          return { ...initialState, user: JSON.parse(user) }
+          return { ...initialState, user: JSON.parse(user), isLoading: true }
         } catch (_) {
-          return initialState
+          return { ...initialState, isLoading: false }
         }
+      } else if (token || refresh_token) {
+        // If we have tokens but no user data yet, we should be in loading state
+        return { ...initialState, isLoading: true }
       } else {
-        return initialState
+        // No tokens found, not loading anymore
+        return { ...initialState, isLoading: false }
       }
     } else {
+      // Server side, keep loading true to prevent flash of NotFound
       return initialState
     }
   }

@@ -21,6 +21,8 @@ function get({
   params,
   cancelToken,
   dontToast,
+  successMessage,
+  failMessage,
 }: RequestGetType): Promise<any> {
   const reqUrl = urlMaker({ url, params, subdomain })
   return fetch(reqUrl, {
@@ -29,6 +31,7 @@ function get({
   })
     .then((res) => {
       if (res.status === 204) {
+        _successHandler({ successMessage, dontToast, method: "GET" })
         return null
       }
       const contentType = res.headers.get("content-type")
@@ -37,6 +40,7 @@ function get({
       )
       return res[isJson ? "json" : "text"]().then((data) => {
         if (res.ok) {
+          _successHandler({ successMessage, dontToast, method: "GET" })
           return data
         } else {
           return _serverErrorHandler({
@@ -48,7 +52,7 @@ function get({
       })
     })
     .catch((err) => {
-      return _networkErrorHandler({ err, dontToast })
+      return _networkErrorHandler({ err, dontToast, failMessage })
     })
 }
 
@@ -59,6 +63,8 @@ function post({
   params,
   cancelToken,
   dontToast,
+  successMessage,
+  failMessage,
 }: RequestPostType) {
   const reqUrl = urlMaker({ url, params, subdomain })
   const isURLSearchParams = data instanceof URLSearchParams
@@ -77,6 +83,7 @@ function post({
   })
     .then((res) => {
       if (res.status === 204) {
+        _successHandler({ successMessage, dontToast, method: "POST" })
         return null
       }
       const contentType = res.headers.get("content-type")
@@ -85,6 +92,7 @@ function post({
       )
       return res[isJson ? "json" : "text"]().then((data) => {
         if (res.ok) {
+          _successHandler({ successMessage, dontToast, method: "POST" })
           return data
         } else {
           return _serverErrorHandler({
@@ -96,7 +104,7 @@ function post({
       })
     })
     .catch((err) => {
-      return _networkErrorHandler({ err, dontToast })
+      return _networkErrorHandler({ err, dontToast, failMessage })
     })
 }
 
@@ -107,6 +115,8 @@ function patch({
   params,
   cancelToken,
   dontToast,
+  successMessage,
+  failMessage,
 }: RequestPatchType) {
   const reqUrl = urlMaker({ url, params, subdomain })
   const isURLSearchParams = data instanceof URLSearchParams
@@ -125,6 +135,7 @@ function patch({
   })
     .then((res) => {
       if (res.status === 204) {
+        _successHandler({ successMessage, dontToast, method: "PATCH" })
         return null
       }
       const contentType = res.headers.get("content-type")
@@ -133,6 +144,7 @@ function patch({
       )
       return res[isJson ? "json" : "text"]().then((data) => {
         if (res.ok) {
+          _successHandler({ successMessage, dontToast, method: "PATCH" })
           return data
         } else {
           return _serverErrorHandler({
@@ -144,7 +156,7 @@ function patch({
       })
     })
     .catch((err) => {
-      return _networkErrorHandler({ err, dontToast })
+      return _networkErrorHandler({ err, dontToast, failMessage })
     })
 }
 
@@ -154,6 +166,8 @@ function del({
   params,
   cancelToken,
   dontToast,
+  successMessage,
+  failMessage,
 }: RequestDelType) {
   const reqUrl = urlMaker({ url, params, subdomain })
   return fetch(reqUrl, {
@@ -163,6 +177,7 @@ function del({
   })
     .then((res) => {
       if (res.status === 204) {
+        _successHandler({ successMessage, dontToast, method: "DELETE" })
         return null
       }
       const contentType = res.headers.get("content-type")
@@ -171,6 +186,7 @@ function del({
       )
       return res[isJson ? "json" : "text"]().then((data) => {
         if (res.ok) {
+          _successHandler({ successMessage, dontToast, method: "DELETE" })
           return data
         } else {
           return _serverErrorHandler({
@@ -182,7 +198,7 @@ function del({
       })
     })
     .catch((err) => {
-      return _networkErrorHandler({ err, dontToast })
+      return _networkErrorHandler({ err, dontToast, failMessage })
     })
 }
 
@@ -193,6 +209,8 @@ function upload({
   params,
   cancelToken,
   dontToast,
+  successMessage,
+  failMessage,
   method,
   progress,
 }: RequestUploadAxiosType): Promise<any> {
@@ -228,6 +246,7 @@ function upload({
       }
 
       if (xhr.status >= 200 && xhr.status < 300) {
+        _successHandler({ successMessage, dontToast, method })
         resolve(responseData)
       } else {
         try {
@@ -237,6 +256,7 @@ function upload({
             callback: () => upload(arguments[0]),
           })
         } catch (err) {
+          _networkErrorHandler({ err, dontToast, failMessage })
           reject(err)
         }
       }
@@ -244,7 +264,11 @@ function upload({
 
     xhr.onerror = () => {
       try {
-        _networkErrorHandler({ err: "NETWORK_ERROR", dontToast })
+        _networkErrorHandler({
+          err: "NETWORK_ERROR",
+          dontToast,
+          failMessage,
+        })
       } catch (err) {
         reject(err)
       }
@@ -259,6 +283,31 @@ function upload({
 
     xhr.send(isFormData ? (data as FormData) : JSON.stringify(data))
   })
+}
+
+function _successHandler({
+  successMessage,
+  dontToast,
+  method,
+}: {
+  successMessage?: string
+  dontToast?: boolean
+  method?: string
+}) {
+  if (typeof window !== "undefined" && !dontToast) {
+    const isMutation =
+      method &&
+      ["post", "patch", "put", "delete"].includes(method.toLowerCase())
+    const message =
+      successMessage || (isMutation ? "عملیات با موفقیت انجام شد" : null)
+
+    if (message) {
+      toastManager.addToast({
+        message,
+        type: "SUCCESS",
+      })
+    }
+  }
 }
 
 function _serverErrorHandler({ data, status, callback }: RequestErrorType) {
@@ -295,9 +344,11 @@ function _serverErrorHandler({ data, status, callback }: RequestErrorType) {
 function _networkErrorHandler({
   err,
   dontToast,
+  failMessage,
 }: {
   err: any
   dontToast?: boolean
+  failMessage?: string
 }) {
   if (
     err !== "CANCEL" &&
@@ -310,20 +361,17 @@ function _networkErrorHandler({
 
     const isServerErr = typeof err === "object" && "status" in err
 
-    if (isServerErr) {
-      if (typeof window !== "undefined" && !dontToast) {
-        toastManager.addToast({
-          message: getErrorMessage({ status: err?.status, data: err?.data }),
-          type: "FAIL",
-        })
-      }
-    } else {
-      if (typeof window !== "undefined" && !dontToast) {
-        toastManager.addToast({
-          message: toastConstant.networkError,
-          type: "FAIL",
-        })
-      }
+    if (typeof window !== "undefined" && !dontToast) {
+      const message =
+        failMessage ||
+        (isServerErr
+          ? getErrorMessage({ status: err?.status, data: err?.data })
+          : toastConstant.networkError)
+
+      toastManager.addToast({
+        message,
+        type: "FAIL",
+      })
     }
   }
   throw err

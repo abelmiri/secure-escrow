@@ -3,6 +3,7 @@
 import { ReactNode } from "react"
 import useUser from "@/context/auth/hooks/useUser"
 import NotFound from "@/components/NotFound/NotFound"
+import { Box, CircularProgress } from "@mui/material"
 
 interface AuthGuardProps {
   children: ReactNode
@@ -17,9 +18,18 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   //   return <>{children}</>
   // }
 
-  // Show nothing while checking authentication
+  // Show a loading spinner while checking authentication
   if (authState?.isLoading) {
-    return null // Or a global loading spinner
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="80vh"
+      >
+        <CircularProgress size={40} sx={{ color: "var(--color-secondary)" }} />
+      </Box>
+    )
   }
 
   // If not logged in, show the NotFound component instead of redirecting

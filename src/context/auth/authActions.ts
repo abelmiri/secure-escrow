@@ -3,6 +3,7 @@ import API_URLS from "@/constants/urls/API_URLS"
 import COOKIE_VALUES from "@/constants/storage/COOKIE_VALUES"
 import LOCAL_STORAGE_VALUES from "@/constants/storage/LOCAL_STORAGE_VALUES"
 import type {
+  AuthActionType,
   LoginType,
   SetUserActionType,
   UpdateUserType,
@@ -18,13 +19,18 @@ function getProfile({
   authDispatch,
   cancelToken,
 }: {
-  authDispatch: Dispatch<SetUserActionType>
+  authDispatch: Dispatch<AuthActionType>
   cancelToken?: RefObject<AbortController | null>
 }) {
+  authDispatch({ type: "SET_GETTING_USER", payload: { isLoading: true } })
   return request
     .get({ url: API_URLS.profile, cancelToken, dontToast: true })
     .then((user: UserType) => {
       setUser({ data: { user }, authDispatch })
+    })
+    .catch((err) => {
+      authDispatch({ type: "SET_GETTING_USER", payload: { isLoading: false } })
+      throw err
     })
 }
 
@@ -36,7 +42,7 @@ function updateUser({
 }: {
   data: Partial<UpdateUserType>
   cancelToken?: RefObject<AbortController | null>
-  authDispatch: Dispatch<SetUserActionType>
+  authDispatch: Dispatch<AuthActionType>
   progress?: (progress: number) => void
 }) {
   const isFormData = Object.values(data).some((value) => value instanceof File)
@@ -57,6 +63,8 @@ function updateUser({
         cancelToken,
         method: "patch",
         progress,
+        successMessage: "اطلاعات با موفقیت بروزرسانی شد",
+        failMessage: "بروزرسانی اطلاعات با شکست مواجه شد",
       })
       .then((user: UserType) => {
         setUser({ data: { user }, authDispatch })
@@ -64,7 +72,13 @@ function updateUser({
   }
 
   return request
-    .patch({ url: API_URLS.profile, data, cancelToken })
+    .patch({
+      url: API_URLS.profile,
+      data,
+      cancelToken,
+      successMessage: "اطلاعات با موفقیت بروزرسانی شد",
+      failMessage: "بروزرسانی اطلاعات با شکست مواجه شد",
+    })
     .then((user: UserType) => {
       setUser({ data: { user }, authDispatch })
     })
@@ -75,7 +89,7 @@ function setUser({
   authDispatch,
 }: {
   data: { user: UserType }
-  authDispatch: Dispatch<SetUserActionType>
+  authDispatch: Dispatch<AuthActionType>
 }) {
   localStorage.setItem(LOCAL_STORAGE_VALUES.ACCOUNT.user, JSON.stringify(user))
   authDispatch({ type: "SET_USER", payload: { user } })
@@ -128,7 +142,7 @@ function verifyOAUTH({
   authDispatch,
 }: {
   data: { code: string; code_verifier: string; redirect_uri: string }
-  authDispatch: Dispatch<SetUserActionType>
+  authDispatch: Dispatch<AuthActionType>
 }) {
   const data = new URLSearchParams()
   data.append("grant_type", "authorization_code")
@@ -137,7 +151,13 @@ function verifyOAUTH({
   data.append("redirect_uri", redirect_uri)
   data.append("client_id", OAUTH.CLIENT_ID)
   return request
-    .post({ url: API_URLS.getToken, subdomain: "oAuth", data })
+    .post({
+      url: API_URLS.getToken,
+      subdomain: "oAuth",
+      data,
+      successMessage: "ورود با موفقیت انجام شد",
+      failMessage: "ورود با شکست مواجه شد",
+    })
     .then((res) => {
       _setCookies({ res })
 
@@ -162,7 +182,8 @@ function logout() {
     url: API_URLS.logout,
     subdomain: "oAuth",
     data,
-    dontToast: true,
+    successMessage: "خروج با موفقیت انجام شد",
+    failMessage: "خروج با موفقیت انجام نشد",
   })
 }
 
