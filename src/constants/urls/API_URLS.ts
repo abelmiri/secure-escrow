@@ -21,6 +21,7 @@ const API_URLS = {
     `v1/base/province/${id}/city`,
   profile: "v1/auth/profile",
   deals: "v1/deals/u",
+  deal: ({ id }: { id: number }) => `v1/deals/u/${id}`,
   categories: "v1/deals/categories",
   subCategories: ({ id }: { id: number }) =>
     `v1/deals/categories/sub-category/${id}`,

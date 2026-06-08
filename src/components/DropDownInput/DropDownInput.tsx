@@ -13,6 +13,7 @@ type DropdownProps = {
   options?: DropdownOption[]
   onChange?: (slug: string) => void
   disabled?: boolean
+  required?: boolean
 }
 
 export default function Dropdown({
@@ -22,6 +23,7 @@ export default function Dropdown({
   onChange,
   disabled = false,
   initialSlug,
+  required = false,
 }: DropdownProps & { initialSlug?: string }) {
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState<DropdownOption | null>(null)
@@ -79,7 +81,14 @@ export default function Dropdown({
 
   return (
     <div className={styles.container} ref={dropdownRef}>
-      {title && <div className={styles.title}>{title}</div>}
+      {title && (
+        <div className={styles.title}>
+          {title}
+          {required && (
+            <span style={{ color: "red", marginRight: "4px" }}>*</span>
+          )}
+        </div>
+      )}
 
       <div className={`${styles.dropdown} ${disabled ? styles.disabled : ""}`}>
         <button

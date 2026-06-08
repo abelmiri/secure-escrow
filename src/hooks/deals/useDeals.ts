@@ -8,21 +8,51 @@ export interface Deal {
   status: string
   amount: number
   created_at: string
-  // Add other relevant fields based on your API response structure
+}
+
+interface DealItem {
+  deal: number
+  description: string
+  id: number
+  images_count: number
+  name: string
+  price: number
+  properties: Record<string, any>
+  quantity: number
+  slug: string
+}
+
+interface DealResult {
+  id: number
+  items: DealItem[]
+  items_count: number | null
+  parties: Array<{ role: string; user: string }>
+  state: number
+  sub_state: number
+  trace_number: string
+  created_at?: string
+  updated_at?: string
 }
 
 interface DealsResponse {
-  collection: Deal[]
-  metadata: {
-    total_count: number
-    limit: number
-    offset: number
-  }
+  count: number
+  next: string | null
+  previous: string | null
+  results: DealResult[]
 }
 
 interface UseDealsProps {
   limit?: number
   offset?: number
+}
+
+const resolveDealTitle = (deal: DealResult) => {
+  const firstItem = deal.items?.[0]
+  return firstItem?.name || firstItem?.description || "معامله بدون عنوان"
+}
+
+const resolveDealAmount = (deal: DealResult) => {
+  return deal.items?.reduce((sum, item) => sum + Number(item.price || 0), 0) || 0
 }
 
 export function useDeals({ limit = 10, offset = 0 }: UseDealsProps = {}) {
@@ -42,8 +72,17 @@ export function useDeals({ limit = 10, offset = 0 }: UseDealsProps = {}) {
         },
       })
       .then((data: DealsResponse) => {
-        setDeals(data.collection)
-        setTotalCount(data.metadata?.total_count || 0)
+        const mappedDeals = data.results.map((deal) => ({
+          id: deal.id,
+          title: resolveDealTitle(deal),
+          status: deal.state?.toString() || "نامشخص",
+          amount: resolveDealAmount(deal),
+          created_at:
+            deal.created_at || deal.updated_at || new Date().toISOString(),
+        }))
+
+        setDeals(mappedDeals)
+        setTotalCount(data.count || mappedDeals.length)
         setError(null)
       })
       .catch((err) => {

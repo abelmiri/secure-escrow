@@ -1,5 +1,5 @@
 import SESSION_STORAGE_VALUES from "@/constants/storage/SESSION_STORAGE_VALUES"
-import type { SetUserActionType } from "@/context/auth/AuthType"
+import type { AuthActionType } from "@/context/auth/AuthType"
 import authActions from "@/context/auth/authActions"
 import getBrowser from "@/helpers/general/getBrowser"
 import createQueryString from "@/helpers/query-param/createQueryString"
@@ -17,7 +17,7 @@ export function getTokenAfterRedirect({
   authDispatch,
 }: {
   code: string
-  authDispatch: Dispatch<SetUserActionType>
+  authDispatch: Dispatch<AuthActionType>
 }): Promise<void> {
   return new Promise((resolve, reject) => {
     const redirectUrl = sessionStorage.getItem(

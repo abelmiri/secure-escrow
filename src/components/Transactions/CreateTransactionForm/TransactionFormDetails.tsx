@@ -1,14 +1,19 @@
 "use client"
 
-import React, { useEffect, useRef, useState } from "react"
-import { useSearchParams } from "next/navigation"
+import React, { useContext, useEffect, useRef, useState } from "react"
+import { useSearchParams, useRouter } from "next/navigation"
 import RadioButton from "@/components/RadioButton/RadioButton"
 import Dropdown from "@/components/DropDownInput/DropDownInput"
 import ListInput from "@/components/ListInput/ListInput"
+import DatePicker from "@/components/DatePicker/DatePicker"
 import styles from "./styles/TransactionFormDetails.module.scss"
 import { Button, CircularProgress } from "@mui/material"
+import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined"
 import { useCategories } from "@/hooks/deals/useCategories"
 import { useSubCategories } from "@/hooks/deals/useSubCategories"
+import { authContext } from "@/context/auth/authProvider"
+import request from "@/request/request"
+import API_URLS from "@/constants/urls/API_URLS"
 import {
   clearTransactionPrefill,
   loadTransactionPrefill,
@@ -22,9 +27,23 @@ const roles = [
   { title: "کارگزار (واسط)", value: "broker" },
 ]
 
-export default function TransactionFormDetails() {
+export default function TransactionFormDetails({
+  stageNumber = 1,
+  dealId,
+  itemId,
+  onDealCreated,
+  onPrevious,
+}: {
+  stageNumber?: number
+  dealId?: number | null
+  itemId?: number | null
+  onDealCreated?: (dealId: number, itemId: number | null) => void
+  onPrevious?: () => void
+}) {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const prefillAppliedRef = useRef(false)
+  const { authState } = useContext(authContext)
 
   const [role, setRole] = useState("customer")
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
@@ -42,6 +61,9 @@ export default function TransactionFormDetails() {
   const [totalTransactionAmount, setTotalTransactionAmount] = useState("")
   const [paymentMethod, setPaymentMethod] = useState("")
   const [paymentDescription, setPaymentDescription] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [counterpartyMobile, setCounterpartyMobile] = useState("")
+  const [isSellerRepresentative, setIsSellerRepresentative] = useState("no")
 
   const { categories, isLoading: isCategoriesLoading } = useCategories()
   const selectedCategory = categories.find((c) => c.id === selectedCategoryId)
@@ -78,87 +100,257 @@ export default function TransactionFormDetails() {
     isLoading: isPropertiesLoading,
   } = useSubCategories(selectedSubCategoryId)
 
+  const stageProperties = properties.filter(
+    (prop) => prop.display_page === stageNumber,
+  )
+
+  const visibleStageProperties =
+    stageNumber === 2
+      ? role === "beneficiary"
+        ? stageProperties.filter((prop) => prop.field_type === "file")
+        : []
+      : stageProperties
+
+  const getSelectedFiles = (value: any) => {
+    if (Array.isArray(value)) return value
+    if (value instanceof File) return [value]
+    return []
+  }
+
   const handlePropertyChange = (propertyName: string, value: any) => {
     setPropertyValues((prev) => ({ ...prev, [propertyName]: value }))
+  }
+
+  const handleContinue = async () => {
+    if (!selectedSubCategoryId || !authState.user) return
+
+    setIsSubmitting(true)
+
+    const selectedSubCategory = subCategoriesList.find(
+      (sc) => sc.id === selectedSubCategoryId,
+    )
+
+    const propertiesData: Record<string, any> = {}
+    properties.forEach((prop) => {
+      const value = propertyValues[prop.slug]
+
+      if (prop.field_type === "file") {
+        if (Array.isArray(value)) {
+          propertiesData[prop.slug] = value.map((file) => file.name).join(", ")
+        } else if (value instanceof File) {
+          propertiesData[prop.slug] = value.name
+        } else {
+          propertiesData[prop.slug] = ""
+        }
+      } else if (prop.field_type === "integer") {
+        const integerValue = value === "" || value === undefined ? "" : Number(value)
+        propertiesData[prop.slug] = Number.isFinite(integerValue)
+          ? integerValue
+          : ""
+      } else {
+        propertiesData[prop.slug] = value ?? ""
+      }
+    })
+
+    const primaryParty = {
+      user: authState.user.mobile_number,
+      role,
+    }
+
+    const secondPartyMobile = counterpartyMobile.trim()
+    const secondPartyRole = role === "beneficiary"
+      ? isSellerRepresentative === "yes"
+        ? "broker"
+        : "customer"
+      : "beneficiary"
+
+    const parties = [primaryParty]
+    if (stageNumber === 2 && secondPartyMobile) {
+      parties.push({ user: secondPartyMobile, role: secondPartyRole })
+    }
+
+    try {
+      if (stageNumber === 1) {
+        const payload = {
+          items: [
+            {
+              subcategory: selectedSubCategory?.slug || "",
+              name: title,
+              description,
+              price: Number(escrowAmount),
+              properties: propertiesData,
+            },
+          ],
+          parties,
+        }
+
+        const response: any = await request.post({
+          url: API_URLS.deals,
+          data: payload,
+          successMessage: "معامله با موفقیت ثبت شد",
+          failMessage: "خطا در ثبت معامله",
+        })
+
+        const createdDealId = response?.id
+        const createdItemId = response?.items?.[0]?.id ?? null
+        if (createdDealId && onDealCreated) {
+          onDealCreated(createdDealId, createdItemId)
+        }
+      } else if (stageNumber === 2 && dealId) {
+        const patchPayload: any = {
+          parties,
+        }
+
+        if (itemId) {
+          patchPayload.items = [
+            {
+              id: itemId,
+              properties: propertiesData,
+            },
+          ]
+        }
+
+        await request.patch({
+          url: API_URLS.deal({ id: dealId }),
+          data: patchPayload,
+          successMessage: "اطلاعات با موفقیت به‌روزرسانی شد",
+          failMessage: "خطا در به‌روزرسانی اطلاعات",
+        })
+        router.push("/dashboard")
+      }
+    } catch (error) {
+      console.error("Error processing deal stage:", error)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const isHalfWidth = (propertyName: string) => {
     return propertyName === "quantity" || propertyName === "weight"
   }
 
+  const headerTitle =
+    stageNumber === 2
+      ? "اطلاعات طرفین و اسناد"
+      : "جزئیات تراکنش"
+  const headerDescription =
+    stageNumber === 2
+      ? "مشخصات خریدار هدف و اسناد مورد نیاز را وارد کنید"
+      : "اطلاعات دقیق محصول یا دارایی مورد معامله را وارد کنید"
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <div className={styles.headerTextBlack}>جزئیات تراکنش</div>
-        <div className={styles.headerTextGray}>
-          اطلاعات دقیق محصول یا دارایی مورد معامله را وارد کنید
-        </div>
+        <div className={styles.headerTextBlack}>{headerTitle}</div>
+        <div className={styles.headerTextGray}>{headerDescription}</div>
       </div>
 
-      <div className={styles.roleSelect}>
-        <div className={styles.roleSelectText}>نقش شما در این معامله</div>
-        {roles.map((data) => (
-          <RadioButton
-            key={data.value}
-            title={data.title}
-            name="user-role"
-            value={data.value}
-            checked={role === data.value}
-            onChange={() => setRole(data.value)}
+      {stageNumber === 1 && (
+        <>
+          <div className={styles.roleSelect}>
+            <div className={styles.roleSelectText}>نقش شما در این معامله</div>
+            {roles.map((data) => (
+              <RadioButton
+                key={data.value}
+                title={data.title}
+                name="user-role"
+                value={data.value}
+                checked={role === data.value}
+                onChange={() => setRole(data.value)}
+              />
+            ))}
+          </div>
+
+          <Dropdown
+            title="دسته بندی معامله"
+            placeholder={
+              isCategoriesLoading
+                ? "در حال بارگذاری..."
+                : "یک دسته بندی انتخاب کنید"
+            }
+            options={categories.map((item) => ({
+              label: item.name,
+              slug: item.id.toString(), // We use ID as slug for Dropdown to manage sub-category fetch
+            }))}
+            initialSlug={selectedCategoryId?.toString()}
+            onChange={(id: string) => {
+              setSelectedCategoryId(Number(id))
+              setSelectedSubCategoryId(null) // Reset sub-category on parent change
+            }}
           />
-        ))}
-      </div>
 
-      <Dropdown
-        title="دسته بندی معامله"
-        placeholder={
-          isCategoriesLoading
-            ? "در حال بارگذاری..."
-            : "یک دسته بندی انتخاب کنید"
-        }
-        options={categories.map((item) => ({
-          label: item.name,
-          slug: item.id.toString(), // We use ID as slug for Dropdown to manage sub-category fetch
-        }))}
-        initialSlug={selectedCategoryId?.toString()}
-        onChange={(id: string) => {
-          setSelectedCategoryId(Number(id))
-          setSelectedSubCategoryId(null) // Reset sub-category on parent change
-        }}
-      />
+          <Dropdown
+            title="نوع دسته بندی"
+            placeholder={
+              !selectedCategoryId
+                ? "ابتدا دسته بندی اصلی را انتخاب کنید"
+                : "زیر دسته بندی انتخاب کنید"
+            }
+            options={subCategoriesList.map((item) => ({
+              label: item.name,
+              slug: item.id.toString(),
+            }))}
+            initialSlug={selectedSubCategoryId?.toString()}
+            onChange={(id: string) => setSelectedSubCategoryId(Number(id))}
+            disabled={!selectedCategoryId}
+          />
 
-      <Dropdown
-        title="نوع دسته بندی"
-        placeholder={
-          !selectedCategoryId
-            ? "ابتدا دسته بندی اصلی را انتخاب کنید"
-            : "زیر دسته بندی انتخاب کنید"
-        }
-        options={subCategoriesList.map((item) => ({
-          label: item.name,
-          slug: item.id.toString(),
-        }))}
-        initialSlug={selectedSubCategoryId?.toString()}
-        onChange={(id: string) => setSelectedSubCategoryId(Number(id))}
-        disabled={!selectedCategoryId}
-      />
+          <ListInput
+            valueType="string"
+            placeholder="عنوان کوتاه و مشخص"
+            title="عنوان معامله"
+            value={title}
+            onChange={setTitle}
+            regex={/^[\u0600-\u06FFa-zA-Z\s]+$/}
+          />
 
-      <ListInput
-        valueType="string"
-        placeholder="عنوان کوتاه و مشخص"
-        title="عنوان معامله"
-        value={title}
-        onChange={setTitle}
-        regex={/^[\u0600-\u06FFa-zA-Z\s]+$/}
-      />
+          <ListInput
+            textarea
+            placeholder="جهت درج هر نوع توضیحات تکمیلی..."
+            title="توضیحات اضافی"
+            value={description}
+            onChange={setDescription}
+          />
+        </>
+      )}
 
-      <ListInput
-        textarea
-        placeholder="جهت درج هر نوع توضیح تکمیلی..."
-        title="توضیحات اضافی"
-        value={description}
-        onChange={setDescription}
-      />
+      {stageNumber === 2 && (
+        <>
+          <ListInput
+            title={
+              role === "beneficiary"
+                ? "شماره موبایل خریدار"
+                : "شماره موبایل فروشنده"
+            }
+            placeholder={
+              role === "beneficiary"
+                ? "شماره موبایل خریدار"
+                : "شماره موبایل فروشنده"
+            }
+            value={counterpartyMobile}
+            onChange={setCounterpartyMobile}
+            valueType="string"
+          />
+
+          <div className={styles.radioQuestion}>آیا نماینده فروشنده هستید؟</div>
+          <div className={styles.radioOptions}>
+            <RadioButton
+              title="خیر، خود فروشنده هستم"
+              name="seller-rep"
+              value="no"
+              checked={isSellerRepresentative === "no"}
+              onChange={() => setIsSellerRepresentative("no")}
+            />
+            <RadioButton
+              title="بله، نماینده فروشنده هستم"
+              name="seller-rep"
+              value="yes"
+              checked={isSellerRepresentative === "yes"}
+              onChange={() => setIsSellerRepresentative("yes")}
+            />
+          </div>
+        </>
+      )}
 
       {isPropertiesLoading && (
         <div
@@ -168,55 +360,154 @@ export default function TransactionFormDetails() {
         </div>
       )}
 
-      {!isPropertiesLoading && properties.length > 0 && (
+      {!isPropertiesLoading && visibleStageProperties.length > 0 && (
         <div className={styles.propertiesBox}>
           <div className={styles.propertiesHeader}>
-            <div className={styles.propertiesTitle}>{subCategoryName}</div>
-            {subCategoryDescription && (
+            <div className={styles.propertiesTitle}>
+              {stageNumber === 2 ? "بارگذاری اسناد" : subCategoryName}
+            </div>
+            {stageNumber === 2 ? (
               <div className={styles.propertiesDescription}>
-                {subCategoryDescription}
+                فایل‌های مورد نیاز برای بارگذاری را انتخاب کنید
               </div>
+            ) : (
+              subCategoryDescription && (
+                <div className={styles.propertiesDescription}>
+                  {subCategoryDescription}
+                </div>
+              )
             )}
           </div>
 
           <div className={styles.propertiesGrid}>
-            {properties.map((prop) => (
-              <div
-                key={prop.property_name}
-                className={
-                  isHalfWidth(prop.property_name) ? "" : styles.fullWidth
-                }
-              >
-                {prop.field_type === "select" ||
-                prop.field_type === "dropdown" ? (
-                  <Dropdown
-                    title={prop.name}
-                    placeholder={`انتخاب ${prop.name}`}
-                    options={prop.options?.map((opt) => {
-                      if (typeof opt === "string") {
-                        return { label: opt, slug: opt }
+            {visibleStageProperties.map((prop) => {
+              const selectedFiles = getSelectedFiles(propertyValues[prop.slug])
+
+              return (
+                <div
+                  key={prop.slug}
+                  className={isHalfWidth(prop.slug) ? "" : styles.fullWidth}
+                >
+                  {prop.field_type === "select" ||
+                  prop.field_type === "dropdown" ? (
+                    <Dropdown
+                      title={prop.name}
+                      placeholder={`انتخاب ${prop.name}`}
+                      options={prop.options?.map((opt) => {
+                        if (typeof opt === "string") {
+                          return { label: opt, slug: opt }
+                        }
+                        return { label: opt.label, slug: opt.value }
+                      })}
+                      onChange={(val) => handlePropertyChange(prop.slug, val)}
+                      required={prop.is_required}
+                    />
+                  ) : prop.field_type === "date" ? (
+                    <DatePicker
+                      title={prop.name}
+                      placeholder={`انتخاب ${prop.name}`}
+                      value={propertyValues[prop.slug] || ""}
+                      onChange={(val) => handlePropertyChange(prop.slug, val)}
+                      required={prop.is_required}
+                    />
+                  ) : prop.field_type === "bool" ? (
+                    <div>
+                      <div className={styles.radioQuestion}>{prop.name}</div>
+                      <div className={styles.radioOptions}>
+                        <RadioButton
+                          title="دارد"
+                          name={prop.slug}
+                          value="true"
+                          checked={propertyValues[prop.slug] === true}
+                          onChange={() => handlePropertyChange(prop.slug, true)}
+                        />
+                        <RadioButton
+                          title="ندارد"
+                          name={prop.slug}
+                          value="false"
+                          checked={propertyValues[prop.slug] === false}
+                          onChange={() => handlePropertyChange(prop.slug, false)}
+                        />
+                      </div>
+                    </div>
+                  ) : prop.field_type === "file" ? (
+                    <div>
+                      <div className={styles.radioQuestion}>{prop.name}</div>
+                      <div
+                        className={styles.fileUploadCard}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={(e) => {
+                          e.preventDefault()
+                          const files = Array.from(e.dataTransfer.files).slice(
+                            0,
+                            3,
+                          )
+                          handlePropertyChange(prop.slug, files)
+                        }}
+                      >
+                        <input
+                          id={`file-upload-${prop.slug}`}
+                          type="file"
+                          multiple
+                          hidden
+                          onChange={(e) => {
+                            const files = e.target.files
+                            handlePropertyChange(
+                              prop.slug,
+                              files ? Array.from(files).slice(0, 3) : [],
+                            )
+                          }}
+                        />
+                        <label
+                          htmlFor={`file-upload-${prop.slug}`}
+                          className={styles.fileUploadLabel}
+                        >
+                          <FileUploadOutlinedIcon
+                            className={styles.fileUploadIcon}
+                          />
+                          <div className={styles.fileUploadText}>
+                            فایل‌ها را اینجا بکشید یا کلیک کنید
+                          </div>
+                          <span className={styles.fileUploadButton}>
+                            انتخاب فایل
+                          </span>
+                          <span className={styles.fileUploadHint}>
+                            حداکثر 3 فایل
+                          </span>
+                        </label>
+                      </div>
+                      {selectedFiles.length > 0 && (
+                        <div className={styles.selectedFiles}>
+                          {selectedFiles.map((file: File, index: number) => (
+                            <div key={index} className={styles.fileName}>
+                              {file.name}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <ListInput
+                      title={prop.name}
+                      placeholder={
+                        prop.unit ? `${prop.name} (${prop.unit})` : prop.name
                       }
-                      return { label: opt.label, slug: opt.value }
-                    })}
-                    onChange={(val) =>
-                      handlePropertyChange(prop.property_name, val)
-                    }
-                  />
-                ) : (
-                  <ListInput
-                    title={prop.name}
-                    placeholder={prop.name}
-                    value={propertyValues[prop.property_name] || ""}
-                    onChange={(val) =>
-                      handlePropertyChange(prop.property_name, val)
-                    }
-                    valueType={
-                      prop.field_type === "integer" ? "number" : "string"
-                    }
-                  />
-                )}
-              </div>
-            ))}
+                      value={propertyValues[prop.slug] || ""}
+                      onChange={(val) => handlePropertyChange(prop.slug, val)}
+                      valueType={
+                        prop.field_type === "integer" ? "number" : "string"
+                      }
+                      required={prop.is_required}
+                      regex={
+                        prop.regex_pattern
+                          ? new RegExp(prop.regex_pattern)
+                          : undefined
+                      }
+                    />
+                  )}
+                </div>
+              )
+            })}
           </div>
         </div>
       )}
@@ -305,8 +596,26 @@ export default function TransactionFormDetails() {
           </div>
 
           <div className={styles.buttonGroup}>
-            <Button className={styles.buttonPrimary} variant="contained">
-              ادامه
+            {stageNumber === 2 && onPrevious && (
+              <Button
+                variant="outlined"
+                onClick={onPrevious}
+                disabled={isSubmitting}
+              >
+                قبلی
+              </Button>
+            )}
+            <Button
+              className={styles.buttonPrimary}
+              variant="contained"
+              onClick={handleContinue}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "ادامه"
+              )}
             </Button>
           </div>
         </>

@@ -10,10 +10,12 @@ export interface PropertyOption {
 export interface Property {
   name: string
   property_name: string
-  field_type: "string" | "integer" | "boolean" | "select" | "dropdown"
+  slug: string
+  field_type: "string" | "integer" | "bool" | "file" | "select" | "dropdown" | "date"
   unit: string | null
   regex_pattern: string | null
   is_required: boolean
+  display_page: number
   options: (string | PropertyOption)[]
 }
 
@@ -26,7 +28,8 @@ export interface SubCategoryResponse {
 }
 
 export function useSubCategories(subCategoryId: number | null) {
-  const [subCategoryData, setSubCategoryData] = useState<SubCategoryResponse | null>(null)
+  const [subCategoryData, setSubCategoryData] =
+    useState<SubCategoryResponse | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<any>(null)
 
@@ -51,11 +54,11 @@ export function useSubCategories(subCategoryId: number | null) {
       })
   }, [subCategoryId])
 
-  return { 
-    properties: subCategoryData?.properties || [], 
+  return {
+    properties: subCategoryData?.properties || [],
     subCategoryName: subCategoryData?.name || "",
     subCategoryDescription: subCategoryData?.description || "",
-    isLoading, 
-    error 
+    isLoading,
+    error,
   }
 }

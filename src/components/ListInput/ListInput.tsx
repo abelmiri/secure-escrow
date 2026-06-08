@@ -10,6 +10,7 @@ type ListInputProps = {
   textarea?: boolean
   regex?: RegExp
   valueType?: "string" | "number" | "integer"
+  required?: boolean
 }
 
 export default function ListInput({
@@ -20,6 +21,7 @@ export default function ListInput({
   textarea = false,
   regex,
   valueType = "string",
+  required = false,
 }: ListInputProps) {
   const isInvalid = regex && value !== "" && !regex.test(value)
 
@@ -67,7 +69,14 @@ export default function ListInput({
 
   return (
     <div className={styles.container}>
-      {title && <div className={styles.title}>{title}</div>}
+      {title && (
+        <div className={styles.title}>
+          {title}
+          {required && (
+            <span style={{ color: "red", marginRight: "4px" }}>*</span>
+          )}
+        </div>
+      )}
       {textarea ? (
         <textarea
           className={textareaClassName}

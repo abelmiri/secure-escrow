@@ -157,6 +157,81 @@
   gap: 12px;
 }
 
+.fileUploadCard {
+  border: 2px dashed #c1c7d0;
+  border-radius: 16px;
+  padding: 28px 20px;
+  background: #f8f9fd;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.fileUploadCard:hover {
+  border-color: #9aa3b8;
+  background: #f1f3f8;
+}
+
+.fileUploadLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.fileUploadIcon {
+  color: #5563eb;
+  font-size: 34px;
+}
+
+.fileUploadText {
+  color: #4f566b;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.fileUploadButton {
+  background-color: #ffffff;
+  color: #0a0a0a;
+  border: 1px solid #d3d7e2;
+  border-radius: 999px;
+  padding: 8px 18px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.fileUploadHint {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.selectedFiles {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fileName {
+  padding: 10px 14px;
+  background: #ffffff;
+  border: 1px solid #e6e8ee;
+  border-radius: 12px;
+  color: #222222;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .remainingCostBox {
   background-color: var(--color-secondary-transparent-box);
   border: 1px solid var(--color-secondary-transparent-box);

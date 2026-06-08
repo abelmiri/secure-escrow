@@ -10,37 +10,72 @@ import {
   IconButton,
   Select,
   MenuItem,
+  CircularProgress,
+  Pagination,
 } from "@mui/material"
 import SearchIcon from "@/media/svg/SearchIcon"
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined"
 import styles from "./styles/DashboardDeals.module.scss"
 import { dealsData } from "@/constants/deals"
+import { useDeals } from "@/hooks/deals/useDeals"
 
 export default function DashboardDeals() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("همه")
   const [roleFilter, setRoleFilter] = useState("همه")
   const [orderFilter, setOrderFilter] = useState("newest")
+  const [page, setPage] = useState(1)
+  const limit = 5
 
-  const filteredDeals = dealsData
-    .filter((deal) => {
-      const matchesSearch =
-        deal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        deal.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        deal.participant.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesStatus =
-        statusFilter === "همه" || deal.status === statusFilter
-      const matchesRole = roleFilter === "همه" || deal.role === roleFilter
+  const {
+    deals: apiDeals,
+    isLoading,
+    totalCount,
+  } = useDeals({
+    limit,
+    offset: (page - 1) * limit,
+  })
 
-      return matchesSearch && matchesStatus && matchesRole
-    })
-    .sort((a, b) => {
-      if (orderFilter === "newest") {
-        return b.date.localeCompare(a.date)
-      } else {
-        return a.date.localeCompare(b.date)
-      }
-    })
+  // Mock data filtering (keep existing logic)
+  const filteredMockDeals = dealsData.filter((deal) => {
+    const matchesSearch =
+      deal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      deal.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      deal.participant.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = statusFilter === "همه" || deal.status === statusFilter
+    const matchesRole = roleFilter === "همه" || deal.role === roleFilter
+
+    return matchesSearch && matchesStatus && matchesRole
+  })
+
+  // Combine Mock and API deals
+  const allDeals = [
+    ...filteredMockDeals.map((d) => ({ ...d, isMock: true })),
+    ...apiDeals.map((d) => ({
+      id: `API-${d.id}`,
+      title: d.title,
+      status: d.status || "نامشخص",
+      statusType: "processing" as const, // Default for API deals
+      role: "نامشخص" as const,
+      participant: `مبلغ: ${d.amount.toLocaleString()} ریال`,
+      date: new Date(d.created_at).toLocaleDateString("fa-IR"),
+      amount: d.amount.toLocaleString(),
+      isMock: false,
+    })),
+  ].sort((a, b) => {
+    if (orderFilter === "newest") {
+      return b.date.localeCompare(a.date)
+    } else {
+      return a.date.localeCompare(b.date)
+    }
+  })
+
+  const handlePageChange = (
+    _event: React.ChangeEvent<unknown>,
+    value: number,
+  ) => {
+    setPage(value)
+  }
 
   return (
     <Box className={styles.container}>
@@ -113,46 +148,79 @@ export default function DashboardDeals() {
       </Box>
 
       <Box className={styles.dealsList}>
-        {filteredDeals.map((deal) => (
-          <Link
-            key={deal.id}
-            href={`/dashboard/${deal.id}`}
-            style={{ textDecoration: "none" }}
+        {isLoading ? (
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              padding: "40px",
+            }}
           >
-            <Box className={styles.dealCard}>
-              <Box className={styles.dealCardHeader}>
-                <Box className={styles.dealBadges}>
-                  <Typography className={styles.dealId}>{deal.id}</Typography>
-                  <span
-                    className={`${styles.badge} ${styles[deal.statusType]}`}
-                  >
-                    {deal.status}
-                  </span>
-                  <span className={`${styles.badge} ${styles.roleBadge}`}>
-                    {deal.role}
-                  </span>
-                </Box>
-                <Typography className={styles.dealDate}>{deal.date}</Typography>
-              </Box>
+            <CircularProgress size={32} />
+          </Box>
+        ) : (
+          <>
+            {allDeals.map((deal) => (
+              <Link
+                key={deal.id}
+                href={deal.isMock ? `/dashboard/${deal.id}` : "#"}
+                style={{ textDecoration: "none" }}
+              >
+                <Box className={styles.dealCard}>
+                  <Box className={styles.dealCardHeader}>
+                    <Box className={styles.dealBadges}>
+                      <Typography className={styles.dealId}>
+                        {deal.id}
+                      </Typography>
+                      <span
+                        className={`${styles.badge} ${styles[deal.statusType]}`}
+                      >
+                        {deal.status}
+                      </span>
+                      {deal.role !== "نامشخص" && (
+                        <span className={`${styles.badge} ${styles.roleBadge}`}>
+                          {deal.role}
+                        </span>
+                      )}
+                    </Box>
+                    <Typography className={styles.dealDate}>
+                      {deal.date}
+                    </Typography>
+                  </Box>
 
-              <Box className={styles.dealCardContent}>
-                <Box className={styles.dealInfo}>
-                  <Typography className={styles.dealTitle}>
-                    {deal.title}
-                  </Typography>
-                  <Typography className={styles.dealParticipant}>
-                    {deal.participant}
-                  </Typography>
+                  <Box className={styles.dealCardContent}>
+                    <Box className={styles.dealInfo}>
+                      <Typography className={styles.dealTitle}>
+                        {deal.title}
+                      </Typography>
+                      <Typography className={styles.dealParticipant}>
+                        {deal.participant}
+                      </Typography>
+                    </Box>
+                    <Box className={styles.dealAmountContainer}>
+                      <Typography className={styles.dealAmount}>
+                        {deal.amount}{" "}
+                        <span className={styles.currency}>تومان</span>
+                      </Typography>
+                    </Box>
+                  </Box>
                 </Box>
-                <Box className={styles.dealAmountContainer}>
-                  <Typography className={styles.dealAmount}>
-                    {deal.amount} <span className={styles.currency}>تومان</span>
-                  </Typography>
-                </Box>
+              </Link>
+            ))}
+
+            {totalCount > limit && (
+              <Box className={styles.paginationWrapper}>
+                <Pagination
+                  count={Math.ceil(totalCount / limit)}
+                  page={page}
+                  onChange={handlePageChange}
+                  color="standard"
+                  shape="rounded"
+                />
               </Box>
-            </Box>
-          </Link>
-        ))}
+            )}
+          </>
+        )}
       </Box>
     </Box>
   )
