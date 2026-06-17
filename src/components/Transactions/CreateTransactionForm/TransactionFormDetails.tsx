@@ -11,6 +11,9 @@ import { Button, CircularProgress } from "@mui/material"
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined"
 import { useCategories } from "@/hooks/deals/useCategories"
 import { useSubCategories } from "@/hooks/deals/useSubCategories"
+import type { Property } from "@/hooks/deals/useSubCategories"
+import { useDocumentRequirements } from "@/hooks/documents/useDocumentRequirements"
+import type { DocumentRequirement } from "@/hooks/documents/useDocumentRequirements"
 import { authContext } from "@/context/auth/authProvider"
 import request from "@/request/request"
 import API_URLS from "@/constants/urls/API_URLS"
@@ -27,16 +30,23 @@ const roles = [
   { title: "کارگزار (واسط)", value: "broker" },
 ]
 
+type PropertyInputValue =
+  | File[]
+  | string
+  | number
+  | boolean
+  | Date
+  | null
+  | undefined
+
 export default function TransactionFormDetails({
   stageNumber = 1,
   dealId,
-  itemId,
   onDealCreated,
   onPrevious,
 }: {
   stageNumber?: number
   dealId?: number | null
-  itemId?: number | null
   onDealCreated?: (dealId: number, itemId: number | null) => void
   onPrevious?: () => void
 }) {
@@ -55,7 +65,9 @@ export default function TransactionFormDetails({
 
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
-  const [propertyValues, setPropertyValues] = useState<Record<string, any>>({})
+  const [propertyValues, setPropertyValues] = useState<
+    Record<string, PropertyInputValue>
+  >({})
   const [escrowAmount, setEscrowAmount] = useState("")
   const [isTotalCost, setIsTotalCost] = useState("yes")
   const [totalTransactionAmount, setTotalTransactionAmount] = useState("")
@@ -63,7 +75,6 @@ export default function TransactionFormDetails({
   const [paymentDescription, setPaymentDescription] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [counterpartyMobile, setCounterpartyMobile] = useState("")
-  const [isSellerRepresentative, setIsSellerRepresentative] = useState("no")
 
   const { categories, isLoading: isCategoriesLoading } = useCategories()
   const selectedCategory = categories.find((c) => c.id === selectedCategoryId)
@@ -100,25 +111,36 @@ export default function TransactionFormDetails({
     isLoading: isPropertiesLoading,
   } = useSubCategories(selectedSubCategoryId)
 
+  const { documentRequirements, isLoading: isDocumentRequirementsLoading } =
+    useDocumentRequirements(stageNumber === 2 ? selectedSubCategoryId : null)
+
   const stageProperties = properties.filter(
     (prop) => prop.display_page === stageNumber,
   )
 
   const visibleStageProperties =
-    stageNumber === 2
-      ? role === "beneficiary"
-        ? stageProperties.filter((prop) => prop.field_type === "file")
-        : []
-      : stageProperties
+    stageNumber === 2 ? documentRequirements : stageProperties
 
-  const getSelectedFiles = (value: any) => {
-    if (Array.isArray(value)) return value
+  console.log("visibleStageProperties", visibleStageProperties)
+  
+  const getSelectedFiles = (value: unknown): File[] => {
+    if (Array.isArray(value)) {
+      return value.filter((item): item is File => item instanceof File)
+    }
     if (value instanceof File) return [value]
     return []
   }
 
-  const handlePropertyChange = (propertyName: string, value: any) => {
+  const handlePropertyChange = (
+    propertyName: string,
+    value: PropertyInputValue,
+  ) => {
     setPropertyValues((prev) => ({ ...prev, [propertyName]: value }))
+  }
+
+  const getStringPropertyValue = (propertyName: string) => {
+    const value = propertyValues[propertyName]
+    return typeof value === "string" ? value : ""
   }
 
   const handleContinue = async () => {
@@ -130,27 +152,22 @@ export default function TransactionFormDetails({
       (sc) => sc.id === selectedSubCategoryId,
     )
 
-    const propertiesData: Record<string, any> = {}
-    properties.forEach((prop) => {
-      const value = propertyValues[prop.slug]
+    const propertiesData: Record<string, unknown> = {}
+    properties
+      .filter((prop) => prop.field_type !== "file")
+      .forEach((prop) => {
+        const value = propertyValues[prop.slug]
 
-      if (prop.field_type === "file") {
-        if (Array.isArray(value)) {
-          propertiesData[prop.slug] = value.map((file) => file.name).join(", ")
-        } else if (value instanceof File) {
-          propertiesData[prop.slug] = value.name
+        if (prop.field_type === "integer") {
+          const integerValue =
+            value === "" || value === undefined ? "" : Number(value)
+          propertiesData[prop.slug] = Number.isFinite(integerValue)
+            ? integerValue
+            : ""
         } else {
-          propertiesData[prop.slug] = ""
+          propertiesData[prop.slug] = value ?? ""
         }
-      } else if (prop.field_type === "integer") {
-        const integerValue = value === "" || value === undefined ? "" : Number(value)
-        propertiesData[prop.slug] = Number.isFinite(integerValue)
-          ? integerValue
-          : ""
-      } else {
-        propertiesData[prop.slug] = value ?? ""
-      }
-    })
+      })
 
     const primaryParty = {
       user: authState.user.mobile_number,
@@ -158,11 +175,7 @@ export default function TransactionFormDetails({
     }
 
     const secondPartyMobile = counterpartyMobile.trim()
-    const secondPartyRole = role === "beneficiary"
-      ? isSellerRepresentative === "yes"
-        ? "broker"
-        : "customer"
-      : "beneficiary"
+    const secondPartyRole = role === "beneficiary" ? "customer" : "beneficiary"
 
     const parties = [primaryParty]
     if (stageNumber === 2 && secondPartyMobile) {
@@ -177,6 +190,8 @@ export default function TransactionFormDetails({
               subcategory: selectedSubCategory?.slug || "",
               name: title,
               description,
+              remaining_price_payment_method: paymentMethod,
+              total_price: Number(totalTransactionAmount),
               price: Number(escrowAmount),
               properties: propertiesData,
             },
@@ -184,30 +199,30 @@ export default function TransactionFormDetails({
           parties,
         }
 
-        const response: any = await request.post({
+        const response = await request.post({
           url: API_URLS.deals,
           data: payload,
           successMessage: "معامله با موفقیت ثبت شد",
           failMessage: "خطا در ثبت معامله",
         })
 
-        const createdDealId = response?.id
-        const createdItemId = response?.items?.[0]?.id ?? null
+        const responseData =
+          typeof response === "object" && response !== null ? response : null
+        const createdDealId =
+          responseData && "id" in responseData
+            ? ((responseData as { id?: number }).id ?? null)
+            : null
+        const createdItemId =
+          responseData && "items" in responseData
+            ? ((responseData as { items?: Array<{ id?: number }> }).items?.[0]
+                ?.id ?? null)
+            : null
         if (createdDealId && onDealCreated) {
           onDealCreated(createdDealId, createdItemId)
         }
       } else if (stageNumber === 2 && dealId) {
-        const patchPayload: any = {
+        const patchPayload: Record<string, unknown> = {
           parties,
-        }
-
-        if (itemId) {
-          patchPayload.items = [
-            {
-              id: itemId,
-              properties: propertiesData,
-            },
-          ]
         }
 
         await request.patch({
@@ -229,10 +244,202 @@ export default function TransactionFormDetails({
     return propertyName === "quantity" || propertyName === "weight"
   }
 
+  const renderDocumentRequirement = (requirement: DocumentRequirement) => {
+    const requirementKey =
+      requirement.document_type_code || requirement.slug || String(requirement.id)
+    const requirementName = requirement.title || requirement.name || requirementKey
+    const isRequired =
+      requirement.is_required ?? requirement.requirement_type !== "optional"
+    const maxFiles = requirement.files_max || 3
+    const minFiles = requirement.files_min || 0
+    const selectedFiles = getSelectedFiles(propertyValues[requirementKey])
+    const accept = requirement.file_types?.length
+      ? requirement.file_types
+          .map((type) => `.${type.replace(/^\./, "")}`)
+          .join(",")
+      : undefined
+
+    return (
+      <div key={requirementKey} className={styles.fullWidth}>
+        <div className={styles.radioQuestion}>
+          {requirementName}
+          {isRequired && " *"}
+        </div>
+        {(requirement.description || requirement.requirement_type) && (
+          <div className={styles.fieldDescription}>
+            {requirement.description ||
+              (requirement.requirement_type === "conditional"
+                ? "این سند در شرایط خاص ضروری است"
+                : requirement.requirement_type === "optional"
+                  ? "این سند اختیاری است"
+                  : "این سند الزامی است")}
+          </div>
+        )}
+        <div
+          className={styles.fileUploadCard}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault()
+            const files = Array.from(e.dataTransfer.files).slice(0, maxFiles)
+            handlePropertyChange(requirementKey, files)
+          }}
+        >
+          <input
+            id={`file-upload-${requirementKey}`}
+            type="file"
+            multiple
+            accept={accept}
+            hidden
+            onChange={(e) => {
+              const files = e.target.files
+              handlePropertyChange(
+                requirementKey,
+                files ? Array.from(files).slice(0, maxFiles) : [],
+              )
+            }}
+          />
+          <label
+            htmlFor={`file-upload-${requirementKey}`}
+            className={styles.fileUploadLabel}
+          >
+            <FileUploadOutlinedIcon className={styles.fileUploadIcon} />
+            <div className={styles.fileUploadText}>
+              فایل‌ها را اینجا بکشید یا کلیک کنید
+            </div>
+            <span className={styles.fileUploadButton}>انتخاب فایل</span>
+            <span className={styles.fileUploadHint}>
+              حداقل {minFiles} و حداکثر {maxFiles} فایل
+            </span>
+          </label>
+        </div>
+        {selectedFiles.length > 0 && (
+          <div className={styles.selectedFiles}>
+            {selectedFiles.map((file: File, index: number) => (
+              <div key={index} className={styles.fileName}>
+                {file.name}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  const renderProperty = (prop: Property) => {
+    const selectedFiles = getSelectedFiles(propertyValues[prop.slug])
+
+    return (
+      <div
+        key={prop.slug}
+        className={isHalfWidth(prop.slug) ? "" : styles.fullWidth}
+      >
+        {prop.field_type === "select" || prop.field_type === "dropdown" ? (
+          <Dropdown
+            title={prop.name}
+            placeholder={`انتخاب ${prop.name}`}
+            options={prop.options?.map((opt) => {
+              if (typeof opt === "string") {
+                return { label: opt, slug: opt }
+              }
+              return { label: opt.label, slug: opt.value }
+            })}
+            onChange={(val) => handlePropertyChange(prop.slug, val)}
+            required={prop.is_required}
+          />
+        ) : prop.field_type === "date" ? (
+          <DatePicker
+            title={prop.name}
+            placeholder={`انتخاب ${prop.name}`}
+            value={getStringPropertyValue(prop.slug)}
+            onChange={(val) => handlePropertyChange(prop.slug, val)}
+            required={prop.is_required}
+          />
+        ) : prop.field_type === "bool" ? (
+          <div>
+            <div className={styles.radioQuestion}>{prop.name}</div>
+            <div className={styles.radioOptions}>
+              <RadioButton
+                title="دارد"
+                name={prop.slug}
+                value="true"
+                checked={propertyValues[prop.slug] === true}
+                onChange={() => handlePropertyChange(prop.slug, true)}
+              />
+              <RadioButton
+                title="ندارد"
+                name={prop.slug}
+                value="false"
+                checked={propertyValues[prop.slug] === false}
+                onChange={() => handlePropertyChange(prop.slug, false)}
+              />
+            </div>
+          </div>
+        ) : prop.field_type === "file" ? (
+          <div>
+            <div className={styles.radioQuestion}>{prop.name}</div>
+            <div
+              className={styles.fileUploadCard}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={(e) => {
+                e.preventDefault()
+                const files = Array.from(e.dataTransfer.files).slice(0, 3)
+                handlePropertyChange(prop.slug, files)
+              }}
+            >
+              <input
+                id={`file-upload-${prop.slug}`}
+                type="file"
+                multiple
+                hidden
+                onChange={(e) => {
+                  const files = e.target.files
+                  handlePropertyChange(
+                    prop.slug,
+                    files ? Array.from(files).slice(0, 3) : [],
+                  )
+                }}
+              />
+              <label
+                htmlFor={`file-upload-${prop.slug}`}
+                className={styles.fileUploadLabel}
+              >
+                <FileUploadOutlinedIcon className={styles.fileUploadIcon} />
+                <div className={styles.fileUploadText}>
+                  فایل‌ها را اینجا بکشید یا کلیک کنید
+                </div>
+                <span className={styles.fileUploadButton}>انتخاب فایل</span>
+                <span className={styles.fileUploadHint}>حداکثر 3 فایل</span>
+              </label>
+            </div>
+            {selectedFiles.length > 0 && (
+              <div className={styles.selectedFiles}>
+                {selectedFiles.map((file: File, index: number) => (
+                  <div key={index} className={styles.fileName}>
+                    {file.name}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <ListInput
+            title={prop.name}
+            placeholder={prop.unit ? `${prop.name} (${prop.unit})` : prop.name}
+            value={getStringPropertyValue(prop.slug)}
+            onChange={(val) => handlePropertyChange(prop.slug, val)}
+            valueType={prop.field_type === "integer" ? "number" : "string"}
+            required={prop.is_required}
+            regex={
+              prop.regex_pattern ? new RegExp(prop.regex_pattern) : undefined
+            }
+          />
+        )}
+      </div>
+    )
+  }
+
   const headerTitle =
-    stageNumber === 2
-      ? "اطلاعات طرفین و اسناد"
-      : "جزئیات تراکنش"
+    stageNumber === 2 ? "اطلاعات طرفین و اسناد" : "جزئیات تراکنش"
   const headerDescription =
     stageNumber === 2
       ? "مشخصات خریدار هدف و اسناد مورد نیاز را وارد کنید"
@@ -332,8 +539,8 @@ export default function TransactionFormDetails({
             valueType="string"
           />
 
-          <div className={styles.radioQuestion}>آیا نماینده فروشنده هستید؟</div>
-          <div className={styles.radioOptions}>
+          {/* <div className={styles.radioQuestion}>آیا نماینده فروشنده هستید؟</div> */}
+          {/* <div className={styles.radioOptions}>
             <RadioButton
               title="خیر، خود فروشنده هستم"
               name="seller-rep"
@@ -348,11 +555,12 @@ export default function TransactionFormDetails({
               checked={isSellerRepresentative === "yes"}
               onChange={() => setIsSellerRepresentative("yes")}
             />
-          </div>
+          </div> */}
         </>
       )}
 
-      {isPropertiesLoading && (
+      {(isPropertiesLoading ||
+        (stageNumber === 2 && isDocumentRequirementsLoading)) && (
         <div
           style={{ display: "flex", justifyContent: "center", padding: "20px" }}
         >
@@ -360,240 +568,119 @@ export default function TransactionFormDetails({
         </div>
       )}
 
-      {!isPropertiesLoading && visibleStageProperties.length > 0 && (
-        <div className={styles.propertiesBox}>
-          <div className={styles.propertiesHeader}>
-            <div className={styles.propertiesTitle}>
-              {stageNumber === 2 ? "بارگذاری اسناد" : subCategoryName}
-            </div>
-            {stageNumber === 2 ? (
-              <div className={styles.propertiesDescription}>
-                فایل‌های مورد نیاز برای بارگذاری را انتخاب کنید
+      {!isPropertiesLoading &&
+        !isDocumentRequirementsLoading &&
+        visibleStageProperties.length > 0 && (
+          <div className={styles.propertiesBox}>
+            <div className={styles.propertiesHeader}>
+              <div className={styles.propertiesTitle}>
+                {stageNumber === 2 ? "بارگذاری اسناد" : subCategoryName}
               </div>
-            ) : (
-              subCategoryDescription && (
+              {stageNumber === 2 ? (
                 <div className={styles.propertiesDescription}>
-                  {subCategoryDescription}
+                  فایل‌های مورد نیاز برای بارگذاری را انتخاب کنید
                 </div>
-              )
-            )}
-          </div>
+              ) : (
+                subCategoryDescription && (
+                  <div className={styles.propertiesDescription}>
+                    {subCategoryDescription}
+                  </div>
+                )
+              )}
+            </div>
 
-          <div className={styles.propertiesGrid}>
-            {visibleStageProperties.map((prop) => {
-              const selectedFiles = getSelectedFiles(propertyValues[prop.slug])
-
-              return (
-                <div
-                  key={prop.slug}
-                  className={isHalfWidth(prop.slug) ? "" : styles.fullWidth}
-                >
-                  {prop.field_type === "select" ||
-                  prop.field_type === "dropdown" ? (
-                    <Dropdown
-                      title={prop.name}
-                      placeholder={`انتخاب ${prop.name}`}
-                      options={prop.options?.map((opt) => {
-                        if (typeof opt === "string") {
-                          return { label: opt, slug: opt }
-                        }
-                        return { label: opt.label, slug: opt.value }
-                      })}
-                      onChange={(val) => handlePropertyChange(prop.slug, val)}
-                      required={prop.is_required}
-                    />
-                  ) : prop.field_type === "date" ? (
-                    <DatePicker
-                      title={prop.name}
-                      placeholder={`انتخاب ${prop.name}`}
-                      value={propertyValues[prop.slug] || ""}
-                      onChange={(val) => handlePropertyChange(prop.slug, val)}
-                      required={prop.is_required}
-                    />
-                  ) : prop.field_type === "bool" ? (
-                    <div>
-                      <div className={styles.radioQuestion}>{prop.name}</div>
-                      <div className={styles.radioOptions}>
-                        <RadioButton
-                          title="دارد"
-                          name={prop.slug}
-                          value="true"
-                          checked={propertyValues[prop.slug] === true}
-                          onChange={() => handlePropertyChange(prop.slug, true)}
-                        />
-                        <RadioButton
-                          title="ندارد"
-                          name={prop.slug}
-                          value="false"
-                          checked={propertyValues[prop.slug] === false}
-                          onChange={() => handlePropertyChange(prop.slug, false)}
-                        />
-                      </div>
-                    </div>
-                  ) : prop.field_type === "file" ? (
-                    <div>
-                      <div className={styles.radioQuestion}>{prop.name}</div>
-                      <div
-                        className={styles.fileUploadCard}
-                        onDragOver={(e) => e.preventDefault()}
-                        onDrop={(e) => {
-                          e.preventDefault()
-                          const files = Array.from(e.dataTransfer.files).slice(
-                            0,
-                            3,
-                          )
-                          handlePropertyChange(prop.slug, files)
-                        }}
-                      >
-                        <input
-                          id={`file-upload-${prop.slug}`}
-                          type="file"
-                          multiple
-                          hidden
-                          onChange={(e) => {
-                            const files = e.target.files
-                            handlePropertyChange(
-                              prop.slug,
-                              files ? Array.from(files).slice(0, 3) : [],
-                            )
-                          }}
-                        />
-                        <label
-                          htmlFor={`file-upload-${prop.slug}`}
-                          className={styles.fileUploadLabel}
-                        >
-                          <FileUploadOutlinedIcon
-                            className={styles.fileUploadIcon}
-                          />
-                          <div className={styles.fileUploadText}>
-                            فایل‌ها را اینجا بکشید یا کلیک کنید
-                          </div>
-                          <span className={styles.fileUploadButton}>
-                            انتخاب فایل
-                          </span>
-                          <span className={styles.fileUploadHint}>
-                            حداکثر 3 فایل
-                          </span>
-                        </label>
-                      </div>
-                      {selectedFiles.length > 0 && (
-                        <div className={styles.selectedFiles}>
-                          {selectedFiles.map((file: File, index: number) => (
-                            <div key={index} className={styles.fileName}>
-                              {file.name}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <ListInput
-                      title={prop.name}
-                      placeholder={
-                        prop.unit ? `${prop.name} (${prop.unit})` : prop.name
-                      }
-                      value={propertyValues[prop.slug] || ""}
-                      onChange={(val) => handlePropertyChange(prop.slug, val)}
-                      valueType={
-                        prop.field_type === "integer" ? "number" : "string"
-                      }
-                      required={prop.is_required}
-                      regex={
-                        prop.regex_pattern
-                          ? new RegExp(prop.regex_pattern)
-                          : undefined
-                      }
-                    />
-                  )}
-                </div>
-              )
-            })}
+            <div className={styles.propertiesGrid}>
+              {stageNumber === 2
+                ? documentRequirements.map(renderDocumentRequirement)
+                : stageProperties.map(renderProperty)}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {!isPropertiesLoading && selectedSubCategoryId && (
         <>
-          <div className={styles.financialSection}>
-            <div className={styles.sectionTitle}>جزئیات مالی معامله</div>
+          {stageNumber === 1 && (
+            <div className={styles.financialSection}>
+              <div className={styles.sectionTitle}>جزئیات مالی معامله</div>
 
-            <div className={styles.fieldWrapper}>
-              <ListInput
-                title="مبلغ واریزی به حساب امانی (ریال)"
-                placeholder="مبلغ واریزی به حساب امانی"
-                value={escrowAmount}
-                onChange={setEscrowAmount}
-                valueType="number"
-              />
-              <div className={styles.fieldDescription}>
-                مبلغی که خریدار در ابتدای کار به حساب امانی واریز می‌کند
-              </div>
-            </div>
-
-            <div className={styles.fieldWrapper}>
-              <div className={styles.radioQuestion}>
-                آیا این مبلغ شامل کل هزینه معامله است؟
-              </div>
-              <div className={styles.radioOptions}>
-                <RadioButton
-                  title="بله، کل هزینه معامله"
-                  name="is-total-cost"
-                  value="yes"
-                  checked={isTotalCost === "yes"}
-                  onChange={() => setIsTotalCost("yes")}
-                />
-                <RadioButton
-                  title="خیر، فقط بخشی از هزینه معامله"
-                  name="is-total-cost"
-                  value="no"
-                  checked={isTotalCost === "no"}
-                  onChange={() => setIsTotalCost("no")}
-                />
-              </div>
-            </div>
-
-            {isTotalCost === "no" && (
-              <div className={styles.remainingCostBox}>
-                <div className={styles.fieldWrapper}>
-                  <ListInput
-                    title="مبلغ نهایی کل معامله (ریال)"
-                    placeholder="مجموع کل هزینه معامله"
-                    value={totalTransactionAmount}
-                    onChange={setTotalTransactionAmount}
-                    valueType="number"
-                  />
-                  <div className={styles.fieldDescription}>
-                    مجموع کل هزینه معامله شامل پرداخت اولیه در پلتفرم +
-                    پرداخت‌های خارج از حساب امانی
-                  </div>
-                </div>
-
-                <Dropdown
-                  title="شیوه پرداخت باقی‌مانده هزینه"
-                  placeholder="انتخاب کنید"
-                  options={[
-                    { label: "پرداخت نقدی/کارت‌به‌کارت", slug: "cash" },
-                    {
-                      label: "واریز به حساب امانی در مرحله بعدی",
-                      slug: "next_escrow",
-                    },
-                    { label: "ارائه چک صیادی", slug: "check" },
-                    { label: "تهاتر یا معاوضه", slug: "barter" },
-                  ]}
-                  onChange={setPaymentMethod}
-                  initialSlug={paymentMethod}
-                />
-
+              <div className={styles.fieldWrapper}>
                 <ListInput
-                  textarea
-                  title="توضیحات شیوه پرداخت"
-                  placeholder="مثال: باقی مبلغ هنگام تنظیم سند رسمی در دفترخانه دریافت می‌شود"
-                  value={paymentDescription}
-                  onChange={setPaymentDescription}
+                  title="مبلغ واریزی به حساب امانی (ریال)"
+                  placeholder="مبلغ واریزی به حساب امانی"
+                  value={escrowAmount}
+                  onChange={setEscrowAmount}
+                  valueType="number"
                 />
+                <div className={styles.fieldDescription}>
+                  مبلغی که خریدار در ابتدای کار به حساب امانی واریز می‌کند
+                </div>
               </div>
-            )}
-          </div>
+
+              <div className={styles.fieldWrapper}>
+                <div className={styles.radioQuestion}>
+                  آیا این مبلغ شامل کل هزینه معامله است؟
+                </div>
+                <div className={styles.radioOptions}>
+                  <RadioButton
+                    title="بله، کل هزینه معامله"
+                    name="is-total-cost"
+                    value="yes"
+                    checked={isTotalCost === "yes"}
+                    onChange={() => setIsTotalCost("yes")}
+                  />
+                  <RadioButton
+                    title="خیر، فقط بخشی از هزینه معامله"
+                    name="is-total-cost"
+                    value="no"
+                    checked={isTotalCost === "no"}
+                    onChange={() => setIsTotalCost("no")}
+                  />
+                </div>
+              </div>
+
+              {isTotalCost === "no" && (
+                <div className={styles.remainingCostBox}>
+                  <div className={styles.fieldWrapper}>
+                    <ListInput
+                      title="مبلغ نهایی کل معامله (ریال)"
+                      placeholder="مجموع کل هزینه معامله"
+                      value={totalTransactionAmount}
+                      onChange={setTotalTransactionAmount}
+                      valueType="number"
+                    />
+                    <div className={styles.fieldDescription}>
+                      مجموع کل هزینه معامله شامل پرداخت اولیه در پلتفرم +
+                      پرداخت‌های خارج از حساب امانی
+                    </div>
+                  </div>
+
+                  <Dropdown
+                    title="شیوه پرداخت باقی‌مانده هزینه"
+                    placeholder="انتخاب کنید"
+                    options={[
+                      { label: "پرداخت نقدی/کارت‌به‌کارت", slug: "cash" },
+                      {
+                        label: "واریز به حساب امانی در مرحله بعدی",
+                        slug: "next_escrow",
+                      },
+                      { label: "ارائه چک صیادی", slug: "check" },
+                      { label: "تهاتر یا معاوضه", slug: "barter" },
+                    ]}
+                    onChange={setPaymentMethod}
+                    initialSlug={paymentMethod}
+                  />
+
+                  <ListInput
+                    textarea
+                    title="توضیحات شیوه پرداخت"
+                    placeholder="مثال: باقی مبلغ هنگام تنظیم سند رسمی در دفترخانه دریافت می‌شود"
+                    value={paymentDescription}
+                    onChange={setPaymentDescription}
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
           <div className={styles.buttonGroup}>
             {stageNumber === 2 && onPrevious && (

@@ -11,11 +11,9 @@ import { Box, CircularProgress } from "@mui/material"
 export default function CreateTransactionForm() {
   const [stage, setStage] = useState(1)
   const [createdDealId, setCreatedDealId] = useState<number | null>(null)
-  const [createdItemId, setCreatedItemId] = useState<number | null>(null)
 
-  const handleDealCreated = (dealId: number, itemId: number | null) => {
+  const handleDealCreated = (dealId: number) => {
     setCreatedDealId(dealId)
-    setCreatedItemId(itemId)
     setStage(2)
   }
 
@@ -40,7 +38,6 @@ export default function CreateTransactionForm() {
         <TransactionFormDetails
           stageNumber={stage}
           dealId={createdDealId}
-          itemId={createdItemId}
           onDealCreated={handleDealCreated}
           onPrevious={handlePrevious}
         />

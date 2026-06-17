@@ -17,16 +17,18 @@ const API_URLS = {
   logout: `realms/${OAUTH.REALMS}/protocol/openid-connect/logout`,
 
   province: "v1/base/province",
-  city: ({ id }: { id: number }) =>
-    `v1/base/province/${id}/city`,
+  city: ({ id }: { id: number }) => `v1/base/province/${id}/city`,
   profile: "v1/auth/profile",
   deals: "v1/deals/u",
   deal: ({ id }: { id: number }) => `v1/deals/u/${id}`,
   categories: "v1/deals/categories",
   subCategories: ({ id }: { id: number }) =>
     `v1/deals/categories/sub-category/${id}`,
-  dealsImage: ({ id }: { id: number }) =>
-    `v1/deals/items/${id}/gallery`,
+  dealDocumens: ({ id }: { id: number }) =>
+    `v1/documents/deals/${id}/documents`,
+  documentRequirements: ({ id }: { id: number }) =>
+    `v1/documents/sub-category/${id}/document-requirements`,
+  documentUpload: () => `v1/documents/upload`,
 }
 
 export default API_URLS

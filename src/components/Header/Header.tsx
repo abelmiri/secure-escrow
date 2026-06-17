@@ -32,7 +32,7 @@ const resources = [
   { label: "سوالات متداول", href: "/faq" },
   { label: "اعتماد و امنیت", href: "/trust-and-safety" },
   { label: "نحوه‌ی عملکرد", href: "/how-it-works" },
-  { label: "درباره ما", href: "about" },
+  { label: "درباره ما", href: "/about" },
   // { label: "وبلاگ", href: "#" },
   // { label: "مرکز راهنما", href: "#" },
   // { label: "مستندات API", href: "#" },
@@ -311,110 +311,200 @@ export default function Header() {
         </Box>
 
         <List className={styles.drawerList}>
-          <ListItem disablePadding className={styles.drawerItem}>
-            <ListItemButton onClick={handleMobileSolutionsToggle}>
-              <ListItemText
-                primary="راه حل ها"
-                className={styles.drawerItemText}
-              />
-              {mobileSolutionsOpen ? <ExpandLess /> : <ExpandMore />}
-            </ListItemButton>
-          </ListItem>
-          <Collapse in={mobileSolutionsOpen} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              {solutions.map((item) => (
-                <ListItem
-                  key={item}
-                  disablePadding
-                  className={styles.drawerSubItem}
+          {isLoggedIn ? (
+            <>
+              <ListItem disablePadding className={styles.drawerItem}>
+                <Link
+                  href="/dashboard"
+                  style={{
+                    textDecoration: "none",
+                    color: "inherit",
+                    width: "100%",
+                  }}
+                  onClick={handleDrawerToggle}
                 >
                   <ListItemButton>
-                    <ListItemText primary={item} />
+                    <ListItemText
+                      primary="داشبورد"
+                      className={styles.drawerItemText}
+                    />
                   </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-          </Collapse>
+                </Link>
+              </ListItem>
 
-          <ListItem disablePadding className={styles.drawerItem}>
-            <ListItemButton>
-              <ListItemText
-                primary="قیمت گذاری"
-                className={styles.drawerItemText}
-              />
-            </ListItemButton>
-          </ListItem>
-
-          <ListItem disablePadding className={styles.drawerItem}>
-            <ListItemButton onClick={handleMobileResourcesToggle}>
-              <ListItemText primary="منابع" className={styles.drawerItemText} />
-              {mobileResourcesOpen ? <ExpandLess /> : <ExpandMore />}
-            </ListItemButton>
-          </ListItem>
-          <Collapse in={mobileResourcesOpen} timeout="auto" unmountOnExit>
-            <List component="div" disablePadding>
-              {resources.map((item) => (
-                <ListItem
-                  key={item.label}
-                  disablePadding
-                  className={styles.drawerSubItem}
+              <ListItem disablePadding className={styles.drawerItem}>
+                <Link
+                  href="/transactions/create"
+                  style={{
+                    textDecoration: "none",
+                    color: "inherit",
+                    width: "100%",
+                  }}
+                  onClick={handleDrawerToggle}
                 >
-                  <Link
-                    href={item.href}
-                    style={{
-                      textDecoration: "none",
-                      color: "inherit",
-                      width: "100%",
-                    }}
-                  >
-                    <ListItemButton onClick={handleDrawerToggle}>
-                      <ListItemText primary={item.label} />
-                    </ListItemButton>
-                  </Link>
-                </ListItem>
-              ))}
-            </List>
-          </Collapse>
+                  <ListItemButton>
+                    <ListItemText
+                      primary="تراکنش جدید"
+                      className={styles.drawerItemText}
+                    />
+                  </ListItemButton>
+                </Link>
+              </ListItem>
 
-          <ListItem disablePadding className={styles.drawerItem}>
-            <Link
-              href="/about"
-              style={{
-                textDecoration: "none",
-                color: "inherit",
-                width: "100%",
-              }}
-              onClick={handleDrawerToggle}
-            >
-              <ListItemButton>
-                <ListItemText
-                  primary="درباره ما"
-                  className={styles.drawerItemText}
-                />
-              </ListItemButton>
-            </Link>
-          </ListItem>
+              <ListItem disablePadding className={styles.drawerItem}>
+                <ListItemButton onClick={handleMobileResourcesToggle}>
+                  <ListItemText primary="منابع" className={styles.drawerItemText} />
+                  {mobileResourcesOpen ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+              </ListItem>
+              <Collapse in={mobileResourcesOpen} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  {resources.map((item) => (
+                    <ListItem
+                      key={item.label}
+                      disablePadding
+                      className={styles.drawerSubItem}
+                    >
+                      <Link
+                        href={item.href}
+                        style={{
+                          textDecoration: "none",
+                          color: "inherit",
+                          width: "100%",
+                        }}
+                        onClick={handleDrawerToggle}
+                      >
+                        <ListItemButton>
+                          <ListItemText primary={item.label} />
+                        </ListItemButton>
+                      </Link>
+                    </ListItem>
+                  ))}
+                </List>
+              </Collapse>
 
-          <ListItem disablePadding className={styles.drawerItem}>
-            <ListItemButton>
-              <ListItemText
-                primary="تماس با ما"
-                className={styles.drawerItemText}
-              />
-            </ListItemButton>
-          </ListItem>
+              <ListItem disablePadding className={styles.drawerItem}>
+                <Link
+                  href="/profile"
+                  style={{
+                    textDecoration: "none",
+                    color: "inherit",
+                    width: "100%",
+                  }}
+                  onClick={handleDrawerToggle}
+                >
+                  <ListItemButton>
+                    <ListItemText
+                      primary="پروفایل"
+                      className={styles.drawerItemText}
+                    />
+                  </ListItemButton>
+                </Link>
+              </ListItem>
+            </>
+          ) : (
+            <>
+              <ListItem disablePadding className={styles.drawerItem}>
+                <ListItemButton>
+                  <ListItemText
+                    primary="تماس با ما"
+                    className={styles.drawerItemText}
+                  />
+                </ListItemButton>
+              </ListItem>
+
+              <ListItem disablePadding className={styles.drawerItem}>
+                <Link
+                  href="/about"
+                  style={{
+                    textDecoration: "none",
+                    color: "inherit",
+                    width: "100%",
+                  }}
+                  onClick={handleDrawerToggle}
+                >
+                  <ListItemButton>
+                    <ListItemText
+                      primary="درباره ما"
+                      className={styles.drawerItemText}
+                    />
+                  </ListItemButton>
+                </Link>
+              </ListItem>
+
+              <ListItem disablePadding className={styles.drawerItem}>
+                <ListItemButton onClick={handleMobileResourcesToggle}>
+                  <ListItemText primary="منابع" className={styles.drawerItemText} />
+                  {mobileResourcesOpen ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+              </ListItem>
+              <Collapse in={mobileResourcesOpen} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  {resources.map((item) => (
+                    <ListItem
+                      key={item.label}
+                      disablePadding
+                      className={styles.drawerSubItem}
+                    >
+                      <Link
+                        href={item.href}
+                        style={{
+                          textDecoration: "none",
+                          color: "inherit",
+                          width: "100%",
+                        }}
+                        onClick={handleDrawerToggle}
+                      >
+                        <ListItemButton>
+                          <ListItemText primary={item.label} />
+                        </ListItemButton>
+                      </Link>
+                    </ListItem>
+                  ))}
+                </List>
+              </Collapse>
+
+              <ListItem disablePadding className={styles.drawerItem}>
+                <ListItemButton>
+                  <ListItemText
+                    primary="قیمت گذاری"
+                    className={styles.drawerItemText}
+                  />
+                </ListItemButton>
+              </ListItem>
+
+              <ListItem disablePadding className={styles.drawerItem}>
+                <ListItemButton onClick={handleMobileSolutionsToggle}>
+                  <ListItemText
+                    primary="راهکارها"
+                    className={styles.drawerItemText}
+                  />
+                  {mobileSolutionsOpen ? <ExpandLess /> : <ExpandMore />}
+                </ListItemButton>
+              </ListItem>
+              <Collapse in={mobileSolutionsOpen} timeout="auto" unmountOnExit>
+                <List component="div" disablePadding>
+                  {solutions.map((item) => (
+                    <ListItem
+                      key={item}
+                      disablePadding
+                      className={styles.drawerSubItem}
+                    >
+                      <ListItemButton onClick={handleDrawerToggle}>
+                        <ListItemText primary={item} />
+                      </ListItemButton>
+                    </ListItem>
+                  ))}
+                </List>
+              </Collapse>
+            </>
+          )}
 
           <Box className={styles.drawerButtons}>
             {isLoggedIn ? (
-              <Link
-                href="/dashboard"
-                style={{ textDecoration: "none", width: "100%" }}
-                onClick={handleDrawerToggle}
-              >
-                <Button className={styles.loginButton} fullWidth>
-                  داشبورد
-                </Button>
-              </Link>
+              <Button className={styles.loginButton} fullWidth onClick={handleLogout}>
+                خروج
+              </Button>
             ) : (
               <>
                 <Button
