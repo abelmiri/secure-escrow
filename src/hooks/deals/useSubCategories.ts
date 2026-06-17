@@ -11,7 +11,15 @@ export interface Property {
   name: string
   property_name: string
   slug: string
-  field_type: "string" | "integer" | "bool" | "file" | "select" | "dropdown" | "date"
+  field_type:
+    | "string"
+    | "integer"
+    | "bool"
+    | "file"
+    | "select"
+    | "dropdown"
+    | "date"
+    | "multiselect"
   unit: string | null
   regex_pattern: string | null
   is_required: boolean

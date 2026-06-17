@@ -39,8 +39,6 @@ export function useDocumentRequirements(subCategoryId: number | null) {
     (url: string) => request.get({ url }),
   )
 
-  console.log("useDocumentRequirements", { data, error, isLoading })
-
   return {
     documentRequirements: normalizeDocumentRequirements(data?.requirements),
     isLoading,

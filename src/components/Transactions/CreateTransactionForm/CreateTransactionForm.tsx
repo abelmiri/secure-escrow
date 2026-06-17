@@ -8,17 +8,31 @@ import styles from "./styles/CreateTransactionForm.module.scss"
 import TransactionFormDetails from "@/components/Transactions/CreateTransactionForm/TransactionFormDetails"
 import { Box, CircularProgress } from "@mui/material"
 
-export default function CreateTransactionForm() {
-  const [stage, setStage] = useState(1)
-  const [createdDealId, setCreatedDealId] = useState<number | null>(null)
+type CreateTransactionFormProps = {
+  initialDealId?: number | null
+  initialStage?: number
+}
+
+export default function CreateTransactionForm({
+  initialDealId = null,
+  initialStage = 1,
+}: CreateTransactionFormProps) {
+  const [stage, setStage] = useState(initialStage)
+  const [createdDealId, setCreatedDealId] = useState<number | null>(
+    initialDealId,
+  )
 
   const handleDealCreated = (dealId: number) => {
     setCreatedDealId(dealId)
     setStage(2)
   }
 
+  const handleStageTwoCompleted = () => {
+    setStage(3)
+  }
+
   const handlePrevious = () => {
-    setStage(1)
+    setStage((prev) => Math.max(1, prev - 1))
   }
 
   return (
@@ -39,6 +53,7 @@ export default function CreateTransactionForm() {
           stageNumber={stage}
           dealId={createdDealId}
           onDealCreated={handleDealCreated}
+          onStageTwoCompleted={handleStageTwoCompleted}
           onPrevious={handlePrevious}
         />
       </Suspense>

@@ -7,11 +7,26 @@ import Dropdown from "@/components/DropDownInput/DropDownInput"
 import ListInput from "@/components/ListInput/ListInput"
 import DatePicker from "@/components/DatePicker/DatePicker"
 import styles from "./styles/TransactionFormDetails.module.scss"
-import { Button, CircularProgress } from "@mui/material"
+import {
+  Button,
+  Checkbox,
+  CircularProgress,
+  FormControl,
+  InputLabel,
+  ListItemText,
+  MenuItem,
+  OutlinedInput,
+  Select,
+} from "@mui/material"
+import type { SelectChangeEvent } from "@mui/material/Select"
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined"
+import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined"
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined"
 import { useCategories } from "@/hooks/deals/useCategories"
 import { useSubCategories } from "@/hooks/deals/useSubCategories"
 import type { Property } from "@/hooks/deals/useSubCategories"
+import { useDeal } from "@/hooks/deals/useDeal"
+import type { DealDetail, DealDocument, DealItem } from "@/hooks/deals/useDeal"
 import { useDocumentRequirements } from "@/hooks/documents/useDocumentRequirements"
 import type { DocumentRequirement } from "@/hooks/documents/useDocumentRequirements"
 import { authContext } from "@/context/auth/authProvider"
@@ -32,6 +47,7 @@ const roles = [
 
 type PropertyInputValue =
   | File[]
+  | string[]
   | string
   | number
   | boolean
@@ -39,15 +55,58 @@ type PropertyInputValue =
   | null
   | undefined
 
+const roleLabels: Record<string, string> = {
+  customer: "خریدار",
+  beneficiary: "فروشنده",
+  broker: "کارگزار",
+}
+
+const paymentMethodLabels: Record<string, string> = {
+  cash: "پرداخت نقدی/کارت‌به‌کارت",
+  next_escrow: "واریز به حساب امانی در مرحله بعدی",
+  check: "ارائه چک صیادی",
+  barter: "تهاتر یا معاوضه",
+}
+
+const formatCurrency = (value?: number | string | null) => {
+  const numericValue = Number(value || 0)
+  return `${Number.isFinite(numericValue) ? numericValue.toLocaleString("fa-IR") : "۰"} ریال`
+}
+
+const formatDate = (value?: string) => {
+  if (!value) return ""
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return new Intl.DateTimeFormat("fa-IR").format(date)
+}
+
+const getItemSubcategory = (item?: DealItem | null) => {
+  if (!item?.subcategory) return ""
+  if (typeof item.subcategory === "string") return item.subcategory
+  return item.subcategory.name || item.subcategory.slug || ""
+}
+
+const getDocumentName = (document: DealDocument) => {
+  return document.title || document.name || "سند معامله"
+}
+
+const getDocumentMeta = (document: DealDocument) => {
+  const size = document.file_size || document.size
+  const date = formatDate(document.uploaded_at || document.created_at)
+  return [size ? `${size}` : "", date].filter(Boolean).join(" • ")
+}
+
 export default function TransactionFormDetails({
   stageNumber = 1,
   dealId,
   onDealCreated,
+  onStageTwoCompleted,
   onPrevious,
 }: {
   stageNumber?: number
   dealId?: number | null
   onDealCreated?: (dealId: number, itemId: number | null) => void
+  onStageTwoCompleted?: () => void
   onPrevious?: () => void
 }) {
   const searchParams = useSearchParams()
@@ -75,6 +134,7 @@ export default function TransactionFormDetails({
   const [paymentDescription, setPaymentDescription] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [counterpartyMobile, setCounterpartyMobile] = useState("")
+  const [isTermsAccepted, setIsTermsAccepted] = useState(false)
 
   const { categories, isLoading: isCategoriesLoading } = useCategories()
   const selectedCategory = categories.find((c) => c.id === selectedCategoryId)
@@ -113,6 +173,9 @@ export default function TransactionFormDetails({
 
   const { documentRequirements, isLoading: isDocumentRequirementsLoading } =
     useDocumentRequirements(stageNumber === 2 ? selectedSubCategoryId : null)
+  const { deal, isLoading: isDealLoading } = useDeal(
+    stageNumber === 3 ? dealId || null : null,
+  )
 
   const stageProperties = properties.filter(
     (prop) => prop.display_page === stageNumber,
@@ -121,8 +184,6 @@ export default function TransactionFormDetails({
   const visibleStageProperties =
     stageNumber === 2 ? documentRequirements : stageProperties
 
-  console.log("visibleStageProperties", visibleStageProperties)
-  
   const getSelectedFiles = (value: unknown): File[] => {
     if (Array.isArray(value)) {
       return value.filter((item): item is File => item instanceof File)
@@ -138,12 +199,34 @@ export default function TransactionFormDetails({
     setPropertyValues((prev) => ({ ...prev, [propertyName]: value }))
   }
 
+  const getPropertyOptions = (prop: Property) =>
+    prop.options?.map((opt) => {
+      if (typeof opt === "string") {
+        return { label: opt, value: opt }
+      }
+      return { label: opt.label, value: opt.value }
+    }) || []
+
   const getStringPropertyValue = (propertyName: string) => {
     const value = propertyValues[propertyName]
     return typeof value === "string" ? value : ""
   }
 
+  const getStringArrayPropertyValue = (propertyName: string) => {
+    const value = propertyValues[propertyName]
+    return Array.isArray(value) &&
+      value.every((item) => typeof item === "string")
+      ? value
+      : []
+  }
+
   const handleContinue = async () => {
+    if (stageNumber === 3) {
+      if (!isTermsAccepted) return
+      router.push("/dashboard")
+      return
+    }
+
     if (!selectedSubCategoryId || !authState.user) return
 
     setIsSubmitting(true)
@@ -231,7 +314,7 @@ export default function TransactionFormDetails({
           successMessage: "اطلاعات با موفقیت به‌روزرسانی شد",
           failMessage: "خطا در به‌روزرسانی اطلاعات",
         })
-        router.push("/dashboard")
+        onStageTwoCompleted?.()
       }
     } catch (error) {
       console.error("Error processing deal stage:", error)
@@ -246,8 +329,11 @@ export default function TransactionFormDetails({
 
   const renderDocumentRequirement = (requirement: DocumentRequirement) => {
     const requirementKey =
-      requirement.document_type_code || requirement.slug || String(requirement.id)
-    const requirementName = requirement.title || requirement.name || requirementKey
+      requirement.document_type_code ||
+      requirement.slug ||
+      String(requirement.id)
+    const requirementName =
+      requirement.title || requirement.name || requirementKey
     const isRequired =
       requirement.is_required ?? requirement.requirement_type !== "optional"
     const maxFiles = requirement.files_max || 3
@@ -327,6 +413,7 @@ export default function TransactionFormDetails({
 
   const renderProperty = (prop: Property) => {
     const selectedFiles = getSelectedFiles(propertyValues[prop.slug])
+    const options = getPropertyOptions(prop)
 
     return (
       <div
@@ -337,15 +424,66 @@ export default function TransactionFormDetails({
           <Dropdown
             title={prop.name}
             placeholder={`انتخاب ${prop.name}`}
-            options={prop.options?.map((opt) => {
-              if (typeof opt === "string") {
-                return { label: opt, slug: opt }
-              }
-              return { label: opt.label, slug: opt.value }
-            })}
+            options={options.map((opt) => ({
+              label: opt.label,
+              slug: opt.value,
+            }))}
             onChange={(val) => handlePropertyChange(prop.slug, val)}
             required={prop.is_required}
           />
+        ) : prop.field_type === "multiselect" ? (
+          <FormControl fullWidth className={styles.multiSelectField}>
+            <InputLabel id={`${prop.slug}-multiselect-label`}>
+              {prop.name}
+              {prop.is_required ? " *" : ""}
+            </InputLabel>
+            <Select<string[]>
+              labelId={`${prop.slug}-multiselect-label`}
+              multiple
+              value={getStringArrayPropertyValue(prop.slug)}
+              input={<OutlinedInput label={prop.name} />}
+              onChange={(event: SelectChangeEvent<string[]>) => {
+                const value = event.target.value as string[] | string
+                handlePropertyChange(
+                  prop.slug,
+                  typeof value === "string" ? value.split(",") : value,
+                )
+              }}
+              renderValue={(selected) => {
+                const selectedValues = Array.isArray(selected) ? selected : []
+                const selectedLabels = options
+                  .filter((option) => selectedValues.includes(option.value))
+                  .map((option) => option.label)
+
+                return selectedLabels.length
+                  ? selectedLabels.join("، ")
+                  : `انتخاب ${prop.name}`
+              }}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    direction: "rtl",
+                    textAlign: "right",
+                  },
+                },
+              }}
+            >
+              {options.map((option) => {
+                const selectedValues = getStringArrayPropertyValue(prop.slug)
+
+                return (
+                  <MenuItem
+                    key={option.value}
+                    value={option.value}
+                    className={styles.multiSelectOption}
+                  >
+                    <Checkbox checked={selectedValues.includes(option.value)} />
+                    <ListItemText primary={option.label} />
+                  </MenuItem>
+                )
+              })}
+            </Select>
+          </FormControl>
         ) : prop.field_type === "date" ? (
           <DatePicker
             title={prop.name}
@@ -438,12 +576,194 @@ export default function TransactionFormDetails({
     )
   }
 
+  const renderReviewRow = (label: string, value?: React.ReactNode) => (
+    <div className={styles.reviewRow}>
+      <div className={styles.reviewLabel}>{label}</div>
+      <div className={styles.reviewValue}>{value || "—"}</div>
+    </div>
+  )
+
+  const renderReviewSection = (
+    title: string,
+    rows: Array<{ label: string; value?: React.ReactNode }>,
+  ) => (
+    <section className={styles.reviewSection}>
+      <h3 className={styles.reviewSectionTitle}>{title}</h3>
+      <div className={styles.reviewRows}>
+        {rows.map((row) => (
+          <React.Fragment key={row.label}>
+            {renderReviewRow(row.label, row.value)}
+          </React.Fragment>
+        ))}
+      </div>
+    </section>
+  )
+
+  const renderDealReview = (dealDetail: DealDetail | null) => {
+    const item = dealDetail?.items?.[0]
+    const currentRole =
+      dealDetail?.parties?.find(
+        (party) => party.user === authState.user?.mobile_number,
+      )?.role || role
+    const counterparty = dealDetail?.parties?.find(
+      (party) => party.role && party.role !== currentRole,
+    )
+    const itemProperties = item?.properties
+      ? Object.entries(item.properties).filter(([, value]) => value !== "")
+      : []
+    const localDocuments = Object.values(propertyValues).flatMap((value) =>
+      getSelectedFiles(value),
+    )
+    const documents = dealDetail?.documents || []
+    const escrowValue = item?.price ?? escrowAmount
+    const totalValue =
+      item?.total_price ?? (totalTransactionAmount || escrowValue)
+    const remainingPayment =
+      item?.remaining_price_payment_method || paymentMethod || ""
+
+    return (
+      <>
+        {renderReviewSection("اطلاعات پایه", [
+          {
+            label: "نقش شما:",
+            value: roleLabels[currentRole] || roleLabels[role] || currentRole,
+          },
+          {
+            label: "دسته‌بندی:",
+            value:
+              getItemSubcategory(item) ||
+              selectedCategory?.name ||
+              subCategoryName,
+          },
+          { label: "عنوان:", value: item?.name || title },
+          { label: "توضیحات:", value: item?.description || description },
+        ])}
+
+        {renderReviewSection(
+          "اطلاعات کالا",
+          [
+            { label: "نوع کالا:", value: getItemSubcategory(item) },
+            { label: "نام کالا:", value: item?.name || title },
+            {
+              label: "وضعیت:",
+              value:
+                itemProperties[0]?.[1] === undefined
+                  ? ""
+                  : String(itemProperties[0][1]),
+            },
+            { label: "تعداد:", value: item?.quantity?.toString() },
+            ...itemProperties.slice(1).map(([key, value]) => ({
+              label: `${key}:`,
+              value:
+                typeof value === "boolean"
+                  ? value
+                    ? "دارد"
+                    : "ندارد"
+                  : `${value}`,
+            })),
+          ].filter((row) => row.value),
+        )}
+
+        {renderReviewSection("جزئیات مالی", [
+          { label: "مبلغ حساب امانی:", value: formatCurrency(escrowValue) },
+          { label: "مبلغ کل معامله:", value: formatCurrency(totalValue) },
+          {
+            label: "شیوه پرداخت باقی‌مانده:",
+            value:
+              paymentMethodLabels[remainingPayment] ||
+              remainingPayment ||
+              (Number(totalValue) > Number(escrowValue) ? "ثبت نشده" : ""),
+          },
+        ])}
+
+        {renderReviewSection("جزئیات ارسال", [
+          { label: "نحوه ارسال:", value: "freight" },
+          { label: "هزینه ارسال:", value: formatCurrency(0) },
+          { label: "پرداخت‌کننده:", value: "" },
+        ])}
+
+        {renderReviewSection("اطلاعات خریدار", [
+          {
+            label: "ایمیل خریدار:",
+            value: counterparty?.email || "",
+          },
+          {
+            label: "نماینده فروشنده:",
+            value: currentRole === "broker" ? "بله" : "خیر",
+          },
+        ])}
+
+        <section className={styles.reviewSection}>
+          <h3 className={styles.reviewSectionTitle}>قرارداد و اسناد معامله</h3>
+          <div className={styles.documentList}>
+            {documents.length > 0 ? (
+              documents.map((document) => (
+                <a
+                  key={document.id || getDocumentName(document)}
+                  href={document.url || document.file || "#"}
+                  className={styles.documentItem}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <DownloadOutlinedIcon className={styles.documentActionIcon} />
+                  <div className={styles.documentInfo}>
+                    <DescriptionOutlinedIcon className={styles.documentIcon} />
+                    <div>
+                      <div className={styles.documentName}>
+                        {getDocumentName(document)}
+                      </div>
+                      <div className={styles.documentMeta}>
+                        {getDocumentMeta(document)}
+                      </div>
+                    </div>
+                  </div>
+                </a>
+              ))
+            ) : localDocuments.length > 0 ? (
+              localDocuments.map((file) => (
+                <div key={file.name} className={styles.documentItem}>
+                  <DownloadOutlinedIcon className={styles.documentActionIcon} />
+                  <div className={styles.documentInfo}>
+                    <DescriptionOutlinedIcon className={styles.documentIcon} />
+                    <div>
+                      <div className={styles.documentName}>{file.name}</div>
+                      <div className={styles.documentMeta}>
+                        {(file.size / 1024).toFixed(0)} KB
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className={styles.emptyReview}>
+                سندی برای نمایش وجود ندارد
+              </div>
+            )}
+          </div>
+        </section>
+
+        <div className={styles.feeNotice}>
+          <div className={styles.feeTitle}>هزینه های حساب امانی و امان‌یار</div>
+          <div>مبلغ حساب امانی: {formatCurrency(escrowValue)}</div>
+          <div>کارمزد امان‌یار (۲.۵٪): {formatCurrency(0)}</div>
+          <strong>مجموعه هزینه های قابل پرداخت: {formatCurrency(0)}</strong>
+        </div>
+      </>
+    )
+  }
+
   const headerTitle =
-    stageNumber === 2 ? "اطلاعات طرفین و اسناد" : "جزئیات تراکنش"
+    stageNumber === 3
+      ? "بررسی و ارسال"
+      : stageNumber === 2
+        ? "اطلاعات طرفین و اسناد"
+        : "جزئیات تراکنش"
   const headerDescription =
-    stageNumber === 2
-      ? "مشخصات خریدار هدف و اسناد مورد نیاز را وارد کنید"
-      : "اطلاعات دقیق محصول یا دارایی مورد معامله را وارد کنید"
+    stageNumber === 3
+      ? "جزئیات معامله خود را قبل از ارسال بررسی کنید"
+      : stageNumber === 2
+        ? "مشخصات خریدار هدف و اسناد مورد نیاز را وارد کنید"
+        : "اطلاعات دقیق محصول یا دارایی مورد معامله را وارد کنید"
 
   return (
     <div className={styles.container}>
@@ -559,6 +879,67 @@ export default function TransactionFormDetails({
         </>
       )}
 
+      {stageNumber === 3 && (
+        <>
+          {isDealLoading ? (
+            <div className={styles.reviewLoading}>
+              <CircularProgress size={24} />
+            </div>
+          ) : (
+            <div className={styles.reviewContainer}>
+              {renderDealReview(deal)}
+            </div>
+          )}
+
+          <div className={styles.termsRow}>
+            <Checkbox
+              checked={isTermsAccepted}
+              onChange={(event) => setIsTermsAccepted(event.target.checked)}
+              sx={{
+                color: "#d0d5dd",
+                "&.Mui-checked": { color: "var(--color-secondary)" },
+              }}
+            />
+            <span>
+              من با{" "}
+              <a href="/terms" target="_blank" rel="noreferrer">
+                شرایط استفاده
+              </a>{" "}
+              و{" "}
+              <a href="/escrow-agreement" target="_blank" rel="noreferrer">
+                قرارداد اسکرو
+              </a>{" "}
+              موافقم و تایید می‌کنم که معامله پس از تایید طرف دیگر ادامه خواهد
+              یافت.
+            </span>
+          </div>
+
+          <div className={styles.buttonGroup}>
+            {onPrevious && (
+              <Button
+                variant="outlined"
+                onClick={onPrevious}
+                disabled={isSubmitting}
+              >
+                قبلی
+              </Button>
+            )}
+            <Button
+              className={`${styles.buttonPrimary} ${styles.submitReviewButton}`}
+              variant="contained"
+              onClick={handleContinue}
+              disabled={isSubmitting || isDealLoading || !isTermsAccepted}
+            >
+              {isSubmitting ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "ارسال برای تایید خریدار"
+              )}
+            </Button>
+          </div>
+        </>
+      )}
+
       {(isPropertiesLoading ||
         (stageNumber === 2 && isDocumentRequirementsLoading)) && (
         <div
@@ -597,7 +978,7 @@ export default function TransactionFormDetails({
           </div>
         )}
 
-      {!isPropertiesLoading && selectedSubCategoryId && (
+      {stageNumber !== 3 && !isPropertiesLoading && selectedSubCategoryId && (
         <>
           {stageNumber === 1 && (
             <div className={styles.financialSection}>
