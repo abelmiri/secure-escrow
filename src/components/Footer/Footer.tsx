@@ -42,9 +42,8 @@ export default function Footer() {
           <Box className={styles.logoSection}>
             <Box className={styles.brand}>
               <Box className={styles.iconContainer}>
-                <IconSvg width={32} height={32} className={styles.icon} />
+                <IconSvg className={styles.icon} />
               </Box>
-              <Typography className={styles.companyName}>امان یار</Typography>
             </Box>
 
             <Typography className={styles.description}>

@@ -60,10 +60,6 @@
 }
 
 .iconContainer {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: var(--color-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -76,10 +72,13 @@
 }
 
 .icon {
-  width: 72px;
-  height: 72px;
+  width: 178px;
   color: white;
   cursor: pointer;
+
+    @media (max-width: 1024px) {
+  width: 110px;
+  }
 }
 
 .title {

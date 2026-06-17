@@ -113,9 +113,8 @@ export default function Header() {
           }}
         >
           <Box className={styles.iconContainer}>
-            <IconSvg width={32} height={32} className={styles.icon} />
+            <IconSvg className={styles.icon} />
           </Box>
-          <Typography className={styles.title}>امان یار</Typography>
         </Link>
 
         {isLoggedIn && (
@@ -302,7 +301,6 @@ export default function Header() {
               <Box className={styles.iconContainer}>
                 <IconSvg width={32} height={32} className={styles.icon} />
               </Box>
-              <Typography className={styles.title}>امان یار</Typography>
             </Link>
           </Box>
           <IconButton onClick={handleDrawerToggle}>
