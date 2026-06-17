@@ -131,7 +131,9 @@ export default function Header() {
             <Link href="/transactions/create" className={styles.navLink}>
               <Typography
                 className={`${styles.navItem} ${
-                  pathname === "/transactions/create" ? styles.activeNavItem : ""
+                  pathname === "/transactions/create"
+                    ? styles.activeNavItem
+                    : ""
                 }`}
               >
                 تراکنش جدید
@@ -299,7 +301,7 @@ export default function Header() {
               onClick={handleDrawerToggle}
             >
               <Box className={styles.iconContainer}>
-                <IconSvg width={32} height={32} className={styles.icon} />
+                <IconSvg className={styles.icon} />
               </Box>
             </Link>
           </Box>
@@ -351,7 +353,10 @@ export default function Header() {
 
               <ListItem disablePadding className={styles.drawerItem}>
                 <ListItemButton onClick={handleMobileResourcesToggle}>
-                  <ListItemText primary="منابع" className={styles.drawerItemText} />
+                  <ListItemText
+                    primary="منابع"
+                    className={styles.drawerItemText}
+                  />
                   {mobileResourcesOpen ? <ExpandLess /> : <ExpandMore />}
                 </ListItemButton>
               </ListItem>
@@ -432,7 +437,10 @@ export default function Header() {
 
               <ListItem disablePadding className={styles.drawerItem}>
                 <ListItemButton onClick={handleMobileResourcesToggle}>
-                  <ListItemText primary="منابع" className={styles.drawerItemText} />
+                  <ListItemText
+                    primary="منابع"
+                    className={styles.drawerItemText}
+                  />
                   {mobileResourcesOpen ? <ExpandLess /> : <ExpandMore />}
                 </ListItemButton>
               </ListItem>
@@ -500,7 +508,11 @@ export default function Header() {
 
           <Box className={styles.drawerButtons}>
             {isLoggedIn ? (
-              <Button className={styles.loginButton} fullWidth onClick={handleLogout}>
+              <Button
+                className={styles.loginButton}
+                fullWidth
+                onClick={handleLogout}
+              >
                 خروج
               </Button>
             ) : (
