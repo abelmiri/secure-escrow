@@ -1,14 +1,14 @@
 "use client"
 
-import React, { Suspense, useState } from "react"
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
+import { Suspense, useState } from "react"
 import Link from "next/link"
-import Stepper from "@/components/Stepper/Stepper"
-import styles from "./styles/CreateTransactionForm.module.scss"
-import TransactionFormDetails from "@/components/Transactions/CreateTransactionForm/TransactionFormDetails"
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
 import { Box, CircularProgress } from "@mui/material"
+import Stepper from "@/components/Stepper/Stepper"
+import TransactionFormDetails from "./TransactionFormDetails"
+import styles from "./styles/CreateTransactionForm.module.scss"
 
-type CreateTransactionFormProps = {
+interface CreateTransactionFormProps {
   initialDealId?: number | null
   initialStage?: number
 }
@@ -38,7 +38,7 @@ export default function CreateTransactionForm({
   return (
     <Box className={styles.container}>
       <Link href="/dashboard" className={styles.backButton}>
-        <ArrowForwardIcon sx={{ fontSize: 18, transform: "rotate(0deg)" }} />
+        <ArrowForwardIcon className={styles.backIcon} />
         بازگشت به داشبورد
       </Link>
       <Stepper currentStep={stage} />

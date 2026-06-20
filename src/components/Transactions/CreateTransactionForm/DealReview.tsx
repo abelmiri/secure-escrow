@@ -43,12 +43,31 @@ const getDocumentMeta = (document: DealDocument) => {
   return [size ? `${size}` : "", date].filter(Boolean).join(" • ")
 }
 
-type ReviewRow = {
+interface ReviewRow {
   label: string
   value?: ReactNode
 }
 
-function ReviewSection({ title, rows }: { title: string; rows: ReviewRow[] }) {
+interface ReviewSectionProps {
+  title: string
+  rows: ReviewRow[]
+}
+
+interface DealReviewProps {
+  deal: DealDetail | null
+  userMobile?: string
+  role: string
+  categoryName?: string
+  subCategoryName: string
+  title: string
+  description: string
+  escrowAmount: string
+  totalTransactionAmount: string
+  paymentMethod: string
+  localDocuments: File[]
+}
+
+function ReviewSection({ title, rows }: ReviewSectionProps) {
   return (
     <section className={styles.reviewSection}>
       <h3 className={styles.reviewSectionTitle}>{title}</h3>
@@ -64,20 +83,6 @@ function ReviewSection({ title, rows }: { title: string; rows: ReviewRow[] }) {
   )
 }
 
-type Props = {
-  deal: DealDetail | null
-  userMobile?: string
-  role: string
-  categoryName?: string
-  subCategoryName: string
-  title: string
-  description: string
-  escrowAmount: string
-  totalTransactionAmount: string
-  paymentMethod: string
-  localDocuments: File[]
-}
-
 export default function DealReview({
   deal,
   userMobile,
@@ -90,7 +95,7 @@ export default function DealReview({
   totalTransactionAmount,
   paymentMethod,
   localDocuments,
-}: Props) {
+}: DealReviewProps) {
   const item = deal?.items?.[0]
   const currentRole =
     deal?.parties?.find((party) => party.user === userMobile)?.role || role

@@ -11,10 +11,18 @@ import Dropdown from "@/components/DropDownInput/DropDownInput"
 import ListInput from "@/components/ListInput/ListInput"
 import RadioButton from "@/components/RadioButton/RadioButton"
 import type { Property } from "@/hooks/deals/useSubCategories"
-import type { PropertyInputValue } from "./types"
 import styles from "./styles/TransactionFormDetails.module.scss"
 
-type Props = {
+export type PropertyInputValue =
+  | string[]
+  | string
+  | number
+  | boolean
+  | Date
+  | null
+  | undefined
+
+interface DynamicPropertyFieldProps {
   property: Property
   value: PropertyInputValue
   onChange: (value: PropertyInputValue) => void
@@ -24,7 +32,7 @@ export default function DynamicPropertyField({
   property,
   value,
   onChange,
-}: Props) {
+}: DynamicPropertyFieldProps) {
   const options =
     property.options?.map((option) =>
       typeof option === "string"
@@ -68,9 +76,7 @@ export default function DynamicPropertyField({
               onChange={(event: SelectChangeEvent<string[]>) => {
                 const selected = event.target.value as string[] | string
                 onChange(
-                  typeof selected === "string"
-                    ? selected.split(",")
-                    : selected,
+                  typeof selected === "string" ? selected.split(",") : selected,
                 )
               }}
               renderValue={(selected) => {

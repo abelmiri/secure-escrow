@@ -1,9 +1,15 @@
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined"
 import type { DocumentRequirement } from "@/hooks/documents/useDocumentRequirements"
-import type { DocumentUpload } from "./types"
 import styles from "./styles/TransactionFormDetails.module.scss"
 
-type Props = {
+export interface DocumentUpload {
+  id: string
+  file: File
+  requirementId: number
+  status: "uploading" | "uploaded" | "failed"
+}
+
+interface DocumentRequirementFieldProps {
   requirement: DocumentRequirement
   uploads: DocumentUpload[]
   dealId?: number | null
@@ -17,7 +23,7 @@ export default function DocumentRequirementField({
   dealId,
   onFilesSelected,
   onRetry,
-}: Props) {
+}: DocumentRequirementFieldProps) {
   const requirementKey =
     requirement.document_type_code || requirement.slug || String(requirement.id)
   const requirementName =

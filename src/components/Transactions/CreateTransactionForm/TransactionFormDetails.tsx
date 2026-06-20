@@ -2,35 +2,41 @@
 
 import { useContext, useEffect, useRef, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
-import RadioButton from "@/components/RadioButton/RadioButton"
-import Dropdown from "@/components/DropDownInput/DropDownInput"
+import { Button, CircularProgress } from "@mui/material"
 import ListInput from "@/components/ListInput/ListInput"
-import styles from "./styles/TransactionFormDetails.module.scss"
-import { Button, Checkbox, CircularProgress } from "@mui/material"
+import { authContext } from "@/context/auth/authProvider"
+import API_URLS from "@/constants/urls/API_URLS"
 import { useCategories } from "@/hooks/deals/useCategories"
 import { useSubCategories } from "@/hooks/deals/useSubCategories"
 import { useDeal } from "@/hooks/deals/useDeal"
 import { useDocumentRequirements } from "@/hooks/documents/useDocumentRequirements"
 import type { DocumentRequirement } from "@/hooks/documents/useDocumentRequirements"
-import { authContext } from "@/context/auth/authProvider"
 import request from "@/request/request"
-import API_URLS from "@/constants/urls/API_URLS"
 import {
   clearTransactionPrefill,
   loadTransactionPrefill,
   parseTransactionPrefillFromSearchParams,
   tomanToRial,
 } from "@/lib/transactionPrefill"
-import DealReview from "./DealReview"
-import DocumentRequirementField from "./DocumentRequirementField"
-import DynamicPropertyField from "./DynamicPropertyField"
-import type { DocumentUpload, PropertyInputValue } from "./types"
+import DocumentRequirementField, {
+  type DocumentUpload,
+} from "./DocumentRequirementField"
+import DynamicPropertyField, {
+  type PropertyInputValue,
+} from "./DynamicPropertyField"
+import TransactionBasicDetails from "./TransactionBasicDetails"
+import TransactionFinancialDetails from "./TransactionFinancialDetails"
+import TransactionPropertiesSection from "./TransactionPropertiesSection"
+import TransactionReviewStage from "./TransactionReviewStage"
+import styles from "./styles/TransactionFormDetails.module.scss"
 
-const roles = [
-  { title: "خریدار", value: "customer" },
-  { title: "فروشنده", value: "beneficiary" },
-  { title: "کارگزار (واسط)", value: "broker" },
-]
+interface TransactionFormDetailsProps {
+  stageNumber?: number
+  dealId?: number | null
+  onDealCreated?: (dealId: number, itemId: number | null) => void
+  onStageTwoCompleted?: () => void
+  onPrevious?: () => void
+}
 
 export default function TransactionFormDetails({
   stageNumber = 1,
@@ -38,13 +44,7 @@ export default function TransactionFormDetails({
   onDealCreated,
   onStageTwoCompleted,
   onPrevious,
-}: {
-  stageNumber?: number
-  dealId?: number | null
-  onDealCreated?: (dealId: number, itemId: number | null) => void
-  onStageTwoCompleted?: () => void
-  onPrevious?: () => void
-}) {
+}: TransactionFormDetailsProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const prefillAppliedRef = useRef(false)
@@ -119,11 +119,15 @@ export default function TransactionFormDetails({
     (prop) => prop.display_page === stageNumber && prop.field_type !== "file",
   )
 
-  const visibleStageProperties =
-    stageNumber === 2 ? documentRequirements : stageProperties
   const hasUploadsInProgress = documentUploads.some(
     (upload) => upload.status === "uploading",
   )
+  const isPropertiesSectionLoading =
+    isPropertiesLoading || (stageNumber === 2 && isDocumentRequirementsLoading)
+  const hasVisibleProperties =
+    stageNumber === 2
+      ? documentRequirements.length > 0
+      : stageProperties.length > 0
 
   const handlePropertyChange = (
     propertyName: string,
@@ -401,288 +405,93 @@ export default function TransactionFormDetails({
       </div>
 
       {stageNumber === 1 && (
-        <>
-          <div className={styles.roleSelect}>
-            <div className={styles.roleSelectText}>نقش شما در این معامله</div>
-            {roles.map((data) => (
-              <RadioButton
-                key={data.value}
-                title={data.title}
-                name="user-role"
-                value={data.value}
-                checked={role === data.value}
-                onChange={() => setRole(data.value)}
-              />
-            ))}
-          </div>
-
-          <Dropdown
-            title="دسته بندی معامله"
-            placeholder={
-              isCategoriesLoading
-                ? "در حال بارگذاری..."
-                : "یک دسته بندی انتخاب کنید"
-            }
-            options={categories.map((item) => ({
-              label: item.name,
-              slug: item.id.toString(), // We use ID as slug for Dropdown to manage sub-category fetch
-            }))}
-            initialSlug={selectedCategoryId?.toString()}
-            onChange={(id: string) => {
-              setSelectedCategoryId(Number(id))
-              setSelectedSubCategoryId(null) // Reset sub-category on parent change
-            }}
-          />
-
-          <Dropdown
-            title="نوع دسته بندی"
-            placeholder={
-              !selectedCategoryId
-                ? "ابتدا دسته بندی اصلی را انتخاب کنید"
-                : "زیر دسته بندی انتخاب کنید"
-            }
-            options={subCategoriesList.map((item) => ({
-              label: item.name,
-              slug: item.id.toString(),
-            }))}
-            initialSlug={selectedSubCategoryId?.toString()}
-            onChange={(id: string) => setSelectedSubCategoryId(Number(id))}
-            disabled={!selectedCategoryId}
-          />
-
-          <ListInput
-            valueType="string"
-            placeholder="عنوان کوتاه و مشخص"
-            title="عنوان معامله"
-            value={title}
-            onChange={setTitle}
-            regex={/^[\u0600-\u06FFa-zA-Z\s]+$/}
-          />
-
-          <ListInput
-            textarea
-            placeholder="جهت درج هر نوع توضیحات تکمیلی..."
-            title="توضیحات اضافی"
-            value={description}
-            onChange={setDescription}
-          />
-        </>
+        <TransactionBasicDetails
+          role={role}
+          categories={categories}
+          subCategories={subCategoriesList}
+          selectedCategoryId={selectedCategoryId}
+          selectedSubCategoryId={selectedSubCategoryId}
+          isCategoriesLoading={isCategoriesLoading}
+          title={title}
+          description={description}
+          onRoleChange={setRole}
+          onCategoryChange={(categoryId) => {
+            setSelectedCategoryId(categoryId)
+            setSelectedSubCategoryId(null)
+          }}
+          onSubCategoryChange={setSelectedSubCategoryId}
+          onTitleChange={setTitle}
+          onDescriptionChange={setDescription}
+        />
       )}
 
       {stageNumber === 2 && (
-        <>
-          <ListInput
-            title={
-              role === "beneficiary"
-                ? "شماره موبایل خریدار"
-                : "شماره موبایل فروشنده"
-            }
-            placeholder={
-              role === "beneficiary"
-                ? "شماره موبایل خریدار"
-                : "شماره موبایل فروشنده"
-            }
-            value={counterpartyMobile}
-            onChange={setCounterpartyMobile}
-            valueType="string"
-          />
-        </>
+        <ListInput
+          title={
+            role === "beneficiary"
+              ? "شماره موبایل خریدار"
+              : "شماره موبایل فروشنده"
+          }
+          placeholder={
+            role === "beneficiary"
+              ? "شماره موبایل خریدار"
+              : "شماره موبایل فروشنده"
+          }
+          value={counterpartyMobile}
+          onChange={setCounterpartyMobile}
+          valueType="string"
+        />
       )}
 
       {stageNumber === 3 && (
-        <>
-          {isDealLoading ? (
-            <div className={styles.reviewLoading}>
-              <CircularProgress size={24} />
-            </div>
-          ) : (
-            <div className={styles.reviewContainer}>
-              <DealReview
-                deal={deal}
-                userMobile={authState.user?.mobile_number}
-                role={role}
-                categoryName={selectedCategory?.name}
-                subCategoryName={subCategoryName}
-                title={title}
-                description={description}
-                escrowAmount={escrowAmount}
-                totalTransactionAmount={totalTransactionAmount}
-                paymentMethod={paymentMethod}
-                localDocuments={uploadedDocuments}
-              />
-            </div>
-          )}
-
-          <div className={styles.termsRow}>
-            <Checkbox
-              checked={isTermsAccepted}
-              onChange={(event) => setIsTermsAccepted(event.target.checked)}
-              sx={{
-                color: "#d0d5dd",
-                "&.Mui-checked": { color: "var(--color-secondary)" },
-              }}
-            />
-            <span>
-              من با{" "}
-              <a href="/terms" target="_blank" rel="noreferrer">
-                شرایط استفاده
-              </a>{" "}
-              و{" "}
-              <a href="/escrow-agreement" target="_blank" rel="noreferrer">
-                قرارداد اسکرو
-              </a>{" "}
-              موافقم و تایید می‌کنم که معامله پس از تایید طرف دیگر ادامه خواهد
-              یافت.
-            </span>
-          </div>
-
-          <div className={styles.buttonGroup}>
-            {onPrevious && (
-              <Button
-                variant="outlined"
-                onClick={onPrevious}
-                disabled={isSubmitting}
-              >
-                قبلی
-              </Button>
-            )}
-            <Button
-              className={`${styles.buttonPrimary} ${styles.submitReviewButton}`}
-              variant="contained"
-              onClick={handleContinue}
-              disabled={isSubmitting || isDealLoading || !isTermsAccepted}
-            >
-              {isSubmitting ? (
-                <CircularProgress size={24} color="inherit" />
-              ) : (
-                "ارسال برای تایید خریدار"
-              )}
-            </Button>
-          </div>
-        </>
+        <TransactionReviewStage
+          deal={deal}
+          isDealLoading={isDealLoading}
+          isSubmitting={isSubmitting}
+          isTermsAccepted={isTermsAccepted}
+          userMobile={authState.user?.mobile_number}
+          role={role}
+          categoryName={selectedCategory?.name}
+          subCategoryName={subCategoryName}
+          title={title}
+          description={description}
+          escrowAmount={escrowAmount}
+          totalTransactionAmount={totalTransactionAmount}
+          paymentMethod={paymentMethod}
+          localDocuments={uploadedDocuments}
+          onTermsAcceptedChange={setIsTermsAccepted}
+          onPrevious={onPrevious}
+          onSubmit={handleContinue}
+        />
       )}
 
-      {(isPropertiesLoading ||
-        (stageNumber === 2 && isDocumentRequirementsLoading)) && (
-        <div
-          style={{ display: "flex", justifyContent: "center", padding: "20px" }}
-        >
-          <CircularProgress size={24} />
-        </div>
-      )}
-
-      {!isPropertiesLoading &&
-        !isDocumentRequirementsLoading &&
-        visibleStageProperties.length > 0 && (
-          <div className={styles.propertiesBox}>
-            <div className={styles.propertiesHeader}>
-              <div className={styles.propertiesTitle}>
-                {stageNumber === 2 ? "بارگذاری اسناد" : subCategoryName}
-              </div>
-              {stageNumber === 2 ? (
-                <div className={styles.propertiesDescription}>
-                  فایل‌های مورد نیاز برای بارگذاری را انتخاب کنید
-                </div>
-              ) : (
-                subCategoryDescription && (
-                  <div className={styles.propertiesDescription}>
-                    {subCategoryDescription}
-                  </div>
-                )
-              )}
-            </div>
-
-            <div className={styles.propertiesGrid}>
-              {stageNumber === 2
-                ? documentRequirements.map(renderDocumentRequirement)
-                : stageProperties.map(renderProperty)}
-            </div>
-          </div>
-        )}
+      <TransactionPropertiesSection
+        stageNumber={stageNumber}
+        isLoading={isPropertiesSectionLoading}
+        hasItems={hasVisibleProperties}
+        subCategoryName={subCategoryName}
+        subCategoryDescription={subCategoryDescription}
+      >
+        {stageNumber === 2
+          ? documentRequirements.map(renderDocumentRequirement)
+          : stageProperties.map(renderProperty)}
+      </TransactionPropertiesSection>
 
       {stageNumber !== 3 && !isPropertiesLoading && selectedSubCategoryId && (
         <>
           {stageNumber === 1 && (
-            <div className={styles.financialSection}>
-              <div className={styles.sectionTitle}>جزئیات مالی معامله</div>
-
-              <div className={styles.fieldWrapper}>
-                <ListInput
-                  title="مبلغ واریزی به حساب امانی (ریال)"
-                  placeholder="مبلغ واریزی به حساب امانی"
-                  value={escrowAmount}
-                  onChange={setEscrowAmount}
-                  valueType="number"
-                />
-                <div className={styles.fieldDescription}>
-                  مبلغی که خریدار در ابتدای کار به حساب امانی واریز می‌کند
-                </div>
-              </div>
-
-              <div className={styles.fieldWrapper}>
-                <div className={styles.radioQuestion}>
-                  آیا این مبلغ شامل کل هزینه معامله است؟
-                </div>
-                <div className={styles.radioOptions}>
-                  <RadioButton
-                    title="بله، کل هزینه معامله"
-                    name="is-total-cost"
-                    value="yes"
-                    checked={isTotalCost === "yes"}
-                    onChange={() => setIsTotalCost("yes")}
-                  />
-                  <RadioButton
-                    title="خیر، فقط بخشی از هزینه معامله"
-                    name="is-total-cost"
-                    value="no"
-                    checked={isTotalCost === "no"}
-                    onChange={() => setIsTotalCost("no")}
-                  />
-                </div>
-              </div>
-
-              {isTotalCost === "no" && (
-                <div className={styles.remainingCostBox}>
-                  <div className={styles.fieldWrapper}>
-                    <ListInput
-                      title="مبلغ نهایی کل معامله (ریال)"
-                      placeholder="مجموع کل هزینه معامله"
-                      value={totalTransactionAmount}
-                      onChange={setTotalTransactionAmount}
-                      valueType="number"
-                    />
-                    <div className={styles.fieldDescription}>
-                      مجموع کل هزینه معامله شامل پرداخت اولیه در پلتفرم +
-                      پرداخت‌های خارج از حساب امانی
-                    </div>
-                  </div>
-
-                  <Dropdown
-                    title="شیوه پرداخت باقی‌مانده هزینه"
-                    placeholder="انتخاب کنید"
-                    options={[
-                      { label: "پرداخت نقدی/کارت‌به‌کارت", slug: "Cash" },
-                      {
-                        label: "واریز به حساب امانی در مرحله بعدی",
-                        slug: "Escrow",
-                      },
-                      { label: "ارائه چک صیادی", slug: "Cheque" },
-                      { label: "تهاتر یا معاوضه", slug: "Change" },
-                    ]}
-                    onChange={setPaymentMethod}
-                    initialSlug={paymentMethod}
-                  />
-
-                  <ListInput
-                    textarea
-                    title="توضیحات شیوه پرداخت"
-                    placeholder="مثال: باقی مبلغ هنگام تنظیم سند رسمی در دفترخانه دریافت می‌شود"
-                    value={paymentDescription}
-                    onChange={setPaymentDescription}
-                  />
-                </div>
-              )}
-            </div>
+            <TransactionFinancialDetails
+              escrowAmount={escrowAmount}
+              isTotalCost={isTotalCost}
+              totalTransactionAmount={totalTransactionAmount}
+              paymentMethod={paymentMethod}
+              paymentDescription={paymentDescription}
+              onEscrowAmountChange={setEscrowAmount}
+              onIsTotalCostChange={setIsTotalCost}
+              onTotalTransactionAmountChange={setTotalTransactionAmount}
+              onPaymentMethodChange={setPaymentMethod}
+              onPaymentDescriptionChange={setPaymentDescription}
+            />
           )}
 
           <div className={styles.buttonGroup}>

@@ -129,7 +129,6 @@
   font-weight: 400;
   font-size: 16px;
   color: var(--text-color);
-  // margin-bottom: 8px;
 }
 
 .fieldWrapper {
@@ -357,6 +356,12 @@
   padding: 32px 0;
 }
 
+.loadingState {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
 .reviewContainer {
   display: flex;
   flex-direction: column;
@@ -514,6 +519,14 @@
 
   @media (max-width: 640px) {
     align-items: flex-start;
+  }
+}
+
+.termsCheckbox {
+  color: #d0d5dd !important;
+
+  &:global(.Mui-checked) {
+    color: var(--color-secondary) !important;
   }
 }
 
