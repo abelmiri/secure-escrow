@@ -18,6 +18,7 @@ import {
   parseTransactionPrefillFromSearchParams,
   tomanToRial,
 } from "@/lib/transactionPrefill"
+import { isDocumentRequirementAllowedForRole } from "@/lib/transactionDocumentRequirements"
 import DocumentRequirementField, {
   type DocumentUpload,
 } from "./DocumentRequirementField"
@@ -119,14 +120,23 @@ export default function TransactionFormDetails({
     (prop) => prop.display_page === stageNumber && prop.field_type !== "file",
   )
 
-  const hasUploadsInProgress = documentUploads.some(
+  const applicableDocumentRequirements = documentRequirements.filter(
+    (requirement) => isDocumentRequirementAllowedForRole(requirement, role),
+  )
+  const applicableRequirementIds = new Set(
+    applicableDocumentRequirements.map((requirement) => requirement.id),
+  )
+  const applicableDocumentUploads = documentUploads.filter((upload) =>
+    applicableRequirementIds.has(upload.requirementId),
+  )
+  const hasUploadsInProgress = applicableDocumentUploads.some(
     (upload) => upload.status === "uploading",
   )
   const isPropertiesSectionLoading =
     isPropertiesLoading || (stageNumber === 2 && isDocumentRequirementsLoading)
   const hasVisibleProperties =
     stageNumber === 2
-      ? documentRequirements.length > 0
+      ? applicableDocumentRequirements.length > 0
       : stageProperties.length > 0
 
   const handlePropertyChange = (
@@ -182,7 +192,13 @@ export default function TransactionFormDetails({
     requirement: DocumentRequirement,
     selectedFiles: File[],
   ) => {
-    if (!dealId || selectedFiles.length === 0) return
+    if (
+      !dealId ||
+      selectedFiles.length === 0 ||
+      !isDocumentRequirementAllowedForRole(requirement, role)
+    ) {
+      return
+    }
 
     const maxFiles = requirement.files_max || 3
     const existingCount = documentUploads.filter(
@@ -217,24 +233,27 @@ export default function TransactionFormDetails({
     if (!selectedSubCategoryId || !authState.user) return
 
     if (stageNumber === 2) {
-      const pendingUpload = documentUploads.some(
+      const pendingUpload = applicableDocumentUploads.some(
         (upload) => upload.status === "uploading",
       )
-      const failedUpload = documentUploads.some(
+      const failedUpload = applicableDocumentUploads.some(
         (upload) => upload.status === "failed",
       )
-      const missingRequirement = documentRequirements.find((requirement) => {
-        const isRequired =
-          requirement.is_required ?? requirement.requirement_type !== "optional"
-        const minimumFiles = requirement.files_min || (isRequired ? 1 : 0)
-        const uploadedCount = documentUploads.filter(
-          (upload) =>
-            upload.requirementId === requirement.id &&
-            upload.status === "uploaded",
-        ).length
+      const missingRequirement = applicableDocumentRequirements.find(
+        (requirement) => {
+          const isRequired =
+            requirement.is_required ??
+            requirement.requirement_type !== "optional"
+          const minimumFiles = requirement.files_min || (isRequired ? 1 : 0)
+          const uploadedCount = applicableDocumentUploads.filter(
+            (upload) =>
+              upload.requirementId === requirement.id &&
+              upload.status === "uploaded",
+          ).length
 
-        return uploadedCount < minimumFiles
-      })
+          return uploadedCount < minimumFiles
+        },
+      )
 
       if (pendingUpload) {
         setDocumentValidationMessage(
@@ -414,7 +433,10 @@ export default function TransactionFormDetails({
           isCategoriesLoading={isCategoriesLoading}
           title={title}
           description={description}
-          onRoleChange={setRole}
+          onRoleChange={(nextRole) => {
+            setRole(nextRole)
+            setDocumentValidationMessage("")
+          }}
           onCategoryChange={(categoryId) => {
             setSelectedCategoryId(categoryId)
             setSelectedSubCategoryId(null)
@@ -473,7 +495,7 @@ export default function TransactionFormDetails({
         subCategoryDescription={subCategoryDescription}
       >
         {stageNumber === 2
-          ? documentRequirements.map(renderDocumentRequirement)
+          ? applicableDocumentRequirements.map(renderDocumentRequirement)
           : stageProperties.map(renderProperty)}
       </TransactionPropertiesSection>
 
