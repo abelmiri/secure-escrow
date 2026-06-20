@@ -1,32 +1,15 @@
 "use client"
 
-import React, { useContext, useEffect, useRef, useState } from "react"
+import { useContext, useEffect, useRef, useState } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import RadioButton from "@/components/RadioButton/RadioButton"
 import Dropdown from "@/components/DropDownInput/DropDownInput"
 import ListInput from "@/components/ListInput/ListInput"
-import DatePicker from "@/components/DatePicker/DatePicker"
 import styles from "./styles/TransactionFormDetails.module.scss"
-import {
-  Button,
-  Checkbox,
-  CircularProgress,
-  FormControl,
-  InputLabel,
-  ListItemText,
-  MenuItem,
-  OutlinedInput,
-  Select,
-} from "@mui/material"
-import type { SelectChangeEvent } from "@mui/material/Select"
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined"
-import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined"
-import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined"
+import { Button, Checkbox, CircularProgress } from "@mui/material"
 import { useCategories } from "@/hooks/deals/useCategories"
 import { useSubCategories } from "@/hooks/deals/useSubCategories"
-import type { Property } from "@/hooks/deals/useSubCategories"
 import { useDeal } from "@/hooks/deals/useDeal"
-import type { DealDetail, DealDocument, DealItem } from "@/hooks/deals/useDeal"
 import { useDocumentRequirements } from "@/hooks/documents/useDocumentRequirements"
 import type { DocumentRequirement } from "@/hooks/documents/useDocumentRequirements"
 import { authContext } from "@/context/auth/authProvider"
@@ -38,63 +21,16 @@ import {
   parseTransactionPrefillFromSearchParams,
   tomanToRial,
 } from "@/lib/transactionPrefill"
+import DealReview from "./DealReview"
+import DocumentRequirementField from "./DocumentRequirementField"
+import DynamicPropertyField from "./DynamicPropertyField"
+import type { DocumentUpload, PropertyInputValue } from "./types"
 
 const roles = [
   { title: "خریدار", value: "customer" },
   { title: "فروشنده", value: "beneficiary" },
   { title: "کارگزار (واسط)", value: "broker" },
 ]
-
-type PropertyInputValue =
-  | File[]
-  | string[]
-  | string
-  | number
-  | boolean
-  | Date
-  | null
-  | undefined
-
-const roleLabels: Record<string, string> = {
-  customer: "خریدار",
-  beneficiary: "فروشنده",
-  broker: "کارگزار",
-}
-
-const paymentMethodLabels: Record<string, string> = {
-  cash: "پرداخت نقدی/کارت‌به‌کارت",
-  next_escrow: "واریز به حساب امانی در مرحله بعدی",
-  check: "ارائه چک صیادی",
-  barter: "تهاتر یا معاوضه",
-}
-
-const formatCurrency = (value?: number | string | null) => {
-  const numericValue = Number(value || 0)
-  return `${Number.isFinite(numericValue) ? numericValue.toLocaleString("fa-IR") : "۰"} ریال`
-}
-
-const formatDate = (value?: string) => {
-  if (!value) return ""
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  return new Intl.DateTimeFormat("fa-IR").format(date)
-}
-
-const getItemSubcategory = (item?: DealItem | null) => {
-  if (!item?.subcategory) return ""
-  if (typeof item.subcategory === "string") return item.subcategory
-  return item.subcategory.name || item.subcategory.slug || ""
-}
-
-const getDocumentName = (document: DealDocument) => {
-  return document.title || document.name || "سند معامله"
-}
-
-const getDocumentMeta = (document: DealDocument) => {
-  const size = document.file_size || document.size
-  const date = formatDate(document.uploaded_at || document.created_at)
-  return [size ? `${size}` : "", date].filter(Boolean).join(" • ")
-}
 
 export default function TransactionFormDetails({
   stageNumber = 1,
@@ -135,6 +71,8 @@ export default function TransactionFormDetails({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [counterpartyMobile, setCounterpartyMobile] = useState("")
   const [isTermsAccepted, setIsTermsAccepted] = useState(false)
+  const [documentUploads, setDocumentUploads] = useState<DocumentUpload[]>([])
+  const [documentValidationMessage, setDocumentValidationMessage] = useState("")
 
   const { categories, isLoading: isCategoriesLoading } = useCategories()
   const selectedCategory = categories.find((c) => c.id === selectedCategoryId)
@@ -178,19 +116,14 @@ export default function TransactionFormDetails({
   )
 
   const stageProperties = properties.filter(
-    (prop) => prop.display_page === stageNumber,
+    (prop) => prop.display_page === stageNumber && prop.field_type !== "file",
   )
 
   const visibleStageProperties =
     stageNumber === 2 ? documentRequirements : stageProperties
-
-  const getSelectedFiles = (value: unknown): File[] => {
-    if (Array.isArray(value)) {
-      return value.filter((item): item is File => item instanceof File)
-    }
-    if (value instanceof File) return [value]
-    return []
-  }
+  const hasUploadsInProgress = documentUploads.some(
+    (upload) => upload.status === "uploading",
+  )
 
   const handlePropertyChange = (
     propertyName: string,
@@ -199,25 +132,75 @@ export default function TransactionFormDetails({
     setPropertyValues((prev) => ({ ...prev, [propertyName]: value }))
   }
 
-  const getPropertyOptions = (prop: Property) =>
-    prop.options?.map((opt) => {
-      if (typeof opt === "string") {
-        return { label: opt, value: opt }
-      }
-      return { label: opt.label, value: opt.value }
-    }) || []
-
-  const getStringPropertyValue = (propertyName: string) => {
-    const value = propertyValues[propertyName]
-    return typeof value === "string" ? value : ""
+  const updateDocumentUpload = (
+    uploadId: string,
+    changes: Partial<DocumentUpload>,
+  ) => {
+    setDocumentUploads((current) =>
+      current.map((upload) =>
+        upload.id === uploadId ? { ...upload, ...changes } : upload,
+      ),
+    )
   }
 
-  const getStringArrayPropertyValue = (propertyName: string) => {
-    const value = propertyValues[propertyName]
-    return Array.isArray(value) &&
-      value.every((item) => typeof item === "string")
-      ? value
-      : []
+  const uploadDocument = async (upload: DocumentUpload) => {
+    if (!dealId) {
+      updateDocumentUpload(upload.id, { status: "failed" })
+      return
+    }
+
+    const formData = new FormData()
+    formData.append("deal_id", String(dealId))
+    formData.append("document_requirement_id", String(upload.requirementId))
+    formData.append("file", upload.file)
+
+    updateDocumentUpload(upload.id, {
+      status: "uploading",
+    })
+
+    try {
+      await request.post({
+        url: API_URLS.documentUpload(),
+        data: formData,
+        dontToast: true,
+      })
+      updateDocumentUpload(upload.id, {
+        status: "uploaded",
+      })
+    } catch {
+      updateDocumentUpload(upload.id, {
+        status: "failed",
+      })
+    }
+  }
+
+  const handleDocumentFiles = (
+    requirement: DocumentRequirement,
+    selectedFiles: File[],
+  ) => {
+    if (!dealId || selectedFiles.length === 0) return
+
+    const maxFiles = requirement.files_max || 3
+    const existingCount = documentUploads.filter(
+      (upload) => upload.requirementId === requirement.id,
+    ).length
+    const availableSlots = Math.max(maxFiles - existingCount, 0)
+    const files = selectedFiles.slice(0, availableSlots)
+
+    if (files.length === 0) return
+
+    const uploads = files.map(
+      (file, index): DocumentUpload => ({
+        id: `${requirement.id}-${Date.now()}-${index}-${file.name}`,
+        file,
+        requirementId: requirement.id,
+        status: "uploading",
+      }),
+    )
+
+    setDocumentValidationMessage("")
+    setDocumentUploads((current) => [...current, ...uploads])
+    uploads.forEach((upload) => void uploadDocument(upload))
   }
 
   const handleContinue = async () => {
@@ -228,6 +211,48 @@ export default function TransactionFormDetails({
     }
 
     if (!selectedSubCategoryId || !authState.user) return
+
+    if (stageNumber === 2) {
+      const pendingUpload = documentUploads.some(
+        (upload) => upload.status === "uploading",
+      )
+      const failedUpload = documentUploads.some(
+        (upload) => upload.status === "failed",
+      )
+      const missingRequirement = documentRequirements.find((requirement) => {
+        const isRequired =
+          requirement.is_required ?? requirement.requirement_type !== "optional"
+        const minimumFiles = requirement.files_min || (isRequired ? 1 : 0)
+        const uploadedCount = documentUploads.filter(
+          (upload) =>
+            upload.requirementId === requirement.id &&
+            upload.status === "uploaded",
+        ).length
+
+        return uploadedCount < minimumFiles
+      })
+
+      if (pendingUpload) {
+        setDocumentValidationMessage(
+          "لطفاً تا پایان بارگذاری فایل‌ها صبر کنید.",
+        )
+        return
+      }
+
+      if (failedUpload) {
+        setDocumentValidationMessage(
+          "بارگذاری بعضی فایل‌ها ناموفق بود؛ آن‌ها را دوباره ارسال کنید.",
+        )
+        return
+      }
+
+      if (missingRequirement) {
+        setDocumentValidationMessage(
+          `حداقل تعداد فایل لازم برای «${missingRequirement.title || missingRequirement.name}» را بارگذاری کنید.`,
+        )
+        return
+      }
+    }
 
     setIsSubmitting(true)
 
@@ -323,434 +348,37 @@ export default function TransactionFormDetails({
     }
   }
 
-  const isHalfWidth = (propertyName: string) => {
-    return propertyName === "quantity" || propertyName === "weight"
-  }
-
   const renderDocumentRequirement = (requirement: DocumentRequirement) => {
-    const requirementKey =
-      requirement.document_type_code ||
-      requirement.slug ||
-      String(requirement.id)
-    const requirementName =
-      requirement.title || requirement.name || requirementKey
-    const isRequired =
-      requirement.is_required ?? requirement.requirement_type !== "optional"
-    const maxFiles = requirement.files_max || 3
-    const minFiles = requirement.files_min || 0
-    const selectedFiles = getSelectedFiles(propertyValues[requirementKey])
-    const accept = requirement.file_types?.length
-      ? requirement.file_types
-          .map((type) => `.${type.replace(/^\./, "")}`)
-          .join(",")
-      : undefined
+    const uploads = documentUploads.filter(
+      (upload) => upload.requirementId === requirement.id,
+    )
 
     return (
-      <div key={requirementKey} className={styles.fullWidth}>
-        <div className={styles.radioQuestion}>
-          {requirementName}
-          {isRequired && " *"}
-        </div>
-        {(requirement.description || requirement.requirement_type) && (
-          <div className={styles.fieldDescription}>
-            {requirement.description ||
-              (requirement.requirement_type === "conditional"
-                ? "این سند در شرایط خاص ضروری است"
-                : requirement.requirement_type === "optional"
-                  ? "این سند اختیاری است"
-                  : "این سند الزامی است")}
-          </div>
-        )}
-        <div
-          className={styles.fileUploadCard}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault()
-            const files = Array.from(e.dataTransfer.files).slice(0, maxFiles)
-            handlePropertyChange(requirementKey, files)
-          }}
-        >
-          <input
-            id={`file-upload-${requirementKey}`}
-            type="file"
-            multiple
-            accept={accept}
-            hidden
-            onChange={(e) => {
-              const files = e.target.files
-              handlePropertyChange(
-                requirementKey,
-                files ? Array.from(files).slice(0, maxFiles) : [],
-              )
-            }}
-          />
-          <label
-            htmlFor={`file-upload-${requirementKey}`}
-            className={styles.fileUploadLabel}
-          >
-            <FileUploadOutlinedIcon className={styles.fileUploadIcon} />
-            <div className={styles.fileUploadText}>
-              فایل‌ها را اینجا بکشید یا کلیک کنید
-            </div>
-            <span className={styles.fileUploadButton}>انتخاب فایل</span>
-            <span className={styles.fileUploadHint}>
-              حداقل {minFiles} و حداکثر {maxFiles} فایل
-            </span>
-          </label>
-        </div>
-        {selectedFiles.length > 0 && (
-          <div className={styles.selectedFiles}>
-            {selectedFiles.map((file: File, index: number) => (
-              <div key={index} className={styles.fileName}>
-                {file.name}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <DocumentRequirementField
+        key={requirement.id}
+        requirement={requirement}
+        uploads={uploads}
+        dealId={dealId}
+        onFilesSelected={handleDocumentFiles}
+        onRetry={(upload) => void uploadDocument(upload)}
+      />
     )
   }
 
-  const renderProperty = (prop: Property) => {
-    const selectedFiles = getSelectedFiles(propertyValues[prop.slug])
-    const options = getPropertyOptions(prop)
-
+  const renderProperty = (property: (typeof properties)[number]) => {
     return (
-      <div
-        key={prop.slug}
-        className={isHalfWidth(prop.slug) ? "" : styles.fullWidth}
-      >
-        {prop.field_type === "select" || prop.field_type === "dropdown" ? (
-          <Dropdown
-            title={prop.name}
-            placeholder={`انتخاب ${prop.name}`}
-            options={options.map((opt) => ({
-              label: opt.label,
-              slug: opt.value,
-            }))}
-            onChange={(val) => handlePropertyChange(prop.slug, val)}
-            required={prop.is_required}
-          />
-        ) : prop.field_type === "multiselect" ? (
-          <FormControl fullWidth className={styles.multiSelectField}>
-            <InputLabel id={`${prop.slug}-multiselect-label`}>
-              {prop.name}
-              {prop.is_required ? " *" : ""}
-            </InputLabel>
-            <Select<string[]>
-              labelId={`${prop.slug}-multiselect-label`}
-              multiple
-              value={getStringArrayPropertyValue(prop.slug)}
-              input={<OutlinedInput label={prop.name} />}
-              onChange={(event: SelectChangeEvent<string[]>) => {
-                const value = event.target.value as string[] | string
-                handlePropertyChange(
-                  prop.slug,
-                  typeof value === "string" ? value.split(",") : value,
-                )
-              }}
-              renderValue={(selected) => {
-                const selectedValues = Array.isArray(selected) ? selected : []
-                const selectedLabels = options
-                  .filter((option) => selectedValues.includes(option.value))
-                  .map((option) => option.label)
-
-                return selectedLabels.length
-                  ? selectedLabels.join("، ")
-                  : `انتخاب ${prop.name}`
-              }}
-              MenuProps={{
-                PaperProps: {
-                  sx: {
-                    direction: "rtl",
-                    textAlign: "right",
-                  },
-                },
-              }}
-            >
-              {options.map((option) => {
-                const selectedValues = getStringArrayPropertyValue(prop.slug)
-
-                return (
-                  <MenuItem
-                    key={option.value}
-                    value={option.value}
-                    className={styles.multiSelectOption}
-                  >
-                    <Checkbox checked={selectedValues.includes(option.value)} />
-                    <ListItemText primary={option.label} />
-                  </MenuItem>
-                )
-              })}
-            </Select>
-          </FormControl>
-        ) : prop.field_type === "date" ? (
-          <DatePicker
-            title={prop.name}
-            placeholder={`انتخاب ${prop.name}`}
-            value={getStringPropertyValue(prop.slug)}
-            onChange={(val) => handlePropertyChange(prop.slug, val)}
-            required={prop.is_required}
-          />
-        ) : prop.field_type === "bool" ? (
-          <div>
-            <div className={styles.radioQuestion}>{prop.name}</div>
-            <div className={styles.radioOptions}>
-              <RadioButton
-                title="دارد"
-                name={prop.slug}
-                value="true"
-                checked={propertyValues[prop.slug] === true}
-                onChange={() => handlePropertyChange(prop.slug, true)}
-              />
-              <RadioButton
-                title="ندارد"
-                name={prop.slug}
-                value="false"
-                checked={propertyValues[prop.slug] === false}
-                onChange={() => handlePropertyChange(prop.slug, false)}
-              />
-            </div>
-          </div>
-        ) : prop.field_type === "file" ? (
-          <div>
-            <div className={styles.radioQuestion}>{prop.name}</div>
-            <div
-              className={styles.fileUploadCard}
-              onDragOver={(e) => e.preventDefault()}
-              onDrop={(e) => {
-                e.preventDefault()
-                const files = Array.from(e.dataTransfer.files).slice(0, 3)
-                handlePropertyChange(prop.slug, files)
-              }}
-            >
-              <input
-                id={`file-upload-${prop.slug}`}
-                type="file"
-                multiple
-                hidden
-                onChange={(e) => {
-                  const files = e.target.files
-                  handlePropertyChange(
-                    prop.slug,
-                    files ? Array.from(files).slice(0, 3) : [],
-                  )
-                }}
-              />
-              <label
-                htmlFor={`file-upload-${prop.slug}`}
-                className={styles.fileUploadLabel}
-              >
-                <FileUploadOutlinedIcon className={styles.fileUploadIcon} />
-                <div className={styles.fileUploadText}>
-                  فایل‌ها را اینجا بکشید یا کلیک کنید
-                </div>
-                <span className={styles.fileUploadButton}>انتخاب فایل</span>
-                <span className={styles.fileUploadHint}>حداکثر 3 فایل</span>
-              </label>
-            </div>
-            {selectedFiles.length > 0 && (
-              <div className={styles.selectedFiles}>
-                {selectedFiles.map((file: File, index: number) => (
-                  <div key={index} className={styles.fileName}>
-                    {file.name}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          <ListInput
-            title={prop.name}
-            placeholder={prop.unit ? `${prop.name} (${prop.unit})` : prop.name}
-            value={getStringPropertyValue(prop.slug)}
-            onChange={(val) => handlePropertyChange(prop.slug, val)}
-            valueType={prop.field_type === "integer" ? "number" : "string"}
-            required={prop.is_required}
-            regex={
-              prop.regex_pattern ? new RegExp(prop.regex_pattern) : undefined
-            }
-          />
-        )}
-      </div>
+      <DynamicPropertyField
+        key={property.slug}
+        property={property}
+        value={propertyValues[property.slug]}
+        onChange={(value) => handlePropertyChange(property.slug, value)}
+      />
     )
   }
 
-  const renderReviewRow = (label: string, value?: React.ReactNode) => (
-    <div className={styles.reviewRow}>
-      <div className={styles.reviewLabel}>{label}</div>
-      <div className={styles.reviewValue}>{value || "—"}</div>
-    </div>
-  )
-
-  const renderReviewSection = (
-    title: string,
-    rows: Array<{ label: string; value?: React.ReactNode }>,
-  ) => (
-    <section className={styles.reviewSection}>
-      <h3 className={styles.reviewSectionTitle}>{title}</h3>
-      <div className={styles.reviewRows}>
-        {rows.map((row) => (
-          <React.Fragment key={row.label}>
-            {renderReviewRow(row.label, row.value)}
-          </React.Fragment>
-        ))}
-      </div>
-    </section>
-  )
-
-  const renderDealReview = (dealDetail: DealDetail | null) => {
-    const item = dealDetail?.items?.[0]
-    const currentRole =
-      dealDetail?.parties?.find(
-        (party) => party.user === authState.user?.mobile_number,
-      )?.role || role
-    const counterparty = dealDetail?.parties?.find(
-      (party) => party.role && party.role !== currentRole,
-    )
-    const itemProperties = item?.properties
-      ? Object.entries(item.properties).filter(([, value]) => value !== "")
-      : []
-    const localDocuments = Object.values(propertyValues).flatMap((value) =>
-      getSelectedFiles(value),
-    )
-    const documents = dealDetail?.documents || []
-    const escrowValue = item?.price ?? escrowAmount
-    const totalValue =
-      item?.total_price ?? (totalTransactionAmount || escrowValue)
-    const remainingPayment =
-      item?.remaining_price_payment_method || paymentMethod || ""
-
-    return (
-      <>
-        {renderReviewSection("اطلاعات پایه", [
-          {
-            label: "نقش شما:",
-            value: roleLabels[currentRole] || roleLabels[role] || currentRole,
-          },
-          {
-            label: "دسته‌بندی:",
-            value:
-              getItemSubcategory(item) ||
-              selectedCategory?.name ||
-              subCategoryName,
-          },
-          { label: "عنوان:", value: item?.name || title },
-          { label: "توضیحات:", value: item?.description || description },
-        ])}
-
-        {renderReviewSection(
-          "اطلاعات کالا",
-          [
-            { label: "نوع کالا:", value: getItemSubcategory(item) },
-            { label: "نام کالا:", value: item?.name || title },
-            {
-              label: "وضعیت:",
-              value:
-                itemProperties[0]?.[1] === undefined
-                  ? ""
-                  : String(itemProperties[0][1]),
-            },
-            { label: "تعداد:", value: item?.quantity?.toString() },
-            ...itemProperties.slice(1).map(([key, value]) => ({
-              label: `${key}:`,
-              value:
-                typeof value === "boolean"
-                  ? value
-                    ? "دارد"
-                    : "ندارد"
-                  : `${value}`,
-            })),
-          ].filter((row) => row.value),
-        )}
-
-        {renderReviewSection("جزئیات مالی", [
-          { label: "مبلغ حساب امانی:", value: formatCurrency(escrowValue) },
-          { label: "مبلغ کل معامله:", value: formatCurrency(totalValue) },
-          {
-            label: "شیوه پرداخت باقی‌مانده:",
-            value:
-              paymentMethodLabels[remainingPayment] ||
-              remainingPayment ||
-              (Number(totalValue) > Number(escrowValue) ? "ثبت نشده" : ""),
-          },
-        ])}
-
-        {renderReviewSection("جزئیات ارسال", [
-          { label: "نحوه ارسال:", value: "freight" },
-          { label: "هزینه ارسال:", value: formatCurrency(0) },
-          { label: "پرداخت‌کننده:", value: "" },
-        ])}
-
-        {renderReviewSection("اطلاعات خریدار", [
-          {
-            label: "ایمیل خریدار:",
-            value: counterparty?.email || "",
-          },
-          {
-            label: "نماینده فروشنده:",
-            value: currentRole === "broker" ? "بله" : "خیر",
-          },
-        ])}
-
-        <section className={styles.reviewSection}>
-          <h3 className={styles.reviewSectionTitle}>قرارداد و اسناد معامله</h3>
-          <div className={styles.documentList}>
-            {documents.length > 0 ? (
-              documents.map((document) => (
-                <a
-                  key={document.id || getDocumentName(document)}
-                  href={document.url || document.file || "#"}
-                  className={styles.documentItem}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <DownloadOutlinedIcon className={styles.documentActionIcon} />
-                  <div className={styles.documentInfo}>
-                    <DescriptionOutlinedIcon className={styles.documentIcon} />
-                    <div>
-                      <div className={styles.documentName}>
-                        {getDocumentName(document)}
-                      </div>
-                      <div className={styles.documentMeta}>
-                        {getDocumentMeta(document)}
-                      </div>
-                    </div>
-                  </div>
-                </a>
-              ))
-            ) : localDocuments.length > 0 ? (
-              localDocuments.map((file) => (
-                <div key={file.name} className={styles.documentItem}>
-                  <DownloadOutlinedIcon className={styles.documentActionIcon} />
-                  <div className={styles.documentInfo}>
-                    <DescriptionOutlinedIcon className={styles.documentIcon} />
-                    <div>
-                      <div className={styles.documentName}>{file.name}</div>
-                      <div className={styles.documentMeta}>
-                        {(file.size / 1024).toFixed(0)} KB
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className={styles.emptyReview}>
-                سندی برای نمایش وجود ندارد
-              </div>
-            )}
-          </div>
-        </section>
-
-        <div className={styles.feeNotice}>
-          <div className={styles.feeTitle}>هزینه های حساب امانی و امان‌یار</div>
-          <div>مبلغ حساب امانی: {formatCurrency(escrowValue)}</div>
-          <div>کارمزد امان‌یار (۲.۵٪): {formatCurrency(0)}</div>
-          <strong>مجموعه هزینه های قابل پرداخت: {formatCurrency(0)}</strong>
-        </div>
-      </>
-    )
-  }
+  const uploadedDocuments = documentUploads
+    .filter((upload) => upload.status === "uploaded")
+    .map((upload) => upload.file)
 
   const headerTitle =
     stageNumber === 3
@@ -858,24 +486,6 @@ export default function TransactionFormDetails({
             onChange={setCounterpartyMobile}
             valueType="string"
           />
-
-          {/* <div className={styles.radioQuestion}>آیا نماینده فروشنده هستید؟</div> */}
-          {/* <div className={styles.radioOptions}>
-            <RadioButton
-              title="خیر، خود فروشنده هستم"
-              name="seller-rep"
-              value="no"
-              checked={isSellerRepresentative === "no"}
-              onChange={() => setIsSellerRepresentative("no")}
-            />
-            <RadioButton
-              title="بله، نماینده فروشنده هستم"
-              name="seller-rep"
-              value="yes"
-              checked={isSellerRepresentative === "yes"}
-              onChange={() => setIsSellerRepresentative("yes")}
-            />
-          </div> */}
         </>
       )}
 
@@ -887,7 +497,19 @@ export default function TransactionFormDetails({
             </div>
           ) : (
             <div className={styles.reviewContainer}>
-              {renderDealReview(deal)}
+              <DealReview
+                deal={deal}
+                userMobile={authState.user?.mobile_number}
+                role={role}
+                categoryName={selectedCategory?.name}
+                subCategoryName={subCategoryName}
+                title={title}
+                description={description}
+                escrowAmount={escrowAmount}
+                totalTransactionAmount={totalTransactionAmount}
+                paymentMethod={paymentMethod}
+                localDocuments={uploadedDocuments}
+              />
             </div>
           )}
 
@@ -1039,13 +661,13 @@ export default function TransactionFormDetails({
                     title="شیوه پرداخت باقی‌مانده هزینه"
                     placeholder="انتخاب کنید"
                     options={[
-                      { label: "پرداخت نقدی/کارت‌به‌کارت", slug: "cash" },
+                      { label: "پرداخت نقدی/کارت‌به‌کارت", slug: "Cash" },
                       {
                         label: "واریز به حساب امانی در مرحله بعدی",
-                        slug: "next_escrow",
+                        slug: "Escrow",
                       },
-                      { label: "ارائه چک صیادی", slug: "check" },
-                      { label: "تهاتر یا معاوضه", slug: "barter" },
+                      { label: "ارائه چک صیادی", slug: "Cheque" },
+                      { label: "تهاتر یا معاوضه", slug: "Change" },
                     ]}
                     onChange={setPaymentMethod}
                     initialSlug={paymentMethod}
@@ -1068,7 +690,7 @@ export default function TransactionFormDetails({
               <Button
                 variant="outlined"
                 onClick={onPrevious}
-                disabled={isSubmitting}
+                disabled={isSubmitting || hasUploadsInProgress}
               >
                 قبلی
               </Button>
@@ -1077,7 +699,7 @@ export default function TransactionFormDetails({
               className={styles.buttonPrimary}
               variant="contained"
               onClick={handleContinue}
-              disabled={isSubmitting}
+              disabled={isSubmitting || hasUploadsInProgress}
             >
               {isSubmitting ? (
                 <CircularProgress size={24} color="inherit" />
@@ -1086,6 +708,11 @@ export default function TransactionFormDetails({
               )}
             </Button>
           </div>
+          {stageNumber === 2 && documentValidationMessage && (
+            <div className={styles.uploadValidationMessage}>
+              {documentValidationMessage}
+            </div>
+          )}
         </>
       )}
     </div>
