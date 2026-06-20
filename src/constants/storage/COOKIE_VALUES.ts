@@ -2,6 +2,7 @@ const COOKIE_VALUES = {
   ACCOUNT: {
     token: "token",
     refresh_token: "refresh_token",
+    id_token: "id_token",
     token_expires_in: "token_expires_in",
   },
   DEVICE: { theme: "theme" },

@@ -5,7 +5,6 @@ import LOCAL_STORAGE_VALUES from "@/constants/storage/LOCAL_STORAGE_VALUES"
 import type {
   AuthActionType,
   LoginType,
-  SetUserActionType,
   UpdateUserType,
   UserType,
 } from "@/context/auth/AuthType"
@@ -52,7 +51,7 @@ function updateUser({
     Object.keys(data).forEach((key) => {
       const value = data[key as keyof UpdateUserType]
       if (value !== undefined && value !== null) {
-        formData.append(key, value as any)
+        formData.append(key, value instanceof File ? value : String(value))
       }
     })
 
@@ -96,12 +95,15 @@ function setUser({
 }
 
 function _setCookies({ res }: { res: LoginType }) {
-  const { access_token, refresh_token, token_type, expires_in } = res
+  const { access_token, refresh_token, id_token, token_type, expires_in } = res
   cookieHelper.setItem(
     COOKIE_VALUES.ACCOUNT.token,
     `${token_type} ${access_token}`,
   )
   cookieHelper.setItem(COOKIE_VALUES.ACCOUNT.refresh_token, refresh_token)
+  if (id_token) {
+    cookieHelper.setItem(COOKIE_VALUES.ACCOUNT.id_token, id_token)
+  }
   cookieHelper.setItem(
     COOKIE_VALUES.ACCOUNT.token_expires_in,
     new Date(Date.now() + expires_in * 1000).toString(),
@@ -126,8 +128,12 @@ function refreshToken() {
         _setCookies({ res })
         resolve(null)
       })
-      .catch((err: any) => {
-        const refreshError = err?.status === 400
+      .catch((err: unknown) => {
+        const refreshError =
+          typeof err === "object" &&
+          err !== null &&
+          "status" in err &&
+          err.status === 400
         if (refreshError) {
           reject(err)
         } else {
@@ -178,6 +184,8 @@ function logout() {
   const data = new URLSearchParams()
   data.append("client_id", OAUTH.CLIENT_ID)
   data.append("refresh_token", getToken({ useRefreshToken: true }))
+  data.append("id_token", getToken({ useIdToken: true }))
+
   return request.post({
     url: API_URLS.logout,
     subdomain: "oAuth",
