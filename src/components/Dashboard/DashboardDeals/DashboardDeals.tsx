@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import Link from "next/link"
 import {
   Box,
@@ -21,17 +21,32 @@ import { useDeals } from "@/hooks/deals/useDeals"
 
 export default function DashboardDeals() {
   const [searchTerm, setSearchTerm] = useState("")
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("همه")
-  const [roleFilter, setRoleFilter] = useState("همه")
+  const [roleFilter, setRoleFilter] = useState("")
   const [orderFilter, setOrderFilter] = useState("newest")
   const [page, setPage] = useState(1)
-  const limit = 5
+  const limit = 10
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm)
+      setPage(1)
+    }, 400)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [searchTerm])
 
   const {
     deals: apiDeals,
     isLoading,
     totalCount,
   } = useDeals({
+    search: debouncedSearchTerm,
+    role:
+      roleFilter === ""
+        ? undefined
+        : (roleFilter as "customer" | "beneficiary" | "broker"),
     limit,
     offset: (page - 1) * limit,
   })
@@ -43,7 +58,13 @@ export default function DashboardDeals() {
       deal.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       deal.participant.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === "همه" || deal.status === statusFilter
-    const matchesRole = roleFilter === "همه" || deal.role === roleFilter
+    const roleLabels: Record<string, string> = {
+      customer: "خریدار",
+      beneficiary: "فروشنده",
+      broker: "کارگزار",
+    }
+    const matchesRole =
+      roleFilter === "" || deal.role === roleLabels[roleFilter]
 
     return matchesSearch && matchesStatus && matchesRole
   })
@@ -121,13 +142,16 @@ export default function DashboardDeals() {
           <Typography className={styles.filterLabel}>نقش شما</Typography>
           <Select
             value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
+            onChange={(e) => {
+              setRoleFilter(e.target.value)
+              setPage(1)
+            }}
             className={styles.filterSelect}
           >
-            <MenuItem value="همه">همه</MenuItem>
-            <MenuItem value="خریدار">خریدار</MenuItem>
-            <MenuItem value="فروشنده">فروشنده</MenuItem>
-            <MenuItem value="کارگزار">کارگزار</MenuItem>
+            <MenuItem value="">همه</MenuItem>
+            <MenuItem value="customer">خریدار</MenuItem>
+            <MenuItem value="beneficiary">فروشنده</MenuItem>
+            <MenuItem value="broker">کارگزار</MenuItem>
           </Select>
         </Box>
 

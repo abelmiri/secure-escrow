@@ -9,6 +9,9 @@ import API_URLS from "@/constants/urls/API_URLS"
 import { useCategories } from "@/hooks/deals/useCategories"
 import { useSubCategories } from "@/hooks/deals/useSubCategories"
 import { useDeal } from "@/hooks/deals/useDeal"
+import { useUpdateDeal } from "@/hooks/deals/useUpdateDeal"
+import { useDealContractPdf } from "@/hooks/documents/useDealContractPdf"
+import { useDealDocuments } from "@/hooks/documents/useDealDocuments"
 import { useDocumentRequirements } from "@/hooks/documents/useDocumentRequirements"
 import type { DocumentRequirement } from "@/hooks/documents/useDocumentRequirements"
 import request from "@/request/request"
@@ -76,6 +79,7 @@ export default function TransactionFormDetails({
   const [documentValidationMessage, setDocumentValidationMessage] = useState("")
 
   const { categories, isLoading: isCategoriesLoading } = useCategories()
+  const { updateDeal } = useUpdateDeal()
   const selectedCategory = categories.find((c) => c.id === selectedCategoryId)
   const subCategoriesList = selectedCategory?.sub_categories || []
 
@@ -115,6 +119,10 @@ export default function TransactionFormDetails({
   const { deal, isLoading: isDealLoading } = useDeal(
     stageNumber === 3 ? dealId || null : null,
   )
+  const { contractPdfUrl, isLoading: isContractPdfLoading } =
+    useDealContractPdf(stageNumber === 3 ? dealId || null : null)
+  const { documents: dealDocuments, isLoading: isDealDocumentsLoading } =
+    useDealDocuments(stageNumber === 3 ? dealId || null : null)
 
   const stageProperties = properties.filter(
     (prop) => prop.display_page === stageNumber && prop.field_type !== "file",
@@ -309,7 +317,7 @@ export default function TransactionFormDetails({
     const secondPartyRole = role === "beneficiary" ? "customer" : "beneficiary"
 
     const parties = [primaryParty]
-    if (stageNumber === 2 && secondPartyMobile) {
+    if (secondPartyMobile) {
       parties.push({ user: secondPartyMobile, role: secondPartyRole })
     }
 
@@ -330,35 +338,41 @@ export default function TransactionFormDetails({
           parties,
         }
 
-        const response = await request.post({
-          url: API_URLS.deals,
-          data: payload,
-          successMessage: "معامله با موفقیت ثبت شد",
-          failMessage: "خطا در ثبت معامله",
-        })
+        if (dealId) {
+          await updateDeal(dealId, payload, {
+            successMessage: "اطلاعات معامله با موفقیت به‌روزرسانی شد",
+            failMessage: "خطا در به‌روزرسانی معامله",
+          })
+          onDealCreated?.(dealId, null)
+        } else {
+          const response = await request.post({
+            url: API_URLS.deals,
+            data: payload,
+            successMessage: "معامله با موفقیت ثبت شد",
+            failMessage: "خطا در ثبت معامله",
+          })
 
-        const responseData =
-          typeof response === "object" && response !== null ? response : null
-        const createdDealId =
-          responseData && "id" in responseData
-            ? ((responseData as { id?: number }).id ?? null)
-            : null
-        const createdItemId =
-          responseData && "items" in responseData
-            ? ((responseData as { items?: Array<{ id?: number }> }).items?.[0]
-                ?.id ?? null)
-            : null
-        if (createdDealId && onDealCreated) {
-          onDealCreated(createdDealId, createdItemId)
+          const responseData =
+            typeof response === "object" && response !== null ? response : null
+          const createdDealId =
+            responseData && "id" in responseData
+              ? ((responseData as { id?: number }).id ?? null)
+              : null
+          const createdItemId =
+            responseData && "items" in responseData
+              ? ((responseData as { items?: Array<{ id?: number }> }).items?.[0]
+                  ?.id ?? null)
+              : null
+          if (createdDealId && onDealCreated) {
+            onDealCreated(createdDealId, createdItemId)
+          }
         }
       } else if (stageNumber === 2 && dealId) {
-        const patchPayload: Record<string, unknown> = {
+        const patchPayload = {
           parties,
         }
 
-        await request.patch({
-          url: API_URLS.deal({ id: dealId }),
-          data: patchPayload,
+        await updateDeal(dealId, patchPayload, {
           successMessage: "اطلاعات با موفقیت به‌روزرسانی شد",
           failMessage: "خطا در به‌روزرسانی اطلاعات",
         })
@@ -468,7 +482,11 @@ export default function TransactionFormDetails({
       {stageNumber === 3 && (
         <TransactionReviewStage
           deal={deal}
+          contractPdfUrl={contractPdfUrl}
+          documents={dealDocuments}
           isDealLoading={isDealLoading}
+          isContractPdfLoading={isContractPdfLoading}
+          isDocumentsLoading={isDealDocumentsLoading}
           isSubmitting={isSubmitting}
           isTermsAccepted={isTermsAccepted}
           userMobile={authState.user?.mobile_number}

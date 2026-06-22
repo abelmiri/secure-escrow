@@ -1,11 +1,16 @@
 import { Button, Checkbox, CircularProgress } from "@mui/material"
 import type { DealDetail } from "@/hooks/deals/useDeal"
+import type { UploadedDealDocument } from "@/hooks/documents/useDealDocuments"
 import DealReview from "./DealReview"
 import styles from "./styles/TransactionFormDetails.module.scss"
 
 interface TransactionReviewStageProps {
   deal: DealDetail | null
+  contractPdfUrl: string
+  documents: UploadedDealDocument[]
   isDealLoading: boolean
+  isContractPdfLoading: boolean
+  isDocumentsLoading: boolean
   isSubmitting: boolean
   isTermsAccepted: boolean
   userMobile?: string
@@ -25,7 +30,11 @@ interface TransactionReviewStageProps {
 
 export default function TransactionReviewStage({
   deal,
+  contractPdfUrl,
+  documents,
   isDealLoading,
+  isContractPdfLoading,
+  isDocumentsLoading,
   isSubmitting,
   isTermsAccepted,
   userMobile,
@@ -42,9 +51,12 @@ export default function TransactionReviewStage({
   onPrevious,
   onSubmit,
 }: TransactionReviewStageProps) {
+  const isReviewLoading =
+    isDealLoading || isContractPdfLoading || isDocumentsLoading
+
   return (
     <>
-      {isDealLoading ? (
+      {isReviewLoading ? (
         <div className={styles.reviewLoading}>
           <CircularProgress size={24} />
         </div>
@@ -52,6 +64,8 @@ export default function TransactionReviewStage({
         <div className={styles.reviewContainer}>
           <DealReview
             deal={deal}
+            contractPdfUrl={contractPdfUrl}
+            documents={documents}
             userMobile={userMobile}
             role={role}
             categoryName={categoryName}
@@ -99,7 +113,7 @@ export default function TransactionReviewStage({
           className={`${styles.buttonPrimary} ${styles.submitReviewButton}`}
           variant="contained"
           onClick={onSubmit}
-          disabled={isSubmitting || isDealLoading || !isTermsAccepted}
+          disabled={isSubmitting || isReviewLoading || !isTermsAccepted}
         >
           {isSubmitting ? (
             <CircularProgress size={24} color="inherit" />

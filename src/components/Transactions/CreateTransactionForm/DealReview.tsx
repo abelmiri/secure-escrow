@@ -1,7 +1,8 @@
 import type { ReactNode } from "react"
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined"
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined"
-import type { DealDetail, DealDocument, DealItem } from "@/hooks/deals/useDeal"
+import type { DealDetail, DealItem } from "@/hooks/deals/useDeal"
+import type { UploadedDealDocument } from "@/hooks/documents/useDealDocuments"
 import styles from "./styles/TransactionFormDetails.module.scss"
 
 const roleLabels: Record<string, string> = {
@@ -28,12 +29,19 @@ const getItemSubcategory = (item?: DealItem | null) => {
   return item.subcategory.name || item.subcategory.slug || ""
 }
 
-const getDocumentName = (document: DealDocument) =>
-  document.title || document.name || "سند معامله"
+const getDocumentName = (document: UploadedDealDocument) =>
+  document.document_name || document.file_name || "سند معامله"
 
-const getDocumentMeta = (document: DealDocument) => {
-  const size = document.file_size || document.size
-  const rawDate = document.uploaded_at || document.created_at
+const formatFileSize = (size: number) => {
+  if (!size) return ""
+  if (size < 1024) return `${size} B`
+  if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`
+}
+
+const getDocumentMeta = (document: UploadedDealDocument) => {
+  const size = formatFileSize(document.file_size)
+  const rawDate = document.created_at
   const parsedDate = rawDate ? new Date(rawDate) : null
   const date =
     rawDate && parsedDate && !Number.isNaN(parsedDate.getTime())
@@ -55,6 +63,8 @@ interface ReviewSectionProps {
 
 interface DealReviewProps {
   deal: DealDetail | null
+  contractPdfUrl: string
+  documents: UploadedDealDocument[]
   userMobile?: string
   role: string
   categoryName?: string
@@ -85,6 +95,8 @@ function ReviewSection({ title, rows }: ReviewSectionProps) {
 
 export default function DealReview({
   deal,
+  contractPdfUrl,
+  documents,
   userMobile,
   role,
   categoryName,
@@ -105,7 +117,6 @@ export default function DealReview({
   const itemProperties = item?.properties
     ? Object.entries(item.properties).filter(([, value]) => value !== "")
     : []
-  const documents = deal?.documents || []
   const escrowValue = item?.price ?? escrowAmount
   const totalValue =
     item?.total_price ?? (totalTransactionAmount || escrowValue)
@@ -199,11 +210,29 @@ export default function DealReview({
       <section className={styles.reviewSection}>
         <h3 className={styles.reviewSectionTitle}>قرارداد و اسناد معامله</h3>
         <div className={styles.documentList}>
+          {contractPdfUrl && (
+            <a
+              href={contractPdfUrl}
+              className={styles.documentItem}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <DownloadOutlinedIcon className={styles.documentActionIcon} />
+              <div className={styles.documentInfo}>
+                <DescriptionOutlinedIcon className={styles.documentIcon} />
+                <div>
+                  <div className={styles.documentName}>قرارداد معامله</div>
+                  <div className={styles.documentMeta}>PDF</div>
+                </div>
+              </div>
+            </a>
+          )}
+
           {documents.length > 0 ? (
             documents.map((document) => (
               <a
                 key={document.id || getDocumentName(document)}
-                href={document.url || document.file || "#"}
+                href={document.download_url || "#"}
                 className={styles.documentItem}
                 target="_blank"
                 rel="noreferrer"
@@ -237,9 +266,9 @@ export default function DealReview({
                 </div>
               </div>
             ))
-          ) : (
+          ) : !contractPdfUrl ? (
             <div className={styles.emptyReview}>سندی برای نمایش وجود ندارد</div>
-          )}
+          ) : null}
         </div>
       </section>
 

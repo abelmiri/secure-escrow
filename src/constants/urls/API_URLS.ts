@@ -21,11 +21,11 @@ const API_URLS = {
   profile: "v1/auth/profile",
   deals: "v1/deals/u",
   deal: ({ id }: { id: number }) => `v1/deals/u/${id}`,
+  dealContractPdf: ({ id }: { id: number }) => `v1/deals/u/${id}/contract-pdf`,
+  dealDocuments: ({ id }: { id: number }) => `v1/documents/deals/${id}/documents`,
   categories: "v1/deals/categories",
   subCategories: ({ id }: { id: number }) =>
     `v1/deals/categories/sub-category/${id}`,
-  dealDocumens: ({ id }: { id: number }) =>
-    `v1/documents/deals/${id}/documents`,
   documentRequirements: ({ id }: { id: number }) =>
     `v1/documents/sub-category/${id}/document-requirements`,
   documentUpload: () => `v1/documents/upload`,

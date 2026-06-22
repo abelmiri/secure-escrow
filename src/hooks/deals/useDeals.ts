@@ -42,6 +42,8 @@ interface DealsResponse {
 }
 
 interface UseDealsProps {
+  search?: string
+  role?: "customer" | "beneficiary" | "broker"
   limit?: number
   offset?: number
 }
@@ -55,7 +57,12 @@ const resolveDealAmount = (deal: DealResult) => {
   return deal.items?.reduce((sum, item) => sum + Number(item.price || 0), 0) || 0
 }
 
-export function useDeals({ limit = 10, offset = 0 }: UseDealsProps = {}) {
+export function useDeals({
+  search = "",
+  role,
+  limit = 10,
+  offset = 0,
+}: UseDealsProps = {}) {
   const [deals, setDeals] = useState<Deal[]>([])
   const [totalCount, setTotalCount] = useState(0)
   const [isLoading, setIsLoading] = useState(false)
@@ -67,6 +74,8 @@ export function useDeals({ limit = 10, offset = 0 }: UseDealsProps = {}) {
       .get({
         url: API_URLS.deals,
         params: {
+          ...(search.trim() ? { search: search.trim() } : {}),
+          ...(role ? { role } : {}),
           limit,
           offset,
         },
@@ -91,7 +100,7 @@ export function useDeals({ limit = 10, offset = 0 }: UseDealsProps = {}) {
       .finally(() => {
         setIsLoading(false)
       })
-  }, [limit, offset])
+  }, [search, role, limit, offset])
 
   return {
     deals,
