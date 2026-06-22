@@ -11,6 +11,10 @@ import Dropdown from "@/components/DropDownInput/DropDownInput"
 import ListInput from "@/components/ListInput/ListInput"
 import RadioButton from "@/components/RadioButton/RadioButton"
 import type { Property } from "@/hooks/deals/useSubCategories"
+import {
+  getTransactionPropertyWidth,
+  type PropertyFieldWidth,
+} from "@/lib/transactionPropertyLayout"
 import styles from "./styles/TransactionFormDetails.module.scss"
 
 export type PropertyInputValue =
@@ -24,12 +28,21 @@ export type PropertyInputValue =
 
 interface DynamicPropertyFieldProps {
   property: Property
+  subCategorySlug?: string
   value: PropertyInputValue
   onChange: (value: PropertyInputValue) => void
 }
 
+const widthClassNames: Record<PropertyFieldWidth, string> = {
+  full: styles.fieldFull,
+  half: styles.fieldHalf,
+  third: styles.fieldThird,
+  twoThird: styles.fieldTwoThird,
+}
+
 export default function DynamicPropertyField({
   property,
+  subCategorySlug,
   value,
   onChange,
 }: DynamicPropertyFieldProps) {
@@ -44,10 +57,14 @@ export default function DynamicPropertyField({
     Array.isArray(value) && value.every((item) => typeof item === "string")
       ? value
       : []
-  const isHalfWidth = property.slug === "quantity" || property.slug === "weight"
+  const propertyName = property.property_name || property.slug
+  const fieldWidth = getTransactionPropertyWidth(
+    subCategorySlug,
+    propertyName,
+  )
 
   return (
-    <div className={isHalfWidth ? "" : styles.fullWidth}>
+    <div className={widthClassNames[fieldWidth]}>
       {property.field_type === "select" ||
       property.field_type === "dropdown" ? (
         <Dropdown

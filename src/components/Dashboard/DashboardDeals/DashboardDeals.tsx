@@ -18,12 +18,15 @@ import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined"
 import styles from "./styles/DashboardDeals.module.scss"
 import { dealsData } from "@/constants/deals"
 import { useDeals } from "@/hooks/deals/useDeals"
+import type { DealRole } from "@/hooks/deals/useDeals"
+
+type RoleFilter = DealRole | ""
 
 export default function DashboardDeals() {
   const [searchTerm, setSearchTerm] = useState("")
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("همه")
-  const [roleFilter, setRoleFilter] = useState("")
+  const [roleFilter, setRoleFilter] = useState<RoleFilter>("")
   const [orderFilter, setOrderFilter] = useState("newest")
   const [page, setPage] = useState(1)
   const limit = 10
@@ -43,10 +46,7 @@ export default function DashboardDeals() {
     totalCount,
   } = useDeals({
     search: debouncedSearchTerm,
-    role:
-      roleFilter === ""
-        ? undefined
-        : (roleFilter as "customer" | "beneficiary" | "broker"),
+    role: roleFilter || undefined,
     limit,
     offset: (page - 1) * limit,
   })
@@ -143,7 +143,7 @@ export default function DashboardDeals() {
           <Select
             value={roleFilter}
             onChange={(e) => {
-              setRoleFilter(e.target.value)
+              setRoleFilter(e.target.value as RoleFilter)
               setPage(1)
             }}
             className={styles.filterSelect}

@@ -1,6 +1,9 @@
-import { useEffect, useState } from "react"
+import { useMemo } from "react"
+import useSWR from "swr"
 import request from "@/request/request"
 import API_URLS from "@/constants/urls/API_URLS"
+
+export type DealRole = "customer" | "beneficiary" | "broker"
 
 export interface Deal {
   id: number
@@ -17,7 +20,7 @@ interface DealItem {
   images_count: number
   name: string
   price: number
-  properties: Record<string, any>
+  properties: Record<string, unknown>
   quantity: number
   slug: string
 }
@@ -43,7 +46,7 @@ interface DealsResponse {
 
 interface UseDealsProps {
   search?: string
-  role?: "customer" | "beneficiary" | "broker"
+  role?: DealRole
   limit?: number
   offset?: number
 }
@@ -63,48 +66,43 @@ export function useDeals({
   limit = 10,
   offset = 0,
 }: UseDealsProps = {}) {
-  const [deals, setDeals] = useState<Deal[]>([])
-  const [totalCount, setTotalCount] = useState(0)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<any>(null)
-
-  useEffect(() => {
-    setIsLoading(true)
-    request
-      .get({
-        url: API_URLS.deals,
+  const normalizedSearch = search.trim()
+  const { data, error, isLoading } = useSWR<DealsResponse>(
+    [API_URLS.deals, normalizedSearch, role || "", limit, offset],
+    ([url, searchValue, roleValue, pageLimit, pageOffset]: [
+      string,
+      string,
+      string,
+      number,
+      number,
+    ]) =>
+      request.get({
+        url,
         params: {
-          ...(search.trim() ? { search: search.trim() } : {}),
-          ...(role ? { role } : {}),
-          limit,
-          offset,
+          ...(searchValue ? { search: searchValue } : {}),
+          ...(roleValue ? { role: roleValue } : {}),
+          limit: pageLimit,
+          offset: pageOffset,
         },
-      })
-      .then((data: DealsResponse) => {
-        const mappedDeals = data.results.map((deal) => ({
+      }),
+  )
+
+  const deals = useMemo(
+    () =>
+      (data?.results || []).map((deal) => ({
           id: deal.id,
           title: resolveDealTitle(deal),
           status: deal.state?.toString() || "نامشخص",
           amount: resolveDealAmount(deal),
           created_at:
             deal.created_at || deal.updated_at || new Date().toISOString(),
-        }))
-
-        setDeals(mappedDeals)
-        setTotalCount(data.count || mappedDeals.length)
-        setError(null)
-      })
-      .catch((err) => {
-        setError(err)
-      })
-      .finally(() => {
-        setIsLoading(false)
-      })
-  }, [search, role, limit, offset])
+        })),
+    [data],
+  )
 
   return {
     deals,
-    totalCount,
+    totalCount: data?.count || deals.length,
     isLoading,
     error,
   }

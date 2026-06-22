@@ -104,16 +104,49 @@
 
 .propertiesGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 20px 24px;
 
-  @media (max-width: 600px) {
-    grid-template-columns: 1fr;
+  @media (max-width: 640px) {
+    gap: 16px;
   }
 }
 
+.fieldFull,
 .fullWidth {
-  grid-column: 1 / -1;
+  grid-column: span 12;
+  min-width: 0;
+}
+
+.fieldHalf {
+  grid-column: span 6;
+  min-width: 0;
+}
+
+.fieldThird {
+  grid-column: span 4;
+  min-width: 0;
+}
+
+.fieldTwoThird {
+  grid-column: span 8;
+  min-width: 0;
+}
+
+@media (max-width: 1024px) {
+  .fieldThird {
+    grid-column: span 6;
+  }
+}
+
+@media (max-width: 640px) {
+  .fieldFull,
+  .fullWidth,
+  .fieldHalf,
+  .fieldThird,
+  .fieldTwoThird {
+    grid-column: span 12;
+  }
 }
 
 .financialSection {

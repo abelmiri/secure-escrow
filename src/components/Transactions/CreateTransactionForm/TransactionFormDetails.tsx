@@ -37,6 +37,7 @@ import styles from "./styles/TransactionFormDetails.module.scss"
 interface TransactionFormDetailsProps {
   stageNumber?: number
   dealId?: number | null
+  dealItemId?: number | null
   onDealCreated?: (dealId: number, itemId: number | null) => void
   onStageTwoCompleted?: () => void
   onPrevious?: () => void
@@ -45,6 +46,7 @@ interface TransactionFormDetailsProps {
 export default function TransactionFormDetails({
   stageNumber = 1,
   dealId,
+  dealItemId,
   onDealCreated,
   onStageTwoCompleted,
   onPrevious,
@@ -82,6 +84,9 @@ export default function TransactionFormDetails({
   const { updateDeal } = useUpdateDeal()
   const selectedCategory = categories.find((c) => c.id === selectedCategoryId)
   const subCategoriesList = selectedCategory?.sub_categories || []
+  const selectedSubCategory = subCategoriesList.find(
+    (subCategory) => subCategory.id === selectedSubCategoryId,
+  )
 
   useEffect(() => {
     if (prefillAppliedRef.current) return
@@ -119,7 +124,7 @@ export default function TransactionFormDetails({
   const { deal, isLoading: isDealLoading } = useDeal(
     stageNumber === 3 ? dealId || null : null,
   )
-  const { contractPdfUrl, isLoading: isContractPdfLoading } =
+  const { contractDocument, isLoading: isContractPdfLoading } =
     useDealContractPdf(stageNumber === 3 ? dealId || null : null)
   const { documents: dealDocuments, isLoading: isDealDocumentsLoading } =
     useDealDocuments(stageNumber === 3 ? dealId || null : null)
@@ -287,10 +292,6 @@ export default function TransactionFormDetails({
 
     setIsSubmitting(true)
 
-    const selectedSubCategory = subCategoriesList.find(
-      (sc) => sc.id === selectedSubCategoryId,
-    )
-
     const propertiesData: Record<string, unknown> = {}
     properties
       .filter((prop) => prop.field_type !== "file")
@@ -326,6 +327,7 @@ export default function TransactionFormDetails({
         const payload = {
           items: [
             {
+              ...(dealId && dealItemId ? { id: dealItemId } : {}),
               subcategory: selectedSubCategory?.slug || "",
               name: title,
               description,
@@ -407,6 +409,7 @@ export default function TransactionFormDetails({
       <DynamicPropertyField
         key={property.slug}
         property={property}
+        subCategorySlug={selectedSubCategory?.slug}
         value={propertyValues[property.slug]}
         onChange={(value) => handlePropertyChange(property.slug, value)}
       />
@@ -482,7 +485,7 @@ export default function TransactionFormDetails({
       {stageNumber === 3 && (
         <TransactionReviewStage
           deal={deal}
-          contractPdfUrl={contractPdfUrl}
+          contractDocument={contractDocument}
           documents={dealDocuments}
           isDealLoading={isDealLoading}
           isContractPdfLoading={isContractPdfLoading}

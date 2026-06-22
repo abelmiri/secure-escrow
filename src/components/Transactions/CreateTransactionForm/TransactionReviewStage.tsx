@@ -6,7 +6,7 @@ import styles from "./styles/TransactionFormDetails.module.scss"
 
 interface TransactionReviewStageProps {
   deal: DealDetail | null
-  contractPdfUrl: string
+  contractDocument: UploadedDealDocument | null
   documents: UploadedDealDocument[]
   isDealLoading: boolean
   isContractPdfLoading: boolean
@@ -30,7 +30,7 @@ interface TransactionReviewStageProps {
 
 export default function TransactionReviewStage({
   deal,
-  contractPdfUrl,
+  contractDocument,
   documents,
   isDealLoading,
   isContractPdfLoading,
@@ -64,7 +64,7 @@ export default function TransactionReviewStage({
         <div className={styles.reviewContainer}>
           <DealReview
             deal={deal}
-            contractPdfUrl={contractPdfUrl}
+            contractDocument={contractDocument}
             documents={documents}
             userMobile={userMobile}
             role={role}

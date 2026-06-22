@@ -30,8 +30,28 @@ export interface UploadedDealDocument {
   updated_at: string
 }
 
+export function normalizeDealDocument(
+  data: unknown,
+): UploadedDealDocument | null {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return null
+
+  const document = data as Partial<UploadedDealDocument>
+  if (
+    typeof document.id !== "string" ||
+    typeof document.download_url !== "string"
+  ) {
+    return null
+  }
+
+  return document as UploadedDealDocument
+}
+
 function normalizeDealDocuments(data: unknown): UploadedDealDocument[] {
-  if (Array.isArray(data)) return data as UploadedDealDocument[]
+  if (Array.isArray(data)) {
+    return data
+      .map(normalizeDealDocument)
+      .filter((document): document is UploadedDealDocument => !!document)
+  }
   if (!data || typeof data !== "object") return []
 
   const response = data as Record<string, unknown>
@@ -43,7 +63,11 @@ function normalizeDealDocuments(data: unknown): UploadedDealDocument[] {
   ]
   const collection = possibleCollections.find(Array.isArray)
 
-  return Array.isArray(collection) ? (collection as UploadedDealDocument[]) : []
+  return Array.isArray(collection)
+    ? collection
+        .map(normalizeDealDocument)
+        .filter((document): document is UploadedDealDocument => !!document)
+    : []
 }
 
 export function useDealDocuments(dealId: number | null) {

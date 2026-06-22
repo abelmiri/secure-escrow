@@ -21,9 +21,13 @@ export default function CreateTransactionForm({
   const [createdDealId, setCreatedDealId] = useState<number | null>(
     initialDealId,
   )
+  const [createdItemId, setCreatedItemId] = useState<number | null>(null)
 
-  const handleDealCreated = (dealId: number) => {
+  const handleDealCreated = (dealId: number, itemId: number | null) => {
     setCreatedDealId(dealId)
+    if (itemId !== null) {
+      setCreatedItemId(itemId)
+    }
     setStage(2)
   }
 
@@ -52,6 +56,7 @@ export default function CreateTransactionForm({
         <TransactionFormDetails
           stageNumber={stage}
           dealId={createdDealId}
+          dealItemId={createdItemId}
           onDealCreated={handleDealCreated}
           onStageTwoCompleted={handleStageTwoCompleted}
           onPrevious={handlePrevious}

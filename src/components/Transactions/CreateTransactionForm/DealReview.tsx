@@ -41,6 +41,7 @@ const formatFileSize = (size: number) => {
 
 const getDocumentMeta = (document: UploadedDealDocument) => {
   const size = formatFileSize(document.file_size)
+  const fileType = document.file_type?.toUpperCase()
   const rawDate = document.created_at
   const parsedDate = rawDate ? new Date(rawDate) : null
   const date =
@@ -48,7 +49,9 @@ const getDocumentMeta = (document: UploadedDealDocument) => {
       ? new Intl.DateTimeFormat("fa-IR").format(parsedDate)
       : rawDate || ""
 
-  return [size ? `${size}` : "", date].filter(Boolean).join(" • ")
+  return [fileType, size, date, document.uploader]
+    .filter(Boolean)
+    .join(" • ")
 }
 
 interface ReviewRow {
@@ -63,7 +66,7 @@ interface ReviewSectionProps {
 
 interface DealReviewProps {
   deal: DealDetail | null
-  contractPdfUrl: string
+  contractDocument: UploadedDealDocument | null
   documents: UploadedDealDocument[]
   userMobile?: string
   role: string
@@ -95,7 +98,7 @@ function ReviewSection({ title, rows }: ReviewSectionProps) {
 
 export default function DealReview({
   deal,
-  contractPdfUrl,
+  contractDocument,
   documents,
   userMobile,
   role,
@@ -210,9 +213,9 @@ export default function DealReview({
       <section className={styles.reviewSection}>
         <h3 className={styles.reviewSectionTitle}>قرارداد و اسناد معامله</h3>
         <div className={styles.documentList}>
-          {contractPdfUrl && (
+          {contractDocument && (
             <a
-              href={contractPdfUrl}
+              href={contractDocument.download_url}
               className={styles.documentItem}
               target="_blank"
               rel="noreferrer"
@@ -221,8 +224,12 @@ export default function DealReview({
               <div className={styles.documentInfo}>
                 <DescriptionOutlinedIcon className={styles.documentIcon} />
                 <div>
-                  <div className={styles.documentName}>قرارداد معامله</div>
-                  <div className={styles.documentMeta}>PDF</div>
+                  <div className={styles.documentName}>
+                    {getDocumentName(contractDocument)}
+                  </div>
+                  <div className={styles.documentMeta}>
+                    {getDocumentMeta(contractDocument)}
+                  </div>
                 </div>
               </div>
             </a>
@@ -266,7 +273,7 @@ export default function DealReview({
                 </div>
               </div>
             ))
-          ) : !contractPdfUrl ? (
+          ) : !contractDocument ? (
             <div className={styles.emptyReview}>سندی برای نمایش وجود ندارد</div>
           ) : null}
         </div>

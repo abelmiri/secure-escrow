@@ -3,6 +3,10 @@ import useSWR from "swr"
 import API_URLS from "@/constants/urls/API_URLS"
 import headerMaker from "@/request/headerMaker"
 import urlMaker from "@/request/urlMaker"
+import {
+  normalizeDealDocument,
+  type UploadedDealDocument,
+} from "./useDealDocuments"
 
 type ContractPdfResponse = Blob | string | Record<string, unknown>
 
@@ -27,6 +31,17 @@ function getContractUrl(data: Record<string, unknown>) {
   return possibleUrls.find(
     (value): value is string => typeof value === "string" && value.length > 0,
   )
+}
+
+function getContractDocument(
+  data: ContractPdfResponse | undefined,
+): UploadedDealDocument | null {
+  if (!data || typeof data !== "object" || data instanceof Blob) return null
+
+  const directDocument = normalizeDealDocument(data)
+  if (directDocument) return directDocument
+
+  return normalizeDealDocument(data.data)
 }
 
 async function fetchContractPdf(url: string): Promise<ContractPdfResponse> {
@@ -73,9 +88,12 @@ export function useDealContractPdf(dealId: number | null) {
       : data && !(data instanceof Blob)
         ? getContractUrl(data)
         : ""
+  const contractDocument = getContractDocument(data)
 
   return {
-    contractPdfUrl: blobUrl || responseUrl || "",
+    contractDocument,
+    contractPdfUrl:
+      contractDocument?.download_url || blobUrl || responseUrl || "",
     isLoading,
     error,
   }
