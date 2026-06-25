@@ -13,6 +13,7 @@ interface TransactionBasicDetailsProps {
   isCategoriesLoading: boolean
   title: string
   description: string
+  fieldErrors?: string[]
   onRoleChange: (role: string) => void
   onCategoryChange: (categoryId: number) => void
   onSubCategoryChange: (subCategoryId: number) => void
@@ -35,6 +36,7 @@ export default function TransactionBasicDetails({
   isCategoriesLoading,
   title,
   description,
+  fieldErrors = [],
   onRoleChange,
   onCategoryChange,
   onSubCategoryChange,
@@ -70,6 +72,8 @@ export default function TransactionBasicDetails({
         }))}
         initialSlug={selectedCategoryId?.toString()}
         onChange={(id) => onCategoryChange(Number(id))}
+        required
+        error={fieldErrors.includes("category")}
       />
 
       <Dropdown
@@ -86,6 +90,8 @@ export default function TransactionBasicDetails({
         initialSlug={selectedSubCategoryId?.toString()}
         onChange={(id) => onSubCategoryChange(Number(id))}
         disabled={!selectedCategoryId}
+        required
+        error={fieldErrors.includes("subcategory")}
       />
 
       <ListInput
@@ -95,6 +101,8 @@ export default function TransactionBasicDetails({
         value={title}
         onChange={onTitleChange}
         regex={/^[\u0600-\u06FFa-zA-Z\s]+$/}
+        required
+        error={fieldErrors.includes("title")}
       />
 
       <ListInput

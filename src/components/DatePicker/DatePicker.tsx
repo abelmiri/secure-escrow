@@ -15,6 +15,7 @@ interface DatePickerProps {
   value: string
   onChange: (value: string) => void
   required?: boolean
+  error?: boolean
 }
 
 export default function DatePicker({
@@ -23,6 +24,7 @@ export default function DatePicker({
   value,
   onChange,
   required,
+  error = false,
 }: DatePickerProps) {
   // Convert incoming Gregorian date (YYYY-MM-DD) to Persian for display
   const pickerValue = useMemo(() => {
@@ -44,14 +46,14 @@ export default function DatePicker({
     }
   }, [value])
 
-  const handleChange = (date: any) => {
+  const handleChange = (date: DateObject | null) => {
     if (!date) {
       onChange("")
       return
     }
 
     try {
-      const dateObj = date instanceof DateObject ? date : new DateObject(date)
+      const dateObj = new DateObject(date)
       dateObj.convert(gregorian, gregorian_en)
       const dateStr = dateObj.format("YYYY-MM-DD")
       onChange(dateStr)
@@ -74,7 +76,7 @@ export default function DatePicker({
         calendar={persian}
         locale={persian_fa}
         calendarPosition="bottom-right"
-        inputClass={styles.input}
+        inputClass={`${styles.input} ${error ? styles.inputError : ""}`}
         placeholder={placeholder}
         format="YYYY/MM/DD"
         // Ensure the input looks like our other inputs

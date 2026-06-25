@@ -9,6 +9,8 @@ interface TransactionFinancialDetailsProps {
   totalTransactionAmount: string
   paymentMethod: string
   paymentDescription: string
+  fieldErrors?: string[]
+  totalAmountError?: string
   onEscrowAmountChange: (value: string) => void
   onIsTotalCostChange: (value: string) => void
   onTotalTransactionAmountChange: (value: string) => void
@@ -29,6 +31,8 @@ export default function TransactionFinancialDetails({
   totalTransactionAmount,
   paymentMethod,
   paymentDescription,
+  fieldErrors = [],
+  totalAmountError,
   onEscrowAmountChange,
   onIsTotalCostChange,
   onTotalTransactionAmountChange,
@@ -46,6 +50,8 @@ export default function TransactionFinancialDetails({
           value={escrowAmount}
           onChange={onEscrowAmountChange}
           valueType="number"
+          required
+          error={fieldErrors.includes("escrowAmount")}
         />
         <div className={styles.fieldDescription}>
           مبلغی که خریدار در ابتدای کار به حساب امانی واریز می‌کند
@@ -83,7 +89,15 @@ export default function TransactionFinancialDetails({
               value={totalTransactionAmount}
               onChange={onTotalTransactionAmountChange}
               valueType="number"
+              required
+              error={
+                fieldErrors.includes("totalTransactionAmount") ||
+                Boolean(totalAmountError)
+              }
             />
+            {totalAmountError && (
+              <div className={styles.fieldErrorText}>{totalAmountError}</div>
+            )}
             <div className={styles.fieldDescription}>
               مجموع کل هزینه معامله شامل پرداخت اولیه در پلتفرم + پرداخت‌های
               خارج از حساب امانی
@@ -96,6 +110,8 @@ export default function TransactionFinancialDetails({
             options={paymentMethodOptions}
             onChange={onPaymentMethodChange}
             initialSlug={paymentMethod}
+            required
+            error={fieldErrors.includes("paymentMethod")}
           />
 
           <ListInput

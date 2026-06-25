@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import useSWR from "swr"
 import request from "@/request/request"
 import API_URLS from "@/constants/urls/API_URLS"
 
@@ -20,6 +20,7 @@ export interface Property {
     | "dropdown"
     | "date"
     | "multiselect"
+    | "map"
   unit: string | null
   regex_pattern: string | null
   is_required: boolean
@@ -36,31 +37,13 @@ export interface SubCategoryResponse {
 }
 
 export function useSubCategories(subCategoryId: number | null) {
-  const [subCategoryData, setSubCategoryData] =
-    useState<SubCategoryResponse | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<any>(null)
-
-  useEffect(() => {
-    if (subCategoryId === null) {
-      setSubCategoryData(null)
-      return
-    }
-
-    setIsLoading(true)
-    request
-      .get({ url: API_URLS.subCategories({ id: subCategoryId }) })
-      .then((data: SubCategoryResponse) => {
-        setSubCategoryData(data)
-        setError(null)
-      })
-      .catch((err) => {
-        setError(err)
-      })
-      .finally(() => {
-        setIsLoading(false)
-      })
-  }, [subCategoryId])
+  const { data: subCategoryData, error, isLoading } = useSWR<
+    SubCategoryResponse,
+    unknown
+  >(
+    subCategoryId ? API_URLS.subCategories({ id: subCategoryId }) : null,
+    (url: string) => request.get({ url }),
+  )
 
   return {
     properties: subCategoryData?.properties || [],

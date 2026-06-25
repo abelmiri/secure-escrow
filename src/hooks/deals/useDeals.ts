@@ -7,10 +7,14 @@ export type DealRole = "customer" | "beneficiary" | "broker"
 
 export interface Deal {
   id: number
+  traceNumber: string
   title: string
   status: string
+  state: string
+  subState: number | null
   amount: number
   created_at: string
+  parties: Array<{ role: string; user: string }>
 }
 
 interface DealItem {
@@ -23,6 +27,7 @@ interface DealItem {
   properties: Record<string, unknown>
   quantity: number
   slug: string
+  subcategory?: string
 }
 
 interface DealResult {
@@ -30,8 +35,9 @@ interface DealResult {
   items: DealItem[]
   items_count: number | null
   parties: Array<{ role: string; user: string }>
-  state: number
-  sub_state: number
+  state: string | number | null
+  sub_state: number | null
+  total_amount?: number | string | null
   trace_number: string
   created_at?: string
   updated_at?: string
@@ -57,6 +63,11 @@ const resolveDealTitle = (deal: DealResult) => {
 }
 
 const resolveDealAmount = (deal: DealResult) => {
+  if (deal.total_amount !== null && deal.total_amount !== undefined) {
+    const totalAmount = Number(deal.total_amount)
+    return Number.isFinite(totalAmount) ? totalAmount : 0
+  }
+
   return deal.items?.reduce((sum, item) => sum + Number(item.price || 0), 0) || 0
 }
 
@@ -90,13 +101,17 @@ export function useDeals({
   const deals = useMemo(
     () =>
       (data?.results || []).map((deal) => ({
-          id: deal.id,
-          title: resolveDealTitle(deal),
-          status: deal.state?.toString() || "نامشخص",
-          amount: resolveDealAmount(deal),
-          created_at:
-            deal.created_at || deal.updated_at || new Date().toISOString(),
-        })),
+        id: deal.id,
+        traceNumber: deal.trace_number,
+        title: resolveDealTitle(deal),
+        status: deal.state?.toString() || "نامشخص",
+        state: deal.state?.toString() || "",
+        subState: deal.sub_state,
+        amount: resolveDealAmount(deal),
+        created_at:
+          deal.created_at || deal.updated_at || new Date().toISOString(),
+        parties: deal.parties || [],
+      })),
     [data],
   )
 

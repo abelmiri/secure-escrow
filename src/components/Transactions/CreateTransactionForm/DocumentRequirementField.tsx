@@ -1,4 +1,5 @@
 import FileUploadOutlinedIcon from "@mui/icons-material/FileUploadOutlined"
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline"
 import type { DocumentRequirement } from "@/hooks/documents/useDocumentRequirements"
 import styles from "./styles/TransactionFormDetails.module.scss"
 
@@ -13,16 +14,20 @@ interface DocumentRequirementFieldProps {
   requirement: DocumentRequirement
   uploads: DocumentUpload[]
   dealId?: number | null
+  error?: boolean
   onFilesSelected: (requirement: DocumentRequirement, files: File[]) => void
   onRetry: (upload: DocumentUpload) => void
+  onRemove: (uploadId: string) => void
 }
 
 export default function DocumentRequirementField({
   requirement,
   uploads,
   dealId,
+  error = false,
   onFilesSelected,
   onRetry,
+  onRemove,
 }: DocumentRequirementFieldProps) {
   const requirementKey =
     requirement.document_type_code || requirement.slug || String(requirement.id)
@@ -62,7 +67,9 @@ export default function DocumentRequirementField({
       )}
 
       <div
-        className={styles.fileUploadCard}
+        className={`${styles.fileUploadCard} ${
+          error ? styles.fileUploadCardError : ""
+        }`}
         onDragOver={(event) => event.preventDefault()}
         onDrop={(event) => {
           event.preventDefault()
@@ -107,13 +114,23 @@ export default function DocumentRequirementField({
                 {upload.status === "uploading" && "در حال بارگذاری..."}
                 {upload.status === "uploaded" && "بارگذاری شد"}
                 {upload.status === "failed" && (
-                  <button
-                    type="button"
-                    className={styles.retryUpload}
-                    onClick={() => onRetry(upload)}
-                  >
-                    تلاش دوباره
-                  </button>
+                  <span className={styles.failedUploadActions}>
+                    <button
+                      type="button"
+                      className={styles.retryUpload}
+                      onClick={() => onRetry(upload)}
+                    >
+                      تلاش دوباره
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.removeUpload}
+                      aria-label={`حذف ${upload.file.name}`}
+                      onClick={() => onRemove(upload.id)}
+                    >
+                      <DeleteOutlineIcon fontSize="small" />
+                    </button>
+                  </span>
                 )}
               </span>
             </div>

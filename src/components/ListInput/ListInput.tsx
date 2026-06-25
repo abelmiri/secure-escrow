@@ -11,6 +11,7 @@ type ListInputProps = {
   regex?: RegExp
   valueType?: "string" | "number" | "integer"
   required?: boolean
+  error?: boolean
 }
 
 export default function ListInput({
@@ -22,11 +23,12 @@ export default function ListInput({
   regex,
   valueType = "string",
   required = false,
+  error = false,
 }: ListInputProps) {
   const isInvalid = regex && value !== "" && !regex.test(value)
 
   const inputClassName = `${styles.input}${
-    isInvalid
+    isInvalid || error
       ? ` ${styles.inputInvalid}`
       : !value
         ? ` ${styles.placeholder}`
@@ -34,7 +36,7 @@ export default function ListInput({
   }`
 
   const textareaClassName = `${styles.textarea}${
-    isInvalid
+    isInvalid || error
       ? ` ${styles.textareaInvalid}`
       : !value
         ? ` ${styles.placeholder}`

@@ -14,6 +14,7 @@ type DropdownProps = {
   onChange?: (slug: string) => void
   disabled?: boolean
   required?: boolean
+  error?: boolean
 }
 
 export default function Dropdown({
@@ -24,31 +25,19 @@ export default function Dropdown({
   disabled = false,
   initialSlug,
   required = false,
+  error = false,
 }: DropdownProps & { initialSlug?: string }) {
   const [open, setOpen] = useState(false)
-  const [selected, setSelected] = useState<DropdownOption | null>(null)
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
   const [search, setSearch] = useState("")
 
   const dropdownRef = useRef<HTMLDivElement | null>(null)
-
-  useEffect(() => {
-    if (
-      initialSlug !== undefined &&
-      initialSlug !== null &&
-      options.length > 0
-    ) {
-      const option = options.find(
-        (opt) => opt.slug.toString() === initialSlug.toString(),
-      )
-      if (option) {
-        setSelected(option)
-      } else {
-        setSelected(null)
-      }
-    } else if (initialSlug === "" || initialSlug === null) {
-      setSelected(null)
-    }
-  }, [initialSlug, options])
+  const activeSlug = initialSlug ?? selectedSlug
+  const selected =
+    activeSlug !== undefined && activeSlug !== null
+      ? (options.find((opt) => opt.slug.toString() === activeSlug.toString()) ??
+        null)
+      : null
 
   const filteredOptions = useMemo(() => {
     return options.filter((option) =>
@@ -57,7 +46,7 @@ export default function Dropdown({
   }, [options, search])
 
   const handleSelect = (option: DropdownOption) => {
-    setSelected(option)
+    setSelectedSlug(option.slug)
     setOpen(false)
     setSearch("")
     onChange?.(option.slug)
@@ -93,7 +82,7 @@ export default function Dropdown({
       <div className={`${styles.dropdown} ${disabled ? styles.disabled : ""}`}>
         <button
           type="button"
-          className={styles.input}
+          className={`${styles.input} ${error ? styles.inputError : ""}`}
           onClick={() => !disabled && setOpen((prev) => !prev)}
           disabled={disabled}
         >

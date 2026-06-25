@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import Link from "next/link"
 import {
   Box,
@@ -17,12 +17,67 @@ import SearchIcon from "@/media/svg/SearchIcon"
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined"
 import styles from "./styles/DashboardDeals.module.scss"
 import { dealsData } from "@/constants/deals"
+import { authContext } from "@/context/auth/authProvider"
 import { useDeals } from "@/hooks/deals/useDeals"
 import type { DealRole } from "@/hooks/deals/useDeals"
 
 type RoleFilter = DealRole | ""
+type StatusType = "processing" | "pending" | "inspection" | "completed"
+type DashboardDealCard = {
+  id: string
+  href: string
+  title: string
+  status: string
+  statusType: StatusType
+  role: string
+  participant: string
+  date: string
+  timestamp: number
+  amount: string
+  currency: "تومان" | "ریال"
+  isMock: boolean
+}
+
+const roleLabels: Record<string, string> = {
+  customer: "خریدار",
+  beneficiary: "فروشنده",
+  broker: "کارگزار",
+}
+
+const statusLabels: Record<string, string> = {
+  Created: "ایجاد شده",
+  Pending: "در انتظار",
+  WaitingForPayment: "در انتظار پرداخت",
+  PaymentPending: "در انتظار پرداخت",
+  InProgress: "در حال انجام",
+  Processing: "در حال انجام",
+  Inspection: "دوره بازرسی",
+  Completed: "تکمیل شده",
+  Done: "تکمیل شده",
+  Cancelled: "لغو شده",
+  Canceled: "لغو شده",
+  Rejected: "رد شده",
+}
+
+const resolveStatusLabel = (state: string, subState: number | null) => {
+  if (state === "Created" && subState === 1) return "ایجاد شده"
+  return statusLabels[state] || state || "نامشخص"
+}
+
+const resolveStatusType = (status: string): StatusType => {
+  if (status === "تکمیل شده") return "completed"
+  if (status === "در انتظار پرداخت" || status === "در انتظار") return "pending"
+  if (status === "دوره بازرسی") return "inspection"
+  return "processing"
+}
+
+const getTimestamp = (date: string) => {
+  const timestamp = new Date(date).getTime()
+  return Number.isNaN(timestamp) ? 0 : timestamp
+}
 
 export default function DashboardDeals() {
+  const { authState } = useContext(authContext)
   const [searchTerm, setSearchTerm] = useState("")
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("همه")
@@ -51,43 +106,61 @@ export default function DashboardDeals() {
     offset: (page - 1) * limit,
   })
 
-  // Mock data filtering (keep existing logic)
-  const filteredMockDeals = dealsData.filter((deal) => {
+  const currentUserMobile = authState.user?.mobile_number
+
+  const filteredMockDeals: DashboardDealCard[] = dealsData.filter((deal) => {
     const matchesSearch =
       deal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       deal.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
       deal.participant.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = statusFilter === "همه" || deal.status === statusFilter
-    const roleLabels: Record<string, string> = {
-      customer: "خریدار",
-      beneficiary: "فروشنده",
-      broker: "کارگزار",
-    }
     const matchesRole =
       roleFilter === "" || deal.role === roleLabels[roleFilter]
 
-    return matchesSearch && matchesStatus && matchesRole
+    return matchesSearch && matchesRole
+  }).map((deal) => ({
+    ...deal,
+    href: `/dashboard/${deal.id}`,
+    timestamp: getTimestamp(deal.date),
+    currency: "تومان",
+    isMock: true,
+  }))
+
+  const mappedApiDeals: DashboardDealCard[] = apiDeals.map((deal) => {
+    const currentParty = currentUserMobile
+      ? deal.parties.find((party) => party.user === currentUserMobile)
+      : undefined
+    const counterparty = currentUserMobile
+      ? deal.parties.find((party) => party.user !== currentUserMobile)
+      : deal.parties.find((party) => party.user)
+    const status = resolveStatusLabel(deal.state, deal.subState)
+
+    return {
+      id: `#${deal.id}`,
+      href: "#",
+      title: deal.title,
+      status,
+      statusType: resolveStatusType(status),
+      role: currentParty?.role ? roleLabels[currentParty.role] : "نامشخص",
+      participant: counterparty
+        ? `طرف مقابل: ${counterparty.user}`
+        : deal.traceNumber
+          ? `کد پیگیری: ${deal.traceNumber}`
+          : "طرف مقابل ثبت نشده",
+      date: new Date(deal.created_at).toLocaleDateString("fa-IR"),
+      timestamp: getTimestamp(deal.created_at),
+      amount: deal.amount.toLocaleString("fa-IR"),
+      currency: "ریال",
+      isMock: false,
+    }
   })
 
-  // Combine Mock and API deals
-  const allDeals = [
-    ...filteredMockDeals.map((d) => ({ ...d, isMock: true })),
-    ...apiDeals.map((d) => ({
-      id: `API-${d.id}`,
-      title: d.title,
-      status: d.status || "نامشخص",
-      statusType: "processing" as const, // Default for API deals
-      role: "نامشخص" as const,
-      participant: `مبلغ: ${d.amount.toLocaleString()} ریال`,
-      date: new Date(d.created_at).toLocaleDateString("fa-IR"),
-      amount: d.amount.toLocaleString(),
-      isMock: false,
-    })),
-  ].sort((a, b) => {
+  const allDeals = [...filteredMockDeals, ...mappedApiDeals]
+    .filter((deal) => statusFilter === "همه" || deal.status === statusFilter)
+    .sort((a, b) => {
     if (orderFilter === "newest") {
-      return b.date.localeCompare(a.date)
+      return b.timestamp - a.timestamp
     } else {
-      return a.date.localeCompare(b.date)
+      return a.timestamp - b.timestamp
     }
   })
 
@@ -187,7 +260,7 @@ export default function DashboardDeals() {
             {allDeals.map((deal) => (
               <Link
                 key={deal.id}
-                href={deal.isMock ? `/dashboard/${deal.id}` : "#"}
+                href={deal.href}
                 style={{ textDecoration: "none" }}
               >
                 <Box className={styles.dealCard}>
@@ -224,7 +297,9 @@ export default function DashboardDeals() {
                     <Box className={styles.dealAmountContainer}>
                       <Typography className={styles.dealAmount}>
                         {deal.amount}{" "}
-                        <span className={styles.currency}>تومان</span>
+                        <span className={styles.currency}>
+                          {deal.currency}
+                        </span>
                       </Typography>
                     </Box>
                   </Box>

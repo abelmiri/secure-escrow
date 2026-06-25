@@ -34,6 +34,9 @@ import TransactionPropertiesSection from "./TransactionPropertiesSection"
 import TransactionReviewStage from "./TransactionReviewStage"
 import styles from "./styles/TransactionFormDetails.module.scss"
 
+const totalAmountLessThanEscrowMessage =
+  "مبلغ نهایی کل معامله نمی‌تواند کمتر از مبلغ واریزی به حساب امانی باشد."
+
 interface TransactionFormDetailsProps {
   stageNumber?: number
   dealId?: number | null
@@ -54,6 +57,7 @@ export default function TransactionFormDetails({
   const searchParams = useSearchParams()
   const router = useRouter()
   const prefillAppliedRef = useRef(false)
+  const previousEscrowAmountRef = useRef("")
   const { authState } = useContext(authContext)
 
   const [role, setRole] = useState("customer")
@@ -79,6 +83,11 @@ export default function TransactionFormDetails({
   const [isTermsAccepted, setIsTermsAccepted] = useState(false)
   const [documentUploads, setDocumentUploads] = useState<DocumentUpload[]>([])
   const [documentValidationMessage, setDocumentValidationMessage] = useState("")
+  const [requiredValidationMessage, setRequiredValidationMessage] = useState<
+    string[]
+  >([])
+  const [fieldErrors, setFieldErrors] = useState<string[]>([])
+  const [totalAmountError, setTotalAmountError] = useState("")
 
   const { categories, isLoading: isCategoriesLoading } = useCategories()
   const { updateDeal } = useUpdateDeal()
@@ -100,7 +109,10 @@ export default function TransactionFormDetails({
     }
 
     if (prefill.amount) {
-      setEscrowAmount(tomanToRial(prefill.amount))
+      const prefilledEscrowAmount = tomanToRial(prefill.amount)
+      setEscrowAmount(prefilledEscrowAmount)
+      setTotalTransactionAmount(prefilledEscrowAmount)
+      previousEscrowAmountRef.current = prefilledEscrowAmount
       setIsTotalCost("yes")
     }
 
@@ -152,11 +164,142 @@ export default function TransactionFormDetails({
       ? applicableDocumentRequirements.length > 0
       : stageProperties.length > 0
 
+  const isEmptyValue = (value: PropertyInputValue | string | number | null) => {
+    if (Array.isArray(value)) return value.length === 0
+    if (typeof value === "boolean") return false
+    if (value instanceof Date) return false
+    if (value === null || value === undefined) return true
+    return String(value).trim() === ""
+  }
+
+  const getRequiredFieldIssues = () => {
+    const issues: Array<{ key: string; label: string }> = []
+
+    if (stageNumber === 1) {
+      if (!selectedCategoryId) {
+        issues.push({ key: "category", label: "دسته بندی معامله" })
+      }
+
+      if (!selectedSubCategoryId) {
+        issues.push({ key: "subcategory", label: "نوع دسته بندی" })
+      }
+
+      if (!title.trim()) {
+        issues.push({ key: "title", label: "عنوان معامله" })
+      }
+
+      stageProperties
+        .filter((property) => property.is_required)
+        .forEach((property) => {
+          if (isEmptyValue(propertyValues[property.slug])) {
+            issues.push({
+              key: `property:${property.slug}`,
+              label: property.name,
+            })
+          }
+        })
+
+      if (!escrowAmount) {
+        issues.push({
+          key: "escrowAmount",
+          label: "مبلغ واریزی به حساب امانی",
+        })
+      }
+
+      if (isTotalCost === "no") {
+        if (!totalTransactionAmount) {
+          issues.push({
+            key: "totalTransactionAmount",
+            label: "مبلغ نهایی کل معامله",
+          })
+        }
+
+        if (!paymentMethod) {
+          issues.push({
+            key: "paymentMethod",
+            label: "شیوه پرداخت باقی‌مانده هزینه",
+          })
+        }
+      }
+    }
+
+    if (stageNumber === 2) {
+      issues.push(
+        ...(!counterpartyMobile.trim()
+          ? [
+              {
+                key: "counterpartyMobile",
+                label:
+                  role === "beneficiary"
+                    ? "شماره موبایل خریدار"
+                    : "شماره موبایل فروشنده",
+              },
+            ]
+          : []),
+      )
+
+      applicableDocumentRequirements.forEach((requirement) => {
+        const isRequired =
+          requirement.is_required ?? requirement.requirement_type !== "optional"
+        const minimumFiles = requirement.files_min || (isRequired ? 1 : 0)
+        const uploadedCount = applicableDocumentUploads.filter(
+          (upload) =>
+            upload.requirementId === requirement.id &&
+            upload.status === "uploaded",
+        ).length
+
+        if (uploadedCount < minimumFiles) {
+          issues.push({
+            key: `document:${requirement.id}`,
+            label: requirement.title || requirement.name || "سند مورد نیاز",
+          })
+        }
+      })
+    }
+
+    return issues
+  }
+
+  const getTotalAmountValidationMessage = () => {
+    if (stageNumber !== 1 || !escrowAmount || !totalTransactionAmount) {
+      return ""
+    }
+
+    if (Number(totalTransactionAmount) < Number(escrowAmount)) {
+      return totalAmountLessThanEscrowMessage
+    }
+
+    return ""
+  }
+
+  const resetValidationMessages = () => {
+    setRequiredValidationMessage([])
+    setFieldErrors([])
+    setTotalAmountError("")
+  }
+
   const handlePropertyChange = (
     propertyName: string,
     value: PropertyInputValue,
   ) => {
     setPropertyValues((prev) => ({ ...prev, [propertyName]: value }))
+    resetValidationMessages()
+  }
+
+  const handleEscrowAmountChange = (value: string) => {
+    const previousEscrowAmount = previousEscrowAmountRef.current
+
+    setEscrowAmount(value)
+    if (
+      value &&
+      (!totalTransactionAmount ||
+        totalTransactionAmount === previousEscrowAmount ||
+        isTotalCost === "yes")
+    ) {
+      setTotalTransactionAmount(value)
+    }
+    previousEscrowAmountRef.current = value
+    resetValidationMessages()
   }
 
   const updateDocumentUpload = (
@@ -232,8 +375,17 @@ export default function TransactionFormDetails({
     )
 
     setDocumentValidationMessage("")
+    resetValidationMessages()
     setDocumentUploads((current) => [...current, ...uploads])
     uploads.forEach((upload) => void uploadDocument(upload))
+  }
+
+  const handleRemoveDocumentUpload = (uploadId: string) => {
+    setDocumentUploads((current) =>
+      current.filter((upload) => upload.id !== uploadId),
+    )
+    setDocumentValidationMessage("")
+    resetValidationMessages()
   }
 
   const handleContinue = async () => {
@@ -243,7 +395,7 @@ export default function TransactionFormDetails({
       return
     }
 
-    if (!selectedSubCategoryId || !authState.user) return
+    if (!authState.user) return
 
     if (stageNumber === 2) {
       const pendingUpload = applicableDocumentUploads.some(
@@ -251,21 +403,6 @@ export default function TransactionFormDetails({
       )
       const failedUpload = applicableDocumentUploads.some(
         (upload) => upload.status === "failed",
-      )
-      const missingRequirement = applicableDocumentRequirements.find(
-        (requirement) => {
-          const isRequired =
-            requirement.is_required ??
-            requirement.requirement_type !== "optional"
-          const minimumFiles = requirement.files_min || (isRequired ? 1 : 0)
-          const uploadedCount = applicableDocumentUploads.filter(
-            (upload) =>
-              upload.requirementId === requirement.id &&
-              upload.status === "uploaded",
-          ).length
-
-          return uploadedCount < minimumFiles
-        },
       )
 
       if (pendingUpload) {
@@ -281,6 +418,40 @@ export default function TransactionFormDetails({
         )
         return
       }
+    }
+
+    const requiredIssues = getRequiredFieldIssues()
+    const totalValidationMessage = getTotalAmountValidationMessage()
+
+    if (requiredIssues.length > 0 || totalValidationMessage) {
+      setFieldErrors(requiredIssues.map((issue) => issue.key))
+      setRequiredValidationMessage(
+        requiredIssues.map((issue) => issue.label),
+      )
+      setTotalAmountError(totalValidationMessage)
+      return
+    }
+
+    resetValidationMessages()
+
+    if (!selectedSubCategoryId) return
+
+    if (stageNumber === 2) {
+      const missingRequirement = applicableDocumentRequirements.find(
+        (requirement) => {
+          const isRequired =
+            requirement.is_required ??
+            requirement.requirement_type !== "optional"
+          const minimumFiles = requirement.files_min || (isRequired ? 1 : 0)
+          const uploadedCount = applicableDocumentUploads.filter(
+            (upload) =>
+              upload.requirementId === requirement.id &&
+              upload.status === "uploaded",
+          ).length
+
+          return uploadedCount < minimumFiles
+        },
+      )
 
       if (missingRequirement) {
         setDocumentValidationMessage(
@@ -332,7 +503,7 @@ export default function TransactionFormDetails({
               name: title,
               description,
               remaining_price_payment_method: paymentMethod,
-              total_price: Number(totalTransactionAmount),
+              total_price: Number(totalTransactionAmount || escrowAmount),
               price: Number(escrowAmount),
               properties: propertiesData,
             },
@@ -400,6 +571,8 @@ export default function TransactionFormDetails({
         dealId={dealId}
         onFilesSelected={handleDocumentFiles}
         onRetry={(upload) => void uploadDocument(upload)}
+        onRemove={handleRemoveDocumentUpload}
+        error={fieldErrors.includes(`document:${requirement.id}`)}
       />
     )
   }
@@ -411,6 +584,7 @@ export default function TransactionFormDetails({
         property={property}
         subCategorySlug={selectedSubCategory?.slug}
         value={propertyValues[property.slug]}
+        error={fieldErrors.includes(`property:${property.slug}`)}
         onChange={(value) => handlePropertyChange(property.slug, value)}
       />
     )
@@ -432,6 +606,8 @@ export default function TransactionFormDetails({
       : stageNumber === 2
         ? "مشخصات خریدار هدف و اسناد مورد نیاز را وارد کنید"
         : "اطلاعات دقیق محصول یا دارایی مورد معامله را وارد کنید"
+  const displayedTotalAmountError =
+    totalAmountError || getTotalAmountValidationMessage()
 
   return (
     <div className={styles.container}>
@@ -453,14 +629,23 @@ export default function TransactionFormDetails({
           onRoleChange={(nextRole) => {
             setRole(nextRole)
             setDocumentValidationMessage("")
+            resetValidationMessages()
           }}
           onCategoryChange={(categoryId) => {
             setSelectedCategoryId(categoryId)
             setSelectedSubCategoryId(null)
+            resetValidationMessages()
           }}
-          onSubCategoryChange={setSelectedSubCategoryId}
-          onTitleChange={setTitle}
+          onSubCategoryChange={(subCategoryId) => {
+            setSelectedSubCategoryId(subCategoryId)
+            resetValidationMessages()
+          }}
+          onTitleChange={(value) => {
+            setTitle(value)
+            resetValidationMessages()
+          }}
           onDescriptionChange={setDescription}
+          fieldErrors={fieldErrors}
         />
       )}
 
@@ -477,8 +662,13 @@ export default function TransactionFormDetails({
               : "شماره موبایل فروشنده"
           }
           value={counterpartyMobile}
-          onChange={setCounterpartyMobile}
+          onChange={(value) => {
+            setCounterpartyMobile(value)
+            resetValidationMessages()
+          }}
           valueType="string"
+          required
+          error={fieldErrors.includes("counterpartyMobile")}
         />
       )}
 
@@ -520,19 +710,33 @@ export default function TransactionFormDetails({
           : stageProperties.map(renderProperty)}
       </TransactionPropertiesSection>
 
-      {stageNumber !== 3 && !isPropertiesLoading && selectedSubCategoryId && (
+      {stageNumber !== 3 && !isPropertiesLoading && (
         <>
-          {stageNumber === 1 && (
+          {stageNumber === 1 && selectedSubCategoryId && (
             <TransactionFinancialDetails
               escrowAmount={escrowAmount}
               isTotalCost={isTotalCost}
               totalTransactionAmount={totalTransactionAmount}
               paymentMethod={paymentMethod}
               paymentDescription={paymentDescription}
-              onEscrowAmountChange={setEscrowAmount}
-              onIsTotalCostChange={setIsTotalCost}
-              onTotalTransactionAmountChange={setTotalTransactionAmount}
-              onPaymentMethodChange={setPaymentMethod}
+              fieldErrors={fieldErrors}
+              totalAmountError={displayedTotalAmountError}
+              onEscrowAmountChange={handleEscrowAmountChange}
+              onIsTotalCostChange={(value) => {
+                setIsTotalCost(value)
+                if (value === "yes" && escrowAmount) {
+                  setTotalTransactionAmount(escrowAmount)
+                }
+                resetValidationMessages()
+              }}
+              onTotalTransactionAmountChange={(value) => {
+                setTotalTransactionAmount(value)
+                resetValidationMessages()
+              }}
+              onPaymentMethodChange={(value) => {
+                setPaymentMethod(value)
+                resetValidationMessages()
+              }}
               onPaymentDescriptionChange={setPaymentDescription}
             />
           )}
@@ -563,6 +767,16 @@ export default function TransactionFormDetails({
           {stageNumber === 2 && documentValidationMessage && (
             <div className={styles.uploadValidationMessage}>
               {documentValidationMessage}
+            </div>
+          )}
+          {requiredValidationMessage.length > 0 && (
+            <div className={styles.uploadValidationMessage}>
+              فیلدهای زیر را تکمیل کنید:
+              <ul className={styles.validationList}>
+                {requiredValidationMessage.map((fieldName) => (
+                  <li key={fieldName}>{fieldName}</li>
+                ))}
+              </ul>
             </div>
           )}
         </>

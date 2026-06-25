@@ -15,6 +15,10 @@ import {
   getTransactionPropertyWidth,
   type PropertyFieldWidth,
 } from "@/lib/transactionPropertyLayout"
+import IranLocationPicker, {
+  isMapLocationValue,
+  type MapLocationValue,
+} from "./IranLocationPicker"
 import styles from "./styles/TransactionFormDetails.module.scss"
 
 export type PropertyInputValue =
@@ -22,6 +26,7 @@ export type PropertyInputValue =
   | string
   | number
   | boolean
+  | MapLocationValue
   | Date
   | null
   | undefined
@@ -30,6 +35,7 @@ interface DynamicPropertyFieldProps {
   property: Property
   subCategorySlug?: string
   value: PropertyInputValue
+  error?: boolean
   onChange: (value: PropertyInputValue) => void
 }
 
@@ -44,6 +50,7 @@ export default function DynamicPropertyField({
   property,
   subCategorySlug,
   value,
+  error = false,
   onChange,
 }: DynamicPropertyFieldProps) {
   const options =
@@ -57,6 +64,7 @@ export default function DynamicPropertyField({
     Array.isArray(value) && value.every((item) => typeof item === "string")
       ? value
       : []
+  const mapValue = isMapLocationValue(value) ? value : null
   const propertyName = property.property_name || property.slug
   const fieldWidth = getTransactionPropertyWidth(
     subCategorySlug,
@@ -76,6 +84,8 @@ export default function DynamicPropertyField({
           }))}
           onChange={onChange}
           required={property.is_required}
+          initialSlug={stringValue}
+          error={error}
         />
       ) : property.field_type === "multiselect" ? (
         <div className={styles.multiSelectContainer}>
@@ -85,7 +95,12 @@ export default function DynamicPropertyField({
               <span className={styles.requiredMark}>*</span>
             )}
           </div>
-          <FormControl fullWidth className={styles.multiSelectField}>
+          <FormControl
+            fullWidth
+            className={`${styles.multiSelectField} ${
+              error ? styles.multiSelectFieldError : ""
+            }`}
+          >
             <Select<string[]>
               multiple
               displayEmpty
@@ -138,9 +153,18 @@ export default function DynamicPropertyField({
           value={stringValue}
           onChange={onChange}
           required={property.is_required}
+          error={error}
+        />
+      ) : property.field_type === "map" ? (
+        <IranLocationPicker
+          title={property.name}
+          value={mapValue}
+          required={property.is_required}
+          error={error}
+          onChange={onChange}
         />
       ) : property.field_type === "bool" ? (
-        <div>
+        <div className={error ? styles.radioGroupError : undefined}>
           <div className={styles.radioQuestion}>{property.name}</div>
           <div className={styles.radioOptions}>
             <RadioButton
@@ -171,6 +195,7 @@ export default function DynamicPropertyField({
           onChange={onChange}
           valueType={property.field_type === "integer" ? "number" : "string"}
           required={property.is_required}
+          error={error}
           regex={
             property.regex_pattern
               ? new RegExp(property.regex_pattern)

@@ -3,6 +3,7 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined"
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined"
 import type { DealDetail, DealItem } from "@/hooks/deals/useDeal"
 import type { UploadedDealDocument } from "@/hooks/documents/useDealDocuments"
+import { isMapLocationValue } from "./IranLocationPicker"
 import styles from "./styles/TransactionFormDetails.module.scss"
 
 const roleLabels: Record<string, string> = {
@@ -52,6 +53,15 @@ const getDocumentMeta = (document: UploadedDealDocument) => {
   return [fileType, size, date, document.uploader]
     .filter(Boolean)
     .join(" • ")
+}
+
+const formatPropertyValue = (value: unknown) => {
+  if (typeof value === "boolean") return value ? "دارد" : "ندارد"
+  if (isMapLocationValue(value)) {
+    return `${value.lat.toLocaleString("fa-IR")}، ${value.lng.toLocaleString("fa-IR")}`
+  }
+  if (Array.isArray(value)) return value.join("، ")
+  return `${value}`
 }
 
 interface ReviewRow {
@@ -154,17 +164,12 @@ export default function DealReview({
             value:
               itemProperties[0]?.[1] === undefined
                 ? ""
-                : String(itemProperties[0][1]),
+                : formatPropertyValue(itemProperties[0][1]),
           },
           { label: "تعداد:", value: item?.quantity?.toString() },
           ...itemProperties.slice(1).map(([key, value]) => ({
             label: `${key}:`,
-            value:
-              typeof value === "boolean"
-                ? value
-                  ? "دارد"
-                  : "ندارد"
-                : `${value}`,
+            value: formatPropertyValue(value),
           })),
         ].filter((row) => row.value)}
       />

@@ -189,6 +189,87 @@
   gap: 12px;
 }
 
+.mapPicker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.iranMapFrame {
+  background: #f3f8fb;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.iranMapFrameError {
+  border-color: #d92d20;
+}
+
+.iranMap {
+  cursor: crosshair;
+  display: block;
+  height: auto;
+  outline: none;
+  width: 100%;
+}
+
+.iranMapSea {
+  fill: #e5f3f6;
+}
+
+.iranMapLand {
+  fill: #f7fbf3;
+  stroke: #4c956c;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.iranMapProvinceLine {
+  fill: none;
+  opacity: 0.45;
+  stroke: #8ab17d;
+  stroke-width: 1;
+}
+
+.iranMapCity {
+  fill: #4a5565;
+
+  text {
+    font-family: "Yekan", Arial, sans-serif;
+    font-size: 8px;
+    pointer-events: none;
+  }
+}
+
+.iranMapWaterLabel {
+  fill: #4a90a4;
+  font-family: "Yekan", Arial, sans-serif;
+  font-size: 9px;
+  opacity: 0.8;
+}
+
+.iranMapMarker {
+  pointer-events: none;
+
+  circle:first-child {
+    fill: rgb(217 45 32 / 18%);
+    stroke: #d92d20;
+    stroke-width: 2;
+  }
+
+  circle:last-child {
+    fill: #d92d20;
+  }
+}
+
+.mapSelectedText {
+  color: #667085;
+  font-size: 13px;
+  text-align: right;
+}
+
 .multiSelectContainer {
   width: 100%;
   display: flex;
@@ -243,6 +324,12 @@
   }
 }
 
+.multiSelectFieldError {
+  :global(.MuiOutlinedInput-notchedOutline) {
+    border-color: #d92d20 !important;
+  }
+}
+
 .multiSelectPlaceholder {
   color: #717182;
 }
@@ -286,6 +373,10 @@
 .fileUploadCard:hover {
   border-color: #9aa3b8;
   background: #f1f3f8;
+}
+
+.fileUploadCardError {
+  border-color: #d92d20;
 }
 
 .fileUploadLabel {
@@ -366,10 +457,44 @@
   padding: 0;
 }
 
+.failedUploadActions {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+}
+
+.removeUpload {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  color: #667085;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  padding: 0;
+}
+
 .uploadValidationMessage {
   color: #d92d20;
   font-size: 13px;
   text-align: right;
+}
+
+.validationList {
+  margin: 4px 0 0;
+  padding-inline-start: 20px;
+}
+
+.fieldErrorText {
+  color: #d92d20;
+  font-size: 13px;
+  text-align: right;
+}
+
+.radioGroupError {
+  border: 1px solid #d92d20;
+  border-radius: 8px;
+  padding: 8px 12px;
 }
 
 .remainingCostBox {
