@@ -200,7 +200,9 @@
   background: #f3f8fb;
   border: 1px solid transparent;
   border-radius: 8px;
+  min-height: 320px;
   overflow: hidden;
+  position: relative;
 }
 
 .iranMapFrameError {
@@ -209,59 +211,21 @@
 
 .iranMap {
   cursor: crosshair;
-  display: block;
-  height: auto;
+  height: 320px;
   outline: none;
   width: 100%;
 }
 
-.iranMapSea {
-  fill: #e5f3f6;
-}
-
-.iranMapLand {
-  fill: #f7fbf3;
-  stroke: #4c956c;
-  stroke-linejoin: round;
-  stroke-width: 2;
-}
-
-.iranMapProvinceLine {
-  fill: none;
-  opacity: 0.45;
-  stroke: #8ab17d;
-  stroke-width: 1;
-}
-
-.iranMapCity {
-  fill: #4a5565;
-
-  text {
-    font-family: "Yekan", Arial, sans-serif;
-    font-size: 8px;
-    pointer-events: none;
-  }
-}
-
-.iranMapWaterLabel {
-  fill: #4a90a4;
-  font-family: "Yekan", Arial, sans-serif;
-  font-size: 9px;
-  opacity: 0.8;
-}
-
-.iranMapMarker {
-  pointer-events: none;
-
-  circle:first-child {
-    fill: rgb(217 45 32 / 18%);
-    stroke: #d92d20;
-    stroke-width: 2;
-  }
-
-  circle:last-child {
-    fill: #d92d20;
-  }
+.iranMapOverlay {
+  align-items: center;
+  background: rgb(255 255 255 / 82%);
+  color: #4a5565;
+  display: flex;
+  font-size: 14px;
+  inset: 0;
+  justify-content: center;
+  position: absolute;
+  text-align: center;
 }
 
 .mapSelectedText {

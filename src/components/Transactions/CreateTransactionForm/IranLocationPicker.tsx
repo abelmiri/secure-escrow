@@ -1,4 +1,6 @@
-import type { MouseEvent } from "react"
+"use client"
+
+import { useEffect, useRef, useState } from "react"
 import styles from "./styles/TransactionFormDetails.module.scss"
 
 export interface MapLocationValue {
@@ -14,78 +16,128 @@ interface IranLocationPickerProps {
   onChange: (value: MapLocationValue) => void
 }
 
-const mapBounds = {
-  minLat: 25,
-  maxLat: 39.8,
-  minLng: 44,
-  maxLng: 63.5,
+interface NeshanLatLng {
+  lat: number
+  lng: number
 }
 
-const mapSize = {
-  width: 360,
-  height: 240,
+interface NeshanMapEvent {
+  latlng: NeshanLatLng
 }
 
-const iranOutline =
-  "M75 78 L96 48 L137 34 L181 41 L214 27 L250 50 L285 68 L302 101 L332 130 L313 160 L272 168 L251 204 L211 213 L176 196 L137 207 L104 184 L78 151 L53 132 L62 101 Z"
+interface NeshanMarkerEvent {
+  target: {
+    getLatLng: () => NeshanLatLng
+  }
+}
 
-const provinceLines = [
-  "M96 48 L118 82 L96 116 L62 101",
-  "M137 34 L146 76 L118 82",
-  "M181 41 L170 86 L146 76",
-  "M214 27 L215 78 L170 86",
-  "M250 50 L246 91 L215 78",
-  "M285 68 L272 112 L246 91",
-  "M302 101 L272 112 L282 146 L313 160",
-  "M118 82 L137 118 L96 116",
-  "M146 76 L170 86 L166 126 L137 118",
-  "M215 78 L207 126 L166 126",
-  "M246 91 L235 132 L207 126",
-  "M272 112 L282 146 L235 132",
-  "M96 116 L118 154 L78 151",
-  "M137 118 L141 162 L118 154",
-  "M166 126 L176 166 L141 162",
-  "M207 126 L211 170 L176 166",
-  "M235 132 L251 169 L211 170",
-  "M282 146 L272 168 L251 169",
-  "M118 154 L137 207",
-  "M176 166 L176 196",
-  "M211 170 L211 213",
-]
+interface NeshanMarker {
+  addTo: (map: NeshanMap) => NeshanMarker
+  setLatLng: (latLng: [number, number] | NeshanLatLng) => NeshanMarker
+  getLatLng: () => NeshanLatLng
+  on: (eventName: "dragend", handler: (event: NeshanMarkerEvent) => void) => void
+}
 
-const cities = [
-  { name: "تهران", lat: 35.6892, lng: 51.389 },
-  { name: "مشهد", lat: 36.2605, lng: 59.6168 },
-  { name: "اصفهان", lat: 32.6546, lng: 51.668 },
-  { name: "شیراز", lat: 29.5918, lng: 52.5837 },
-  { name: "تبریز", lat: 38.0962, lng: 46.2738 },
-  { name: "اهواز", lat: 31.3183, lng: 48.6706 },
-  { name: "بندرعباس", lat: 27.1832, lng: 56.2666 },
-]
+interface NeshanMap {
+  on: (eventName: "click", handler: (event: NeshanMapEvent) => void) => void
+  panTo: (latLng: [number, number]) => void
+  setView: (latLng: [number, number], zoom?: number) => void
+  remove: () => void
+}
+
+interface NeshanLeaflet {
+  Map: new (
+    element: HTMLElement,
+    options: {
+      key: string
+      maptype: string
+      poi: boolean
+      traffic: boolean
+      center: [number, number]
+      zoom: number
+    },
+  ) => NeshanMap
+  marker: (
+    latLng: [number, number],
+    options?: { draggable?: boolean },
+  ) => NeshanMarker
+}
+
+declare global {
+  interface Window {
+    L?: NeshanLeaflet
+  }
+}
+
+const neshanMapKey = process.env.NEXT_PUBLIC_NESHAN_MAP_KEY
+const neshanMapType = process.env.NEXT_PUBLIC_NESHAN_MAP_TYPE || "standard-day"
+const defaultLocation: MapLocationValue = { lat: 35.6892, lng: 51.389 }
+const neshanCssId = "neshan-leaflet-css"
+const neshanScriptId = "neshan-leaflet-script"
+let neshanLoader: Promise<NeshanLeaflet> | null = null
 
 const roundCoordinate = (value: number) => Math.round(value * 100000) / 100000
 
-const locationToPoint = (location: MapLocationValue) => ({
-  x:
-    ((location.lng - mapBounds.minLng) /
-      (mapBounds.maxLng - mapBounds.minLng)) *
-    mapSize.width,
-  y:
-    ((mapBounds.maxLat - location.lat) /
-      (mapBounds.maxLat - mapBounds.minLat)) *
-    mapSize.height,
+const normalizeLocation = (location: NeshanLatLng): MapLocationValue => ({
+  lat: roundCoordinate(location.lat),
+  lng: roundCoordinate(location.lng),
 })
 
-const pointToLocation = (x: number, y: number): MapLocationValue => ({
-  lat: roundCoordinate(
-    mapBounds.maxLat -
-      (y / mapSize.height) * (mapBounds.maxLat - mapBounds.minLat),
-  ),
-  lng: roundCoordinate(
-    mapBounds.minLng +
-      (x / mapSize.width) * (mapBounds.maxLng - mapBounds.minLng),
-  ),
-})
+const loadNeshanLeaflet = () => {
+  if (typeof window === "undefined") {
+    return Promise.reject(new Error("Neshan map is available in browser only."))
+  }
+
+  if (window.L) {
+    return Promise.resolve(window.L)
+  }
+
+  if (neshanLoader) return neshanLoader
+
+  neshanLoader = new Promise<NeshanLeaflet>((resolve, reject) => {
+    if (!document.getElementById(neshanCssId)) {
+      const link = document.createElement("link")
+      link.id = neshanCssId
+      link.rel = "stylesheet"
+      link.href = "https://static.neshan.org/sdk/leaflet/1.4.0/leaflet.css"
+      document.head.appendChild(link)
+    }
+
+    const existingScript = document.getElementById(
+      neshanScriptId,
+    ) as HTMLScriptElement | null
+
+    if (existingScript) {
+      existingScript.addEventListener("load", () => {
+        if (window.L) {
+          resolve(window.L)
+        } else {
+          reject(new Error("Neshan SDK not found."))
+        }
+      })
+      existingScript.addEventListener("error", () => {
+        reject(new Error("Neshan SDK failed to load."))
+      })
+      return
+    }
+
+    const script = document.createElement("script")
+    script.id = neshanScriptId
+    script.src = "https://static.neshan.org/sdk/leaflet/1.4.0/leaflet.js"
+    script.async = true
+    script.onload = () => {
+      if (window.L) {
+        resolve(window.L)
+      } else {
+        reject(new Error("Neshan SDK not found."))
+      }
+    }
+    script.onerror = () => reject(new Error("Neshan SDK failed to load."))
+    document.body.appendChild(script)
+  })
+
+  return neshanLoader
+}
 
 export function isMapLocationValue(
   value: unknown,
@@ -108,15 +160,86 @@ export default function IranLocationPicker({
   error = false,
   onChange,
 }: IranLocationPickerProps) {
-  const selectedPoint = value ? locationToPoint(value) : null
+  const mapElementRef = useRef<HTMLDivElement | null>(null)
+  const mapRef = useRef<NeshanMap | null>(null)
+  const markerRef = useRef<NeshanMarker | null>(null)
+  const initialLocationRef = useRef(value || defaultLocation)
+  const latestOnChangeRef = useRef(onChange)
+  const [loadError, setLoadError] = useState(
+    neshanMapKey ? "" : "کلید نقشه نشان تنظیم نشده است.",
+  )
+  const [isLoading, setIsLoading] = useState(Boolean(neshanMapKey))
 
-  const handleMapClick = (event: MouseEvent<SVGSVGElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect()
-    const x = ((event.clientX - rect.left) / rect.width) * mapSize.width
-    const y = ((event.clientY - rect.top) / rect.height) * mapSize.height
+  const selectedLocation = value || null
 
-    onChange(pointToLocation(x, y))
-  }
+  useEffect(() => {
+    latestOnChangeRef.current = onChange
+  }, [onChange])
+
+  useEffect(() => {
+    if (!neshanMapKey) return
+
+    const mapElement = mapElementRef.current
+    if (!mapElement || mapRef.current) return
+
+    let isMounted = true
+    const initialLocation = initialLocationRef.current
+
+    loadNeshanLeaflet()
+      .then((leaflet) => {
+        if (!isMounted || !mapElementRef.current) return
+
+        const map = new leaflet.Map(mapElementRef.current, {
+          key: neshanMapKey,
+          maptype: neshanMapType,
+          poi: true,
+          traffic: false,
+          center: [initialLocation.lat, initialLocation.lng],
+          zoom: 14,
+        })
+        const marker = leaflet
+          .marker([initialLocation.lat, initialLocation.lng], {
+            draggable: true,
+          })
+          .addTo(map)
+
+        map.on("click", (event) => {
+          const nextLocation = normalizeLocation(event.latlng)
+          marker.setLatLng(nextLocation)
+          map.panTo([nextLocation.lat, nextLocation.lng])
+          latestOnChangeRef.current(nextLocation)
+        })
+
+        marker.on("dragend", (event) => {
+          const nextLocation = normalizeLocation(event.target.getLatLng())
+          map.panTo([nextLocation.lat, nextLocation.lng])
+          latestOnChangeRef.current(nextLocation)
+        })
+
+        mapRef.current = map
+        markerRef.current = marker
+        setIsLoading(false)
+      })
+      .catch(() => {
+        if (!isMounted) return
+        setIsLoading(false)
+        setLoadError("بارگذاری نقشه نشان ناموفق بود.")
+      })
+
+    return () => {
+      isMounted = false
+      mapRef.current?.remove()
+      mapRef.current = null
+      markerRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!value || !markerRef.current || !mapRef.current) return
+
+    markerRef.current.setLatLng([value.lat, value.lng])
+    mapRef.current.setView([value.lat, value.lng])
+  }, [value])
 
   return (
     <div className={styles.mapPicker}>
@@ -130,58 +253,18 @@ export default function IranLocationPicker({
           error ? styles.iranMapFrameError : ""
         }`}
       >
-        <svg
-          viewBox={`0 0 ${mapSize.width} ${mapSize.height}`}
-          className={styles.iranMap}
-          role="button"
-          tabIndex={0}
-          aria-label="انتخاب موقعیت روی نقشه ایران"
-          onClick={handleMapClick}
-          onKeyDown={(event) => {
-            if (event.key === "Enter" || event.key === " ") {
-              onChange({ lat: 35.6892, lng: 51.389 })
-            }
-          }}
-        >
-          <rect width="360" height="240" className={styles.iranMapSea} />
-          <path d={iranOutline} className={styles.iranMapLand} />
-          {provinceLines.map((line) => (
-            <path key={line} d={line} className={styles.iranMapProvinceLine} />
-          ))}
-          {cities.map((city) => {
-            const point = locationToPoint(city)
-
-            return (
-              <g key={city.name} className={styles.iranMapCity}>
-                <circle cx={point.x} cy={point.y} r="2.4" />
-                <text x={point.x + 4} y={point.y - 4}>
-                  {city.name}
-                </text>
-              </g>
-            )
-          })}
-          <text x="96" y="34" className={styles.iranMapWaterLabel}>
-            دریای خزر
-          </text>
-          <text x="98" y="224" className={styles.iranMapWaterLabel}>
-            خلیج فارس
-          </text>
-          <text x="228" y="226" className={styles.iranMapWaterLabel}>
-            دریای عمان
-          </text>
-          {selectedPoint && (
-            <g className={styles.iranMapMarker}>
-              <circle cx={selectedPoint.x} cy={selectedPoint.y} r="9" />
-              <circle cx={selectedPoint.x} cy={selectedPoint.y} r="4" />
-            </g>
-          )}
-        </svg>
+        <div ref={mapElementRef} className={styles.iranMap} />
+        {(isLoading || loadError) && (
+          <div className={styles.iranMapOverlay}>
+            {isLoading ? "در حال بارگذاری نقشه نشان..." : loadError}
+          </div>
+        )}
       </div>
 
       <div className={styles.mapSelectedText}>
-        {value
-          ? `موقعیت انتخاب‌شده: ${value.lat.toLocaleString("fa-IR")}، ${value.lng.toLocaleString("fa-IR")}`
-          : "برای انتخاب موقعیت، روی نقشه کلیک کنید."}
+        {selectedLocation
+          ? `موقعیت انتخاب‌شده: ${selectedLocation.lat.toLocaleString("fa-IR")}، ${selectedLocation.lng.toLocaleString("fa-IR")}`
+          : "برای انتخاب موقعیت، روی نقشه کلیک کنید یا نشانگر را جابه‌جا کنید."}
       </div>
     </div>
   )
