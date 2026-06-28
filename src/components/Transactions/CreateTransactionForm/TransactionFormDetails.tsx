@@ -37,6 +37,15 @@ import styles from "./styles/TransactionFormDetails.module.scss"
 const totalAmountLessThanEscrowMessage =
   "مبلغ نهایی کل معامله نمی‌تواند کمتر از مبلغ واریزی به حساب امانی باشد."
 
+const conditionalPropertyTypes = [
+  "boolean_integer",
+  "boolean_string",
+  "boolean_date",
+] as const
+
+const isConditionalPropertyType = (fieldType: string) =>
+  conditionalPropertyTypes.some((type) => type === fieldType)
+
 interface TransactionFormDetailsProps {
   stageNumber?: number
   dealId?: number | null
@@ -188,16 +197,21 @@ export default function TransactionFormDetails({
         issues.push({ key: "title", label: "عنوان معامله" })
       }
 
-      stageProperties
-        .filter((property) => property.is_required)
-        .forEach((property) => {
-          if (isEmptyValue(propertyValues[property.slug])) {
-            issues.push({
-              key: `property:${property.slug}`,
-              label: property.name,
-            })
-          }
-        })
+      stageProperties.forEach((property) => {
+        const value = propertyValues[property.slug]
+        const isMissingRequiredValue =
+          property.is_required && isEmptyValue(value)
+        const isMissingConditionalValue =
+          isConditionalPropertyType(property.field_type) &&
+          (value === true || value === "")
+
+        if (isMissingRequiredValue || isMissingConditionalValue) {
+          issues.push({
+            key: `property:${property.slug}`,
+            label: property.name,
+          })
+        }
+      })
 
       if (!escrowAmount) {
         issues.push({
@@ -425,9 +439,7 @@ export default function TransactionFormDetails({
 
     if (requiredIssues.length > 0 || totalValidationMessage) {
       setFieldErrors(requiredIssues.map((issue) => issue.key))
-      setRequiredValidationMessage(
-        requiredIssues.map((issue) => issue.label),
-      )
+      setRequiredValidationMessage(requiredIssues.map((issue) => issue.label))
       setTotalAmountError(totalValidationMessage)
       return
     }
@@ -469,9 +481,17 @@ export default function TransactionFormDetails({
       .forEach((prop) => {
         const value = propertyValues[prop.slug]
 
-        if (prop.field_type === "integer") {
+        if (
+          prop.field_type === "integer" ||
+          prop.field_type === "boolean_integer"
+        ) {
+          if (value === false || value === undefined) {
+            propertiesData[prop.slug] = value ?? ""
+            return
+          }
+
           const integerValue =
-            value === "" || value === undefined ? "" : Number(value)
+            value === "" || value === true ? "" : Number(value)
           propertiesData[prop.slug] = Number.isFinite(integerValue)
             ? integerValue
             : ""

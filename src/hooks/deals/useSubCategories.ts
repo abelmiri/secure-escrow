@@ -21,6 +21,9 @@ export interface Property {
     | "date"
     | "multiselect"
     | "map"
+    | "boolean_integer"
+    | "boolean_string"
+    | "boolean_date"
   unit: string | null
   regex_pattern: string | null
   is_required: boolean
@@ -37,10 +40,11 @@ export interface SubCategoryResponse {
 }
 
 export function useSubCategories(subCategoryId: number | null) {
-  const { data: subCategoryData, error, isLoading } = useSWR<
-    SubCategoryResponse,
-    unknown
-  >(
+  const {
+    data: subCategoryData,
+    error,
+    isLoading,
+  } = useSWR<SubCategoryResponse, unknown>(
     subCategoryId ? API_URLS.subCategories({ id: subCategoryId }) : null,
     (url: string) => request.get({ url }),
   )

@@ -46,6 +46,34 @@ const widthClassNames: Record<PropertyFieldWidth, string> = {
   twoThird: styles.fieldTwoThird,
 }
 
+type ConditionalFieldType =
+  | "boolean_integer"
+  | "boolean_string"
+  | "boolean_date"
+
+const isConditionalFieldType = (
+  fieldType: Property["field_type"],
+): fieldType is ConditionalFieldType =>
+  fieldType === "boolean_integer" ||
+  fieldType === "boolean_string" ||
+  fieldType === "boolean_date"
+
+const getConditionalFieldTitles = (title: string) => {
+  const separatorIndex = title.indexOf("_")
+
+  if (separatorIndex === -1) {
+    return { questionTitle: title, inputTitle: title }
+  }
+
+  const questionTitle = title.slice(0, separatorIndex).trim()
+  const inputTitle = title.slice(separatorIndex + 1).trim()
+
+  return {
+    questionTitle: questionTitle || title,
+    inputTitle: inputTitle || questionTitle || title,
+  }
+}
+
 export default function DynamicPropertyField({
   property,
   subCategorySlug,
@@ -67,6 +95,17 @@ export default function DynamicPropertyField({
   const mapValue = isMapLocationValue(value) ? value : null
   const propertyName = property.property_name || property.slug
   const fieldWidth = getTransactionPropertyWidth(subCategorySlug, propertyName)
+  const isConditionalField = isConditionalFieldType(property.field_type)
+  const isConditionalFieldEnabled =
+    isConditionalField &&
+    (value === true || typeof value === "string" || typeof value === "number")
+  const conditionalValue =
+    typeof value === "string"
+      ? value
+      : typeof value === "number"
+        ? String(value)
+        : ""
+  const { questionTitle, inputTitle } = getConditionalFieldTitles(property.name)
 
   return (
     <div className={widthClassNames[fieldWidth]}>
@@ -160,6 +199,75 @@ export default function DynamicPropertyField({
           error={error}
           onChange={onChange}
         />
+      ) : isConditionalField ? (
+        <div className={styles.conditionalField}>
+          <div
+            className={
+              error && !isConditionalFieldEnabled && value !== false
+                ? styles.radioGroupError
+                : undefined
+            }
+          >
+            <div className={styles.radioQuestion}>
+              {questionTitle}
+              {property.is_required && (
+                <span className={styles.requiredMark}>*</span>
+              )}
+            </div>
+            <div className={styles.radioOptionsInline}>
+              <RadioButton
+                title="بله"
+                name={property.slug}
+                value="true"
+                checked={isConditionalFieldEnabled}
+                onChange={() => onChange(true)}
+              />
+              <RadioButton
+                title="خیر"
+                name={property.slug}
+                value="false"
+                checked={value === false}
+                onChange={() => onChange(false)}
+              />
+            </div>
+          </div>
+
+          {isConditionalFieldEnabled &&
+            (property.field_type === "boolean_date" ? (
+              <DatePicker
+                title={inputTitle}
+                placeholder={`انتخاب ${inputTitle}`}
+                value={conditionalValue}
+                onChange={onChange}
+                required
+                error={error && conditionalValue === ""}
+              />
+            ) : (
+              <ListInput
+                title={inputTitle}
+                placeholder={
+                  property.unit
+                    ? `${inputTitle} (${property.unit})`
+                    : inputTitle
+                }
+                value={conditionalValue}
+                onChange={onChange}
+                valueType={
+                  property.field_type === "boolean_integer"
+                    ? "number"
+                    : "string"
+                }
+                rejectPersianDigits
+                required
+                error={error && conditionalValue === ""}
+                regex={
+                  property.regex_pattern
+                    ? new RegExp(property.regex_pattern)
+                    : undefined
+                }
+              />
+            ))}
+        </div>
       ) : property.field_type === "bool" ? (
         <div className={error ? styles.radioGroupError : undefined}>
           <div className={styles.radioQuestion}>{property.name}</div>

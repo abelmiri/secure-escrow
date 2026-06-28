@@ -71,6 +71,7 @@ export default function DatePicker({
         </div>
       )}
       <MultiDatePicker
+        zIndex={50}
         value={pickerValue}
         onChange={handleChange}
         calendar={persian}
