@@ -13,6 +13,8 @@ import resetDataManager from "@/helpers/storage/resetDataManager"
 import type { Dispatch, RefObject } from "react"
 import getToken from "@/request/getToken"
 import request from "@/request/request"
+import refreshAccessToken from "@/helpers/auth/refreshAccessToken"
+import storeAuthTokens from "@/helpers/auth/storeAuthTokens"
 
 function getProfile({
   authDispatch,
@@ -94,53 +96,8 @@ function setUser({
   authDispatch({ type: "SET_USER", payload: { user } })
 }
 
-function _setCookies({ res }: { res: LoginType }) {
-  const { access_token, refresh_token, id_token, token_type, expires_in } = res
-  cookieHelper.setItem(
-    COOKIE_VALUES.ACCOUNT.token,
-    `${token_type} ${access_token}`,
-  )
-  cookieHelper.setItem(COOKIE_VALUES.ACCOUNT.refresh_token, refresh_token)
-  if (id_token) {
-    cookieHelper.setItem(COOKIE_VALUES.ACCOUNT.id_token, id_token)
-  }
-  cookieHelper.setItem(
-    COOKIE_VALUES.ACCOUNT.token_expires_in,
-    new Date(Date.now() + expires_in * 1000).toString(),
-  )
-}
-
 function refreshToken() {
-  const refresh_token = getToken({ useRefreshToken: true })
-  const data = new URLSearchParams()
-  data.append("refresh_token", refresh_token)
-  data.append("client_id", OAUTH.CLIENT_ID)
-  data.append("grant_type", "refresh_token")
-  return new Promise((resolve, reject) => {
-    request
-      .post({
-        data,
-        url: API_URLS.getToken,
-        subdomain: "oAuth",
-        dontToast: true,
-      })
-      .then((res: LoginType) => {
-        _setCookies({ res })
-        resolve(null)
-      })
-      .catch((err: unknown) => {
-        const refreshError =
-          typeof err === "object" &&
-          err !== null &&
-          "status" in err &&
-          err.status === 400
-        if (refreshError) {
-          reject(err)
-        } else {
-          resolve(null)
-        }
-      })
-  })
+  return refreshAccessToken()
 }
 
 function verifyOAUTH({
@@ -163,9 +120,10 @@ function verifyOAUTH({
       data,
       successMessage: "ورود با موفقیت انجام شد",
       failMessage: "ورود با شکست مواجه شد",
+      skipAuthRefresh: true,
     })
-    .then((res) => {
-      _setCookies({ res })
+    .then((res: LoginType) => {
+      storeAuthTokens(res)
 
       return getProfile({ authDispatch })
         .then(() => {
@@ -192,6 +150,7 @@ function logout() {
     data,
     successMessage: "خروج با موفقیت انجام شد",
     failMessage: "خروج با موفقیت انجام نشد",
+    skipAuthRefresh: true,
   })
 }
 

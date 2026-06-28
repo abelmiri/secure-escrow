@@ -3,11 +3,17 @@ export function getErrorMessage({
   data,
 }: {
   status?: number
-  data?: any
+  data?: unknown
 }): string {
   if (data && typeof data === "string") return data
-  if (data?.message) return data.message
-  if (data?.error) return data.error
+  if (data && typeof data === "object") {
+    if ("message" in data && typeof data.message === "string") {
+      return data.message
+    }
+    if ("error" in data && typeof data.error === "string") {
+      return data.error
+    }
+  }
 
   if (status === 404) return "منبع مورد نظر یافت نشد"
   if (status === 500) return "خطای داخلی سرور"

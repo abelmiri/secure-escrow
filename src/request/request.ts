@@ -1,5 +1,4 @@
 import cancelMaker from "@/request/cancelMaker"
-import getToken from "@/request/getToken"
 import headerMaker from "@/request/headerMaker"
 import urlMaker from "@/request/urlMaker"
 import type {
@@ -10,20 +9,25 @@ import type {
   RequestPostType,
   RequestUploadAxiosType,
 } from "@/request/RequestTypes"
-import authActions from "@/context/auth/authActions"
 import { toastManager } from "@/lib/toastManager"
 import { getErrorMessage, toastConstant } from "@/lib/errorHelpers"
 import handleUnauthorized from "@/helpers/auth/handleUnauthorized"
+import refreshAccessToken from "@/helpers/auth/refreshAccessToken"
 
-function get({
-  url,
-  subdomain,
-  params,
-  cancelToken,
-  dontToast,
-  successMessage,
-  failMessage,
-}: RequestGetType): Promise<any> {
+type RequestResult = Awaited<ReturnType<Body["json"]>>
+
+function get(options: RequestGetType): Promise<RequestResult> {
+  const {
+    url,
+    subdomain,
+    params,
+    cancelToken,
+    dontToast,
+    successMessage,
+    failMessage,
+    skipAuthRefresh,
+    hasRetriedAfterRefresh,
+  } = options
   const reqUrl = urlMaker({ url, params, subdomain })
   return fetch(reqUrl, {
     headers: headerMaker(),
@@ -46,7 +50,8 @@ function get({
           return _serverErrorHandler({
             status: res.status,
             data,
-            callback: () => get(arguments[0]),
+            callback: () => get({ ...options, hasRetriedAfterRefresh: true }),
+            canRefreshToken: !skipAuthRefresh && !hasRetriedAfterRefresh,
           })
         }
       })
@@ -56,16 +61,19 @@ function get({
     })
 }
 
-function post({
-  url,
-  subdomain,
-  data,
-  params,
-  cancelToken,
-  dontToast,
-  successMessage,
-  failMessage,
-}: RequestPostType) {
+function post(options: RequestPostType): Promise<RequestResult> {
+  const {
+    url,
+    subdomain,
+    data,
+    params,
+    cancelToken,
+    dontToast,
+    successMessage,
+    failMessage,
+    skipAuthRefresh,
+    hasRetriedAfterRefresh,
+  } = options
   const reqUrl = urlMaker({ url, params, subdomain })
   const isURLSearchParams = data instanceof URLSearchParams
   const isFormData = data instanceof FormData
@@ -98,7 +106,8 @@ function post({
           return _serverErrorHandler({
             data,
             status: res.status,
-            callback: () => post(arguments[0]),
+            callback: () => post({ ...options, hasRetriedAfterRefresh: true }),
+            canRefreshToken: !skipAuthRefresh && !hasRetriedAfterRefresh,
           })
         }
       })
@@ -108,16 +117,19 @@ function post({
     })
 }
 
-function patch({
-  url,
-  subdomain,
-  data,
-  params,
-  cancelToken,
-  dontToast,
-  successMessage,
-  failMessage,
-}: RequestPatchType) {
+function patch(options: RequestPatchType): Promise<RequestResult> {
+  const {
+    url,
+    subdomain,
+    data,
+    params,
+    cancelToken,
+    dontToast,
+    successMessage,
+    failMessage,
+    skipAuthRefresh,
+    hasRetriedAfterRefresh,
+  } = options
   const reqUrl = urlMaker({ url, params, subdomain })
   const isURLSearchParams = data instanceof URLSearchParams
   const isFormData = data instanceof FormData
@@ -150,7 +162,8 @@ function patch({
           return _serverErrorHandler({
             data,
             status: res.status,
-            callback: () => patch(arguments[0]),
+            callback: () => patch({ ...options, hasRetriedAfterRefresh: true }),
+            canRefreshToken: !skipAuthRefresh && !hasRetriedAfterRefresh,
           })
         }
       })
@@ -160,15 +173,18 @@ function patch({
     })
 }
 
-function del({
-  url,
-  subdomain,
-  params,
-  cancelToken,
-  dontToast,
-  successMessage,
-  failMessage,
-}: RequestDelType) {
+function del(options: RequestDelType): Promise<RequestResult> {
+  const {
+    url,
+    subdomain,
+    params,
+    cancelToken,
+    dontToast,
+    successMessage,
+    failMessage,
+    skipAuthRefresh,
+    hasRetriedAfterRefresh,
+  } = options
   const reqUrl = urlMaker({ url, params, subdomain })
   return fetch(reqUrl, {
     method: "DELETE",
@@ -192,7 +208,8 @@ function del({
           return _serverErrorHandler({
             data,
             status: res.status,
-            callback: () => del(arguments[0]),
+            callback: () => del({ ...options, hasRetriedAfterRefresh: true }),
+            canRefreshToken: !skipAuthRefresh && !hasRetriedAfterRefresh,
           })
         }
       })
@@ -202,18 +219,21 @@ function del({
     })
 }
 
-function upload({
-  url,
-  subdomain,
-  data,
-  params,
-  cancelToken,
-  dontToast,
-  successMessage,
-  failMessage,
-  method,
-  progress,
-}: RequestUploadAxiosType): Promise<any> {
+function upload(options: RequestUploadAxiosType): Promise<RequestResult> {
+  const {
+    url,
+    subdomain,
+    data,
+    params,
+    cancelToken,
+    dontToast,
+    successMessage,
+    failMessage,
+    method,
+    progress,
+    skipAuthRefresh,
+    hasRetriedAfterRefresh,
+  } = options
   const reqUrl = urlMaker({ url, params, subdomain })
   const isFormData = data instanceof FormData
 
@@ -249,16 +269,23 @@ function upload({
         _successHandler({ successMessage, dontToast, method })
         resolve(responseData)
       } else {
-        try {
-          _serverErrorHandler({
-            status: xhr.status,
-            data: responseData,
-            callback: () => upload(arguments[0]),
+        Promise.resolve()
+          .then(() =>
+            _serverErrorHandler({
+              status: xhr.status,
+              data: responseData,
+              callback: () =>
+                upload({ ...options, hasRetriedAfterRefresh: true }),
+              canRefreshToken: !skipAuthRefresh && !hasRetriedAfterRefresh,
+            }),
+          )
+          .then(resolve, (err) => {
+            try {
+              _networkErrorHandler({ err, dontToast, failMessage })
+            } catch (handledError) {
+              reject(handledError)
+            }
           })
-        } catch (err) {
-          _networkErrorHandler({ err, dontToast, failMessage })
-          reject(err)
-        }
       }
     }
 
@@ -310,8 +337,18 @@ function _successHandler({
   }
 }
 
-function _serverErrorHandler({ data, status, callback }: RequestErrorType) {
-  if (status === 401 || status === 403) {
+function _serverErrorHandler({
+  data,
+  status,
+  callback,
+  canRefreshToken,
+}: RequestErrorType) {
+  if (status === 401 && canRefreshToken) {
+    return refreshAccessToken().then(callback, (refreshError) => {
+      handleUnauthorized()
+      throw refreshError
+    })
+  } else if (status === 401 || status === 403) {
     handleUnauthorized()
     throw { status, data }
   } else {
@@ -319,53 +356,38 @@ function _serverErrorHandler({ data, status, callback }: RequestErrorType) {
   }
 }
 
-// function _serverErrorHandler({ data, status, callback }: RequestErrorType) {
-//   const refresh_token = getToken({ useRefreshToken: true })
-//   if (
-//     status === 401 &&
-//     "code" in data &&
-//     data.code === "token_not_valid" &&
-//     refresh_token
-//   ) {
-//     return authActions
-//       .refreshToken()
-//       .then(callback)
-//       .catch(() => {
-//         handleUnauthorized()
-//       })
-//   } else if (status === 401 || status === 403) {
-//     handleUnauthorized()
-//     throw { status, data }
-//   } else {
-//     throw { status, data }
-//   }
-// }
-
 function _networkErrorHandler({
   err,
   dontToast,
   failMessage,
 }: {
-  err: any
+  err: unknown
   dontToast?: boolean
   failMessage?: string
 }) {
+  const errorObject =
+    typeof err === "object" && err !== null
+      ? (err as Record<string, unknown>)
+      : null
+  const errorStatus =
+    typeof errorObject?.status === "number" ? errorObject.status : undefined
+
   if (
     err !== "CANCEL" &&
-    err?.code !== "ERR_CANCELED" &&
-    !err?.toString()?.includes?.("abort")
+    errorObject?.code !== "ERR_CANCELED" &&
+    !String(err).includes("abort")
   ) {
-    if (err?.status !== 404) {
+    if (errorStatus !== 404) {
       console.error(err)
     }
 
-    const isServerErr = typeof err === "object" && "status" in err
+    const isServerErr = errorStatus !== undefined
 
     if (typeof window !== "undefined" && !dontToast) {
       const message =
         failMessage ||
         (isServerErr
-          ? getErrorMessage({ status: err?.status, data: err?.data })
+          ? getErrorMessage({ status: errorStatus, data: errorObject?.data })
           : toastConstant.networkError)
 
       toastManager.addToast({

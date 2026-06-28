@@ -66,10 +66,7 @@ export default function DynamicPropertyField({
       : []
   const mapValue = isMapLocationValue(value) ? value : null
   const propertyName = property.property_name || property.slug
-  const fieldWidth = getTransactionPropertyWidth(
-    subCategorySlug,
-    propertyName,
-  )
+  const fieldWidth = getTransactionPropertyWidth(subCategorySlug, propertyName)
 
   return (
     <div className={widthClassNames[fieldWidth]}>
@@ -194,6 +191,7 @@ export default function DynamicPropertyField({
           value={stringValue}
           onChange={onChange}
           valueType={property.field_type === "integer" ? "number" : "string"}
+          rejectPersianDigits
           required={property.is_required}
           error={error}
           regex={

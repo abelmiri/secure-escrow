@@ -10,6 +10,7 @@ type ListInputProps = {
   textarea?: boolean
   regex?: RegExp
   valueType?: "string" | "number" | "integer"
+  rejectPersianDigits?: boolean
   required?: boolean
   error?: boolean
 }
@@ -22,6 +23,7 @@ export default function ListInput({
   textarea = false,
   regex,
   valueType = "string",
+  rejectPersianDigits = false,
   required = false,
   error = false,
 }: ListInputProps) {
@@ -57,12 +59,14 @@ export default function ListInput({
   }
 
   const handleChange = (val: string) => {
+    const sanitizedValue = rejectPersianDigits ? val.replace(/[۰-۹]/g, "") : val
+
     if (valueType === "number" || valueType === "integer") {
-      const englishDigits = toEnglishDigits(val)
+      const englishDigits = toEnglishDigits(sanitizedValue)
       const rawValue = englishDigits.replace(/,/g, "").replace(/[^0-9]/g, "")
       onChange?.(rawValue)
     } else {
-      onChange?.(val)
+      onChange?.(sanitizedValue)
     }
   }
 

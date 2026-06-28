@@ -10,6 +10,8 @@ interface RequestType {
   successMessage?: string
   failMessage?: string
   subdomain?: SubdomainType
+  skipAuthRefresh?: boolean
+  hasRetriedAfterRefresh?: boolean
 }
 
 export interface RequestGetType extends RequestType {
@@ -38,5 +40,6 @@ export interface RequestServerErrorType {
 }
 
 export interface RequestErrorType extends RequestServerErrorType {
-  callback: (value: any) => any
+  callback: () => unknown
+  canRefreshToken: boolean
 }
