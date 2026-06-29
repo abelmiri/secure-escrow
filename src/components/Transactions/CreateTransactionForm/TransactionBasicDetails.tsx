@@ -100,7 +100,8 @@ export default function TransactionBasicDetails({
         title="عنوان معامله"
         value={title}
         onChange={onTitleChange}
-        regex={/^[\u0600-\u06FFa-zA-Z\s]+$/}
+        regex={/^[\u0600-\u06FFa-zA-Z0-9\s]+$/}
+        rejectPersianDigits
         required
         error={fieldErrors.includes("title")}
       />
