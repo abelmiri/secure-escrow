@@ -15,12 +15,15 @@ export interface DealItem {
   deal?: number
   name?: string
   description?: string
+  escrow_price?: number | string | null
+  images_count?: number
   price?: number | string
   total_price?: number | string
   quantity?: number | string
   slug?: string
   subcategory?: string | { id?: number; name?: string; slug?: string }
   properties?: Record<string, unknown>
+  remaining_price_payment_description?: string | null
   remaining_price_payment_method?: string
 }
 
@@ -38,11 +41,13 @@ export interface DealDocument {
 
 export interface DealDetail {
   id: number
+  label?: string
   items?: DealItem[]
   parties?: DealParty[]
   documents?: DealDocument[]
   state?: number | string
   sub_state?: number | string
+  total_amount?: number | string | null
   trace_number?: string
   created_at?: string
   updated_at?: string

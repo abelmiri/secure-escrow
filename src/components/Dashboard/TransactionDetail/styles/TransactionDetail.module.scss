@@ -119,6 +119,21 @@
     background-color: #d6ddff;
     color: var(--color-secondary);
   }
+
+  &.pending {
+    background-color: #fef0c7;
+    color: #b54708;
+  }
+
+  &.inspection {
+    background-color: #e0f2fe;
+    color: #026aa2;
+  }
+
+  &.completed {
+    background-color: #dcfae6;
+    color: #067647;
+  }
 }
 
 .roleBadge {

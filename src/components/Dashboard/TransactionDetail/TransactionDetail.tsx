@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useContext, useState } from "react"
 import {
   Box,
   Typography,
@@ -9,6 +9,7 @@ import {
   Tabs,
   Tab,
   Avatar,
+  CircularProgress,
 } from "@mui/material"
 import Link from "next/link"
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
@@ -24,6 +25,14 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile"
 import FolderZipIcon from "@mui/icons-material/FolderZip"
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined"
 import { dealsData } from "@/constants/deals"
+import type { Deal } from "@/constants/deals"
+import { authContext } from "@/context/auth/authProvider"
+import { useDeal } from "@/hooks/deals/useDeal"
+import type {
+  DealDetail,
+  DealItem,
+  DealParty,
+} from "@/hooks/deals/useDeal"
 import styles from "./styles/TransactionDetail.module.scss"
 
 interface TabPanelProps {
@@ -75,16 +84,259 @@ function TabPanel(props: TabPanelProps) {
   )
 }
 
+const roleLabels: Record<string, Deal["role"]> = {
+  customer: "خریدار",
+  beneficiary: "فروشنده",
+  broker: "کارگزار",
+}
+
+const statusLabels: Record<string, string> = {
+  Created: "ایجاد شده",
+  Pending: "در انتظار",
+  WaitingForPayment: "در انتظار پرداخت",
+  PaymentPending: "در انتظار پرداخت",
+  InProgress: "در حال انجام",
+  Processing: "در حال انجام",
+  Inspection: "دوره بازرسی",
+  Completed: "تکمیل شده",
+  Done: "تکمیل شده",
+  Cancelled: "لغو شده",
+  Canceled: "لغو شده",
+  Rejected: "رد شده",
+}
+
+const resolveStatus = (state?: number | string) => {
+  const normalizedState = state?.toString() || ""
+  return statusLabels[normalizedState] || normalizedState || "نامشخص"
+}
+
+const resolveStatusType = (status: string): Deal["statusType"] => {
+  if (status === "تکمیل شده") return "completed"
+  if (status === "در انتظار" || status === "در انتظار پرداخت") return "pending"
+  if (status === "دوره بازرسی") return "inspection"
+  return "processing"
+}
+
+const resolveSubcategory = (item?: DealItem) => {
+  if (!item?.subcategory) return undefined
+  if (typeof item.subcategory === "string") return item.subcategory
+  return item.subcategory.name || item.subcategory.slug
+}
+
+const propertyLabels: Record<string, string> = {
+  author_name: "نام نویسنده",
+  book_condition: "وضعیت کتاب",
+  book_title: "عنوان کتاب",
+  publication_year: "سال انتشار",
+}
+
+const propertyValueLabels: Record<string, string> = {
+  new: "نو",
+  like_new: "در حد نو",
+  used: "دست دوم",
+}
+
+const paymentMethodLabels: Record<string, string> = {
+  Cash: "پرداخت نقدی/کارت‌به‌کارت",
+  Escrow: "واریز به حساب امانی",
+  Cheque: "چک صیادی",
+  Change: "تهاتر یا معاوضه",
+}
+
+const formatDetailValue = (value: unknown): string | null => {
+  if (value === null || value === undefined || value === "") return null
+  if (typeof value === "number") return value.toLocaleString("fa-IR")
+  if (typeof value === "boolean") return value ? "بله" : "خیر"
+  if (typeof value === "string") return propertyValueLabels[value] || value
+  if (Array.isArray(value)) {
+    const values = value
+      .map(formatDetailValue)
+      .filter((item): item is string => Boolean(item))
+    return values.length ? values.join("، ") : null
+  }
+
+  try {
+    return JSON.stringify(value)
+  } catch {
+    return null
+  }
+}
+
+const resolveLocation = (item?: DealItem) => {
+  const location = item?.properties?.["sample-map-prop"]
+  if (!location || typeof location !== "object" || Array.isArray(location)) {
+    return undefined
+  }
+
+  const { lat, lng } = location as { lat?: unknown; lng?: unknown }
+  if (typeof lat !== "number" || typeof lng !== "number") return undefined
+  return `${lat.toLocaleString("fa-IR")}، ${lng.toLocaleString("fa-IR")}`
+}
+
+const resolveAdditionalDetails = (apiDeal: DealDetail, item?: DealItem) => {
+  const details: Array<{ label: string; value: string }> = []
+  const addDetail = (label: string, value: unknown) => {
+    const formattedValue = formatDetailValue(value)
+    if (formattedValue) details.push({ label, value: formattedValue })
+  }
+
+  addDetail("کد پیگیری", apiDeal.trace_number)
+  addDetail("تعداد", item?.quantity)
+  addDetail("تعداد تصاویر", item?.images_count)
+  addDetail("مبلغ واحد (ریال)", item?.price)
+  addDetail("مبلغ امانی (ریال)", item?.escrow_price)
+  addDetail(
+    "روش پرداخت مبلغ باقی‌مانده",
+    item?.remaining_price_payment_method
+      ? paymentMethodLabels[item.remaining_price_payment_method] ||
+          item.remaining_price_payment_method
+      : null,
+  )
+  addDetail(
+    "توضیحات پرداخت مبلغ باقی‌مانده",
+    item?.remaining_price_payment_description,
+  )
+
+  Object.entries(item?.properties || {}).forEach(([key, value]) => {
+    if (key !== "sample-map-prop") {
+      addDetail(propertyLabels[key] || key, value)
+    }
+  })
+
+  return details
+}
+
+const resolveAmount = (apiDeal: DealDetail) => {
+  const totalAmount = Number(apiDeal.total_amount)
+  if (
+    apiDeal.total_amount !== null &&
+    apiDeal.total_amount !== undefined &&
+    Number.isFinite(totalAmount)
+  ) {
+    return totalAmount
+  }
+
+  return (apiDeal.items || []).reduce(
+    (sum, item) =>
+      sum +
+      Number(item.price || item.total_price || 0) * Number(item.quantity || 1),
+    0,
+  )
+}
+
+const mapParty = (party?: DealParty) => {
+  if (!party) return undefined
+
+  const identifier = party.mobile_number || party.user || ""
+  return {
+    name: party.full_name || identifier || "نامشخص",
+    email: party.email || identifier,
+    isVerified: false,
+  }
+}
+
+const mapApiDealToUi = (
+  apiDeal: DealDetail,
+  staticTemplate: Deal,
+  currentUserMobile?: string,
+): Deal => {
+  const firstItem = apiDeal.items?.[0]
+  const status = resolveStatus(apiDeal.state)
+  const currentParty = currentUserMobile
+    ? apiDeal.parties?.find(
+        (party) =>
+          party.user === currentUserMobile ||
+          party.mobile_number === currentUserMobile,
+      )
+    : undefined
+  const buyer = apiDeal.parties?.find((party) => party.role === "customer")
+  const seller = apiDeal.parties?.find((party) => party.role === "beneficiary")
+  const counterparty = currentUserMobile
+    ? apiDeal.parties?.find(
+        (party) =>
+          party.user !== currentUserMobile &&
+          party.mobile_number !== currentUserMobile,
+      )
+    : apiDeal.parties?.[0]
+  const amount = resolveAmount(apiDeal).toLocaleString("fa-IR")
+
+  return {
+    ...staticTemplate,
+    id: apiDeal.label || apiDeal.id.toString(),
+    title:
+      firstItem?.name ||
+      firstItem?.description ||
+      "معامله بدون عنوان",
+    status,
+    statusType: resolveStatusType(status),
+    role: currentParty?.role
+      ? roleLabels[currentParty.role] || staticTemplate.role
+      : "نامشخص",
+    participant: counterparty
+      ? `طرف مقابل: ${mapParty(counterparty)?.name}`
+      : "طرف مقابل ثبت نشده",
+    date: apiDeal.created_at
+      ? new Date(apiDeal.created_at).toLocaleDateString("fa-IR")
+      : "",
+    amount,
+    currency: "ریال",
+    serviceFee: undefined,
+    totalAmount: amount,
+    paymentStatus: undefined,
+    buyer: apiDeal.parties ? mapParty(buyer) : staticTemplate.buyer,
+    seller: apiDeal.parties ? mapParty(seller) : staticTemplate.seller,
+    details: {
+      category: resolveSubcategory(firstItem),
+      description: firstItem?.description || undefined,
+      location: resolveLocation(firstItem),
+      additionalDetails: resolveAdditionalDetails(apiDeal, firstItem),
+    },
+  }
+}
+
 export default function TransactionDetail({ id }: { id: string }) {
-  const deal = dealsData.find((d) => d.id === id)
+  const { authState } = useContext(authContext)
+  const staticDeal = dealsData.find((deal) => deal.id === id)
+  const numericId = Number(id)
+  const apiDealId =
+    !staticDeal && Number.isInteger(numericId) && numericId > 0
+      ? numericId
+      : null
+  const { deal: apiDeal, isLoading, error } = useDeal(apiDealId)
+  const deal =
+    staticDeal ||
+    (apiDeal
+      ? mapApiDealToUi(
+          apiDeal,
+          dealsData[0],
+          authState.user?.mobile_number,
+        )
+      : undefined)
   const [tabValue, setTabValue] = useState(2) // Default to Messages to match the image
   const [messageText, setMessageText] = useState("")
+
+  if (isLoading) {
+    return (
+      <Box className={styles.mainWrapper}>
+        <Box
+          className={styles.container}
+          sx={{ display: "flex", justifyContent: "center", padding: "80px" }}
+        >
+          <CircularProgress size={36} />
+        </Box>
+      </Box>
+    )
+  }
 
   if (!deal) {
     return (
       <Box className={styles.mainWrapper}>
         <Box className={styles.container}>
-          <Typography>معامله‌ای با این شناسه یافت نشد.</Typography>
+          <Typography>
+            {error
+              ? "دریافت اطلاعات معامله با خطا مواجه شد."
+              : "معامله‌ای با این شناسه یافت نشد."}
+          </Typography>
           <Link href="/dashboard" className={styles.backButton}>
             بازگشت به داشبورد
           </Link>
@@ -134,7 +386,9 @@ export default function TransactionDetail({ id }: { id: string }) {
               <Typography className={styles.transactionId}>
                 شناسه معامله: {deal.id}
               </Typography>
-              <Box className={`${styles.statusBadge} ${styles.processing}`}>
+              <Box
+                className={`${styles.statusBadge} ${styles[deal.statusType]}`}
+              >
                 {deal.status}
               </Box>
               <Box className={styles.roleBadge}>شما {deal.role} هستید</Box>
@@ -142,9 +396,9 @@ export default function TransactionDetail({ id }: { id: string }) {
           </Box>
           <Box className={styles.headerLeft}>
             <Typography className={styles.amount}>
-              {deal.amount} تومان
+              {deal.amount} {deal.currency || "تومان"}
             </Typography>
-            <Typography className={styles.amountLabel}>مبلغ امانی</Typography>
+            <Typography className={styles.amountLabel}>مبلغ معامله</Typography>
           </Box>
         </Box>
 
@@ -369,6 +623,16 @@ export default function TransactionDetail({ id }: { id: string }) {
                           </Typography>
                         </Box>
                       )}
+                      {deal.details.additionalDetails?.map((detail) => (
+                        <Box key={detail.label} className={styles.detailRow}>
+                          <Typography className={styles.detailLabel}>
+                            {detail.label}
+                          </Typography>
+                          <Typography className={styles.detailValue}>
+                            {detail.value}
+                          </Typography>
+                        </Box>
+                      ))}
                     </>
                   )}
                 </Box>
@@ -615,7 +879,7 @@ export default function TransactionDetail({ id }: { id: string }) {
                     مبلغ معامله
                   </Typography>
                   <Typography className={styles.paymentValue}>
-                    {deal.amount} تومان
+                    {deal.amount} {deal.currency || "تومان"}
                   </Typography>
                 </Box>
                 {deal.serviceFee && (
@@ -624,14 +888,15 @@ export default function TransactionDetail({ id }: { id: string }) {
                       کارمزد سرویس امانی (۲.۵٪)
                     </Typography>
                     <Typography className={styles.paymentValue}>
-                      {deal.serviceFee} تومان
+                      {deal.serviceFee} {deal.currency || "تومان"}
                     </Typography>
                   </Box>
                 )}
                 <Box className={`${styles.paymentRow} ${styles.paymentTotal}`}>
                   <Typography className={styles.paymentLabel}>مجموع</Typography>
                   <Typography className={styles.paymentValue}>
-                    {deal.totalAmount || deal.amount} تومان
+                    {deal.totalAmount || deal.amount}{" "}
+                    {deal.currency || "تومان"}
                   </Typography>
                 </Box>
                 {deal.paymentStatus && (

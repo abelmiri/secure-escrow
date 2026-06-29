@@ -25,6 +25,7 @@ type RoleFilter = DealRole | ""
 type StatusType = "processing" | "pending" | "inspection" | "completed"
 type DashboardDealCard = {
   id: string
+  label: string
   href: string
   title: string
   status: string
@@ -119,6 +120,7 @@ export default function DashboardDeals() {
     return matchesSearch && matchesRole
   }).map((deal) => ({
     ...deal,
+    label: deal.id,
     href: `/dashboard/${deal.id}`,
     timestamp: getTimestamp(deal.date),
     currency: "تومان",
@@ -136,7 +138,8 @@ export default function DashboardDeals() {
 
     return {
       id: `#${deal.id}`,
-      href: "#",
+      label: deal.label,
+      href: `/dashboard/${deal.id}`,
       title: deal.title,
       status,
       statusType: resolveStatusType(status),
@@ -267,7 +270,7 @@ export default function DashboardDeals() {
                   <Box className={styles.dealCardHeader}>
                     <Box className={styles.dealBadges}>
                       <Typography className={styles.dealId}>
-                        {deal.id}
+                        {deal.label}
                       </Typography>
                       <span
                         className={`${styles.badge} ${styles[deal.statusType]}`}

@@ -7,6 +7,7 @@ export type DealRole = "customer" | "beneficiary" | "broker"
 
 export interface Deal {
   id: number
+  label: string
   traceNumber: string
   title: string
   status: string
@@ -20,35 +21,40 @@ export interface Deal {
 interface DealItem {
   deal: number
   description: string
+  escrow_price: number | string | null
   id: number
   images_count: number
   name: string
   price: number
   properties: Record<string, unknown>
   quantity: number
+  remaining_price_payment_description: string | null
+  remaining_price_payment_method: string
   slug: string
-  subcategory?: string
+  subcategory: string | null
 }
 
 interface DealResult {
+  created_at: string
   id: number
+  label: string
   items: DealItem[]
-  items_count: number | null
   parties: Array<{ role: string; user: string }>
-  state: string | number | null
+  state: string
   sub_state: number | null
-  total_amount?: number | string | null
+  total_amount: number | string | null
   trace_number: string
-  created_at?: string
   updated_at?: string
 }
 
-interface DealsResponse {
+interface PaginatedDealsResponse {
   count: number
   next: string | null
   previous: string | null
   results: DealResult[]
 }
+
+type DealsResponse = DealResult[] | PaginatedDealsResponse
 
 interface UseDealsProps {
   search?: string
@@ -68,7 +74,13 @@ const resolveDealAmount = (deal: DealResult) => {
     return Number.isFinite(totalAmount) ? totalAmount : 0
   }
 
-  return deal.items?.reduce((sum, item) => sum + Number(item.price || 0), 0) || 0
+  return (
+    deal.items?.reduce(
+      (sum, item) =>
+        sum + Number(item.price || 0) * Number(item.quantity || 1),
+      0,
+    ) || 0
+  )
 }
 
 export function useDeals({
@@ -98,10 +110,16 @@ export function useDeals({
       }),
   )
 
+  const dealResults = useMemo(
+    () => (Array.isArray(data) ? data : data?.results || []),
+    [data],
+  )
+
   const deals = useMemo(
     () =>
-      (data?.results || []).map((deal) => ({
+      dealResults.map((deal) => ({
         id: deal.id,
+        label: deal.label,
         traceNumber: deal.trace_number,
         title: resolveDealTitle(deal),
         status: deal.state?.toString() || "نامشخص",
@@ -112,12 +130,12 @@ export function useDeals({
           deal.created_at || deal.updated_at || new Date().toISOString(),
         parties: deal.parties || [],
       })),
-    [data],
+    [dealResults],
   )
 
   return {
     deals,
-    totalCount: data?.count || deals.length,
+    totalCount: Array.isArray(data) ? data.length : data?.count || deals.length,
     isLoading,
     error,
   }

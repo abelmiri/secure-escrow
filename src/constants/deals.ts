@@ -35,10 +35,11 @@ export interface Deal {
   title: string
   status: string
   statusType: "processing" | "pending" | "inspection" | "completed"
-  role: "خریدار" | "فروشنده" | "کارگزار"
+  role: "خریدار" | "فروشنده" | "کارگزار" | "نامشخص"
   participant: string
   date: string
   amount: string
+  currency?: "تومان" | "ریال"
   progress: ProgressStep[]
   requiredAction?: {
     text: string
@@ -59,6 +60,10 @@ export interface Deal {
     deliveryMethod?: string
     inspectionPeriod?: string
     terms?: string
+    additionalDetails?: Array<{
+      label: string
+      value: string
+    }>
   }
 }
 
