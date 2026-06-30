@@ -10,7 +10,6 @@ import { useCategories } from "@/hooks/deals/useCategories"
 import { useSubCategories } from "@/hooks/deals/useSubCategories"
 import { useDeal } from "@/hooks/deals/useDeal"
 import { useUpdateDeal } from "@/hooks/deals/useUpdateDeal"
-import { useDealContractPdf } from "@/hooks/documents/useDealContractPdf"
 import { useDealDocuments } from "@/hooks/documents/useDealDocuments"
 import { useDocumentRequirements } from "@/hooks/documents/useDocumentRequirements"
 import type { DocumentRequirement } from "@/hooks/documents/useDocumentRequirements"
@@ -147,8 +146,6 @@ export default function TransactionFormDetails({
   const { deal, isLoading: isDealLoading } = useDeal(
     stageNumber === 3 ? dealId || null : null,
   )
-  const { contractDocument, isLoading: isContractPdfLoading } =
-    useDealContractPdf(stageNumber === 3 ? dealId || null : null)
   const { documents: dealDocuments, isLoading: isDealDocumentsLoading } =
     useDealDocuments(stageNumber === 3 ? dealId || null : null)
 
@@ -701,10 +698,10 @@ export default function TransactionFormDetails({
       {stageNumber === 3 && (
         <TransactionReviewStage
           deal={deal}
-          contractDocument={contractDocument}
+          contractDocument={null}
           documents={dealDocuments}
           isDealLoading={isDealLoading}
-          isContractPdfLoading={isContractPdfLoading}
+          isContractPdfLoading={false}
           isDocumentsLoading={isDealDocumentsLoading}
           isSubmitting={isSubmitting}
           isTermsAccepted={isTermsAccepted}

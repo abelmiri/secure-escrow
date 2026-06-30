@@ -3,7 +3,9 @@ import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined"
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined"
 import type { DealDetail, DealItem } from "@/hooks/deals/useDeal"
 import type { UploadedDealDocument } from "@/hooks/documents/useDealDocuments"
-import { isMapLocationValue } from "./IranLocationPicker"
+import IranLocationPicker, {
+  isMapLocationValue,
+} from "./IranLocationPicker"
 import styles from "./styles/TransactionFormDetails.module.scss"
 
 const roleLabels: Record<string, string> = {
@@ -57,12 +59,16 @@ const getDocumentMeta = (document: UploadedDealDocument) => {
 
 const formatPropertyValue = (value: unknown) => {
   if (typeof value === "boolean") return value ? "دارد" : "ندارد"
-  if (isMapLocationValue(value)) {
-    return `${value.lat.toLocaleString("fa-IR")}، ${value.lng.toLocaleString("fa-IR")}`
-  }
   if (Array.isArray(value)) return value.join("، ")
   return `${value}`
 }
+
+const renderPropertyValue = (value: unknown) =>
+  isMapLocationValue(value) ? (
+    <IranLocationPicker title="" value={value} readOnly />
+  ) : (
+    formatPropertyValue(value)
+  )
 
 interface ReviewRow {
   label: string
@@ -72,6 +78,15 @@ interface ReviewRow {
 interface ReviewSectionProps {
   title: string
   rows: ReviewRow[]
+}
+
+const isPhoneNumber = (value: ReactNode) => {
+  if (typeof value !== "string") return false
+
+  const normalizedValue = value.replace(/[\s-]/g, "")
+  return /^(?:09[0-9]{9}|\+989[0-9]{9}|00989[0-9]{9})$/.test(
+    normalizedValue,
+  )
 }
 
 interface DealReviewProps {
@@ -95,12 +110,22 @@ function ReviewSection({ title, rows }: ReviewSectionProps) {
     <section className={styles.reviewSection}>
       <h3 className={styles.reviewSectionTitle}>{title}</h3>
       <div className={styles.reviewRows}>
-        {rows.map((row) => (
-          <div key={row.label} className={styles.reviewRow}>
-            <div className={styles.reviewLabel}>{row.label}</div>
-            <div className={styles.reviewValue}>{row.value || "—"}</div>
-          </div>
-        ))}
+        {rows.map((row) => {
+          const value = row.value || "—"
+
+          return (
+            <div key={row.label} className={styles.reviewRow}>
+              <div className={styles.reviewLabel}>{row.label}</div>
+              <div
+                className={`${styles.reviewValue} ${
+                  isPhoneNumber(value) ? styles.reviewValueLtr : ""
+                }`}
+              >
+                {value}
+              </div>
+            </div>
+          )
+        })}
       </div>
     </section>
   )
@@ -168,12 +193,12 @@ export default function DealReview({
             value:
               itemProperties[0]?.[1] === undefined
                 ? ""
-                : formatPropertyValue(itemProperties[0][1]),
+                : renderPropertyValue(itemProperties[0][1]),
           },
           { label: "تعداد:", value: item?.quantity?.toString() },
           ...itemProperties.slice(1).map(([key, value]) => ({
             label: `${key}:`,
-            value: formatPropertyValue(value),
+            value: renderPropertyValue(value),
           })),
         ].filter((row) => row.value)}
       />

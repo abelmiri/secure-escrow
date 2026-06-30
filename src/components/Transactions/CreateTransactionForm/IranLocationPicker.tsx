@@ -13,7 +13,8 @@ interface IranLocationPickerProps {
   value?: MapLocationValue | null
   required?: boolean
   error?: boolean
-  onChange: (value: MapLocationValue) => void
+  readOnly?: boolean
+  onChange?: (value: MapLocationValue) => void
 }
 
 interface NeshanLatLng {
@@ -158,6 +159,7 @@ export default function IranLocationPicker({
   value,
   required = false,
   error = false,
+  readOnly = false,
   onChange,
 }: IranLocationPickerProps) {
   const mapElementRef = useRef<HTMLDivElement | null>(null)
@@ -199,22 +201,24 @@ export default function IranLocationPicker({
         })
         const marker = leaflet
           .marker([initialLocation.lat, initialLocation.lng], {
-            draggable: true,
+            draggable: !readOnly,
           })
           .addTo(map)
 
-        map.on("click", (event) => {
-          const nextLocation = normalizeLocation(event.latlng)
-          marker.setLatLng(nextLocation)
-          map.panTo([nextLocation.lat, nextLocation.lng])
-          latestOnChangeRef.current(nextLocation)
-        })
+        if (!readOnly) {
+          map.on("click", (event) => {
+            const nextLocation = normalizeLocation(event.latlng)
+            marker.setLatLng(nextLocation)
+            map.panTo([nextLocation.lat, nextLocation.lng])
+            latestOnChangeRef.current?.(nextLocation)
+          })
 
-        marker.on("dragend", (event) => {
-          const nextLocation = normalizeLocation(event.target.getLatLng())
-          map.panTo([nextLocation.lat, nextLocation.lng])
-          latestOnChangeRef.current(nextLocation)
-        })
+          marker.on("dragend", (event) => {
+            const nextLocation = normalizeLocation(event.target.getLatLng())
+            map.panTo([nextLocation.lat, nextLocation.lng])
+            latestOnChangeRef.current?.(nextLocation)
+          })
+        }
 
         mapRef.current = map
         markerRef.current = marker
@@ -232,7 +236,7 @@ export default function IranLocationPicker({
       mapRef.current = null
       markerRef.current = null
     }
-  }, [])
+  }, [readOnly])
 
   useEffect(() => {
     if (!value || !markerRef.current || !mapRef.current) return
@@ -243,17 +247,24 @@ export default function IranLocationPicker({
 
   return (
     <div className={styles.mapPicker}>
-      <div className={styles.multiSelectTitle}>
-        {title}
-        {required && <span className={styles.requiredMark}>*</span>}
-      </div>
+      {title && (
+        <div className={styles.multiSelectTitle}>
+          {title}
+          {required && <span className={styles.requiredMark}>*</span>}
+        </div>
+      )}
 
       <div
         className={`${styles.iranMapFrame} ${
           error ? styles.iranMapFrameError : ""
         }`}
       >
-        <div ref={mapElementRef} className={styles.iranMap} />
+        <div
+          ref={mapElementRef}
+          className={`${styles.iranMap} ${
+            readOnly ? styles.iranMapReadOnly : ""
+          }`}
+        />
         {(isLoading || loadError) && (
           <div className={styles.iranMapOverlay}>
             {isLoading ? "در حال بارگذاری نقشه نشان..." : loadError}
@@ -263,8 +274,10 @@ export default function IranLocationPicker({
 
       <div className={styles.mapSelectedText}>
         {selectedLocation
-          ? `موقعیت انتخاب‌شده: ${selectedLocation.lat.toLocaleString("fa-IR")}، ${selectedLocation.lng.toLocaleString("fa-IR")}`
-          : "برای انتخاب موقعیت، روی نقشه کلیک کنید یا نشانگر را جابه‌جا کنید."}
+          ? `${readOnly ? "موقعیت ثبت‌شده" : "موقعیت انتخاب‌شده"}: ${selectedLocation.lat.toLocaleString("fa-IR")}، ${selectedLocation.lng.toLocaleString("fa-IR")}`
+          : readOnly
+            ? "موقعیتی ثبت نشده است."
+            : "برای انتخاب موقعیت، روی نقشه کلیک کنید یا نشانگر را جابه‌جا کنید."}
       </div>
     </div>
   )
