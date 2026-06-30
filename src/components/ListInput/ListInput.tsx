@@ -59,7 +59,9 @@ export default function ListInput({
   }
 
   const handleChange = (val: string) => {
-    const sanitizedValue = rejectPersianDigits ? val.replace(/[۰-۹]/g, "") : val
+    const sanitizedValue = rejectPersianDigits
+      ? val.replace(/[۰-۹٠-٩]/g, "")
+      : val
 
     if (valueType === "number" || valueType === "integer") {
       const englishDigits = toEnglishDigits(sanitizedValue)

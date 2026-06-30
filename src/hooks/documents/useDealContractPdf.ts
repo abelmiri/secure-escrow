@@ -1,6 +1,8 @@
 import { useEffect, useMemo } from "react"
 import useSWR from "swr"
 import API_URLS from "@/constants/urls/API_URLS"
+import { getRequestErrorMessage } from "@/lib/errorHelpers"
+import { toastManager } from "@/lib/toastManager"
 import headerMaker from "@/request/headerMaker"
 import urlMaker from "@/request/urlMaker"
 import {
@@ -50,7 +52,26 @@ async function fetchContractPdf(url: string): Promise<ContractPdfResponse> {
   })
 
   if (!response.ok) {
-    throw { status: response.status }
+    const contentType = response.headers.get("content-type") || ""
+    let errorData: unknown
+
+    try {
+      errorData = contentType.includes("application/json")
+        ? await response.json()
+        : await response.text()
+    } catch {
+      errorData = null
+    }
+
+    toastManager.addToast({
+      message: getRequestErrorMessage({
+        status: response.status,
+        data: errorData,
+      }),
+      type: "FAIL",
+    })
+
+    throw { status: response.status, data: errorData }
   }
 
   const contentType = response.headers.get("content-type") || ""
@@ -70,6 +91,7 @@ export function useDealContractPdf(dealId: number | null) {
   const { data, error, isLoading } = useSWR(
     dealId ? API_URLS.dealContractPdf({ id: dealId }) : null,
     fetchContractPdf,
+    { shouldRetryOnError: false },
   )
   const blobUrl = useMemo(
     () => (data instanceof Blob ? URL.createObjectURL(data) : ""),

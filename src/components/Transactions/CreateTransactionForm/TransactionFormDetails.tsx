@@ -37,6 +37,8 @@ import styles from "./styles/TransactionFormDetails.module.scss"
 const totalAmountLessThanEscrowMessage =
   "مبلغ نهایی کل معامله نمی‌تواند کمتر از مبلغ واریزی به حساب امانی باشد."
 
+const iranianMobilePattern = /^09[0-9]{9}$/
+
 const conditionalPropertyTypes = [
   "boolean_integer",
   "boolean_string",
@@ -238,15 +240,17 @@ export default function TransactionFormDetails({
     }
 
     if (stageNumber === 2) {
+      const counterpartyMobileLabel =
+        role === "beneficiary"
+          ? "شماره موبایل خریدار"
+          : "شماره موبایل فروشنده"
+
       issues.push(
-        ...(!counterpartyMobile.trim()
+        ...(!iranianMobilePattern.test(counterpartyMobile.trim())
           ? [
               {
                 key: "counterpartyMobile",
-                label:
-                  role === "beneficiary"
-                    ? "شماره موبایل خریدار"
-                    : "شماره موبایل فروشنده",
+                label: counterpartyMobileLabel,
               },
             ]
           : []),
@@ -523,8 +527,8 @@ export default function TransactionFormDetails({
               name: title,
               description,
               remaining_price_payment_method: paymentMethod,
-              total_price: Number(totalTransactionAmount || escrowAmount),
-              price: Number(escrowAmount),
+              escrow_price: Number(escrowAmount),
+              price: Number(totalTransactionAmount || escrowAmount),
               properties: propertiesData,
             },
           ],
@@ -687,6 +691,8 @@ export default function TransactionFormDetails({
             resetValidationMessages()
           }}
           valueType="string"
+          regex={iranianMobilePattern}
+          rejectPersianDigits
           required
           error={fieldErrors.includes("counterpartyMobile")}
         />

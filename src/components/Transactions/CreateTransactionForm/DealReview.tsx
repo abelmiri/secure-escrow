@@ -127,12 +127,16 @@ export default function DealReview({
   const counterparty = deal?.parties?.find(
     (party) => party.role && party.role !== currentRole,
   )
+  const counterpartyRoleLabel = counterparty?.role
+    ? roleLabels[counterparty.role] || "طرف مقابل"
+    : "طرف مقابل"
+  const counterpartyMobile =
+    counterparty?.user || counterparty?.mobile_number || ""
   const itemProperties = item?.properties
     ? Object.entries(item.properties).filter(([, value]) => value !== "")
     : []
-  const escrowValue = item?.price ?? escrowAmount
-  const totalValue =
-    item?.total_price ?? (totalTransactionAmount || escrowValue)
+  const escrowValue = item?.escrow_price ?? escrowAmount
+  const totalValue = item?.price ?? (totalTransactionAmount || escrowValue)
   const remainingPayment =
     item?.remaining_price_payment_method || paymentMethod || ""
 
@@ -205,9 +209,12 @@ export default function DealReview({
       />
 
       <ReviewSection
-        title="اطلاعات خریدار"
+        title={`اطلاعات ${counterpartyRoleLabel}`}
         rows={[
-          { label: "ایمیل خریدار:", value: counterparty?.email || "" },
+          {
+            label: `شماره موبایل ${counterpartyRoleLabel}:`,
+            value: counterpartyMobile,
+          },
           {
             label: "نماینده فروشنده:",
             value: currentRole === "broker" ? "بله" : "خیر",
@@ -287,8 +294,8 @@ export default function DealReview({
       <div className={styles.feeNotice}>
         <div className={styles.feeTitle}>هزینه های حساب امانی و امان‌یار</div>
         <div>مبلغ حساب امانی: {formatCurrency(escrowValue)}</div>
-        <div>کارمزد امان‌یار (۲.۵٪): {formatCurrency(0)}</div>
-        <strong>مجموعه هزینه های قابل پرداخت: {formatCurrency(0)}</strong>
+        <div>کارمزد امان‌یار (۲.۵٪)</div>
+        {/* <strong>مجموعه هزینه های قابل پرداخت: {formatCurrency(0)}</strong> */}
       </div>
     </>
   )

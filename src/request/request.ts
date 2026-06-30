@@ -10,7 +10,7 @@ import type {
   RequestUploadAxiosType,
 } from "@/request/RequestTypes"
 import { toastManager } from "@/lib/toastManager"
-import { getErrorMessage, toastConstant } from "@/lib/errorHelpers"
+import { getRequestErrorMessage } from "@/lib/errorHelpers"
 import handleUnauthorized from "@/helpers/auth/handleUnauthorized"
 import refreshAccessToken from "@/helpers/auth/refreshAccessToken"
 
@@ -384,14 +384,12 @@ function _networkErrorHandler({
     const isServerErr = errorStatus !== undefined
 
     if (typeof window !== "undefined" && !dontToast) {
-      const message =
-        failMessage ||
-        (isServerErr
-          ? getErrorMessage({ status: errorStatus, data: errorObject?.data })
-          : toastConstant.networkError)
-
       toastManager.addToast({
-        message,
+        message: getRequestErrorMessage({
+          status: isServerErr ? errorStatus : undefined,
+          data: errorObject?.data,
+          fallbackMessage: failMessage,
+        }),
         type: "FAIL",
       })
     }

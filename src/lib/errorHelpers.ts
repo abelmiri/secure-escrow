@@ -7,11 +7,11 @@ export function getErrorMessage({
 }): string {
   if (data && typeof data === "string") return data
   if (data && typeof data === "object") {
-    if ("message" in data && typeof data.message === "string") {
-      return data.message
-    }
     if ("error" in data && typeof data.error === "string") {
       return data.error
+    }
+    if ("message" in data && typeof data.message === "string") {
+      return data.message
     }
   }
 
@@ -21,6 +21,30 @@ export function getErrorMessage({
   if (status === 401) return "عدم احراز هویت"
 
   return "خطای غیرمنتظره‌ای رخ داده است"
+}
+
+export function getRequestErrorMessage({
+  status,
+  data,
+  fallbackMessage,
+}: {
+  status?: number
+  data?: unknown
+  fallbackMessage?: string
+}): string {
+  const isClientError =
+    status !== undefined && status >= 400 && status < 500
+
+  if (isClientError) {
+    return getErrorMessage({ status, data })
+  }
+
+  return (
+    fallbackMessage ||
+    (status !== undefined
+      ? getErrorMessage({ status, data })
+      : toastConstant.networkError)
+  )
 }
 
 export const toastConstant = {
