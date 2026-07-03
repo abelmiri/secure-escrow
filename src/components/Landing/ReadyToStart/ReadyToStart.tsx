@@ -1,8 +1,15 @@
+"use client"
+
 import { Box, Typography, Button } from "@mui/material"
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
+import { useRouter } from "next/navigation"
+import useUser from "@/context/auth/hooks/useUser"
+import loginOAUTH from "@/helpers/auth/loginOAUTH"
 import styles from "./styles/ReadyToStart.module.scss"
 
 export default function ReadyToStart({ howItWorks }: { howItWorks?: boolean }) {
+  const router = useRouter()
+  const { isLoggedIn } = useUser()
   const title = howItWorks
     ? "آماده شروع هستید؟"
     : "شروع معامله با امان یار، انتخابی امن برای خرید و فروش"
@@ -11,6 +18,16 @@ export default function ReadyToStart({ howItWorks }: { howItWorks?: boolean }) {
     : "خرید، فروش و انجام تراکنش‌های مطمئن از خودرو و املاک تا کالاهای لوکس و با ارزش"
   const buttonText = howItWorks ? "شروع یک معامله" : "شروع معامله"
   const secondaryButtonText = howItWorks ? "تماس با ما" : ""
+
+  const handleStart = () => {
+    if (isLoggedIn) {
+      router.push("/contracts/create")
+      return
+    }
+
+    loginOAUTH({ redirect: true, returnTo: "/contracts/create" })
+  }
+
   return (
     <Box
       className={`${styles.container} ${howItWorks ? styles.howItWorks : ""}`}
@@ -23,12 +40,27 @@ export default function ReadyToStart({ howItWorks }: { howItWorks?: boolean }) {
         <Typography className={styles.subtitle}>{subtitle}</Typography>
 
         <Box className={styles.buttonContainer}>
-          <Button
-            className={`${styles.primaryButton} ${howItWorks ? styles.howItWorks : ""}`}
-            endIcon={<ArrowForwardIcon sx={{ transform: "rotate(180deg)" }} />}
-          >
-            {buttonText}
-          </Button>
+          {howItWorks ? (
+            <Button
+              className={`${styles.primaryButton} ${styles.howItWorks}`}
+              onClick={handleStart}
+              endIcon={
+                <ArrowForwardIcon sx={{ transform: "rotate(180deg)" }} />
+              }
+            >
+              {buttonText}
+            </Button>
+          ) : (
+            <Button
+              className={styles.primaryButton}
+              onClick={handleStart}
+              endIcon={
+                <ArrowForwardIcon sx={{ transform: "rotate(180deg)" }} />
+              }
+            >
+              {buttonText}
+            </Button>
+          )}
 
           {secondaryButtonText && (
             <Button className={styles.secondaryButton}>

@@ -1,10 +1,10 @@
 @font-face {
   font-family: "Yekan";
   src:
-    url("/media/fonts/Yekan.woff2") format("woff2"),
-    url("/media/fonts/Yekan.woff") format("woff"),
-    url("/media/fonts/Yekan.ttf") format("truetype"),
-    url("/media/fonts/Yekan.eot");
+    url("/media/fonts/Dana-fanum-regular.woff2") format("woff2"),
+    url("/media/fonts/Dana-fanum-regular.woff") format("woff"),
+    url("/media/fonts/Dana-FaNum-Regular.ttf") format("truetype"),
+    url("/media/fonts/Dana-fanum-regular.eot");
   font-weight: normal;
   font-style: normal;
   font-display: swap;

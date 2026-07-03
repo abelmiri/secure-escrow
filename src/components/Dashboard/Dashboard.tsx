@@ -53,7 +53,7 @@ export default function Dashboard() {
               خوش آمدید! نمای کلی معاملات شما در داشبورد قابل مشاهده است.
             </Typography>
           </Box>
-          <Link href="/transactions/create">
+          <Link href="/contracts/create">
             <Button variant="contained" className={styles.newTransactionButton}>
               <AddIcon sx={{ marginLeft: "8px" }} />
               <Typography>معامله جدید</Typography>

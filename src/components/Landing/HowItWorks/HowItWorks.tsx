@@ -1,5 +1,8 @@
+"use client"
+
 import { Box, Typography, Button } from "@mui/material"
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
+import Link from "next/link"
 import styles from "./styles/HowItWorks.module.scss"
 import BuyerSeller from "@/media/svg/BuyerSeller"
 import DollarSign from "@/media/svg/DollarSign"
@@ -76,6 +79,8 @@ export default function HowItWorks() {
       </Box>
 
       <Button
+        component={Link}
+        href="/how-it-works"
         className={styles.learnMoreButton}
         endIcon={<ArrowForwardIcon sx={{ transform: "rotate(180deg)" }} />}
       >

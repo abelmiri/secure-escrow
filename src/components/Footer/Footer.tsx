@@ -6,6 +6,7 @@ import FacebookIcon from "@mui/icons-material/Facebook"
 import TwitterIcon from "@mui/icons-material/Twitter"
 import LinkedInIcon from "@mui/icons-material/LinkedIn"
 import InstagramIcon from "@mui/icons-material/Instagram"
+import Link from "next/link"
 import IconSvg from "@/media/svg/IconSvg"
 import styles from "./styles/Footer.module.scss"
 
@@ -19,11 +20,11 @@ const footerLinks = {
     "محاسبه‌گر کارمزد",
   ],
   company: [
-    "درباره ما",
-    "چگونه کار می‌کند",
-    "اعتماد و ایمنی",
-    "فرصت‌های شغلی",
-    "تماس با ما",
+    { label: "درباره ما", href: "/about" },
+    { label: "چگونه کار می‌کند", href: "/how-it-works" },
+    { label: "اعتماد و ایمنی", href: "/trust-and-safety" },
+    { label: "فرصت‌های شغلی" },
+    { label: "تماس با ما" },
   ],
   support: [
     "مرکز راهنما",
@@ -93,22 +94,36 @@ export default function Footer() {
           <Box className={styles.column}>
             <Typography className={styles.columnTitle}>شرکت</Typography>
             <Box className={styles.linkList}>
-              {footerLinks.company.map((link) => (
-                <Typography key={link} className={styles.link}>
-                  {link}
-                </Typography>
-              ))}
+              {footerLinks.company.map((link) =>
+                link.href ? (
+                  <Link key={link.label} href={link.href}>
+                    <Typography className={styles.link}>
+                      {link.label}
+                    </Typography>
+                  </Link>
+                ) : (
+                  <Typography key={link.label} className={styles.link}>
+                    {link.label}
+                  </Typography>
+                ),
+              )}
             </Box>
           </Box>
 
           <Box className={styles.column}>
             <Typography className={styles.columnTitle}>پشتیبانی</Typography>
             <Box className={styles.linkList}>
-              {footerLinks.support.map((link) => (
-                <Typography key={link} className={styles.link}>
-                  {link}
-                </Typography>
-              ))}
+              {footerLinks.support.map((link) =>
+                link === "قوانین و مقررات" ? (
+                  <Link key={link} href="/terms-and-conditions">
+                    <Typography className={styles.link}>{link}</Typography>
+                  </Link>
+                ) : (
+                  <Typography key={link} className={styles.link}>
+                    {link}
+                  </Typography>
+                ),
+              )}
             </Box>
           </Box>
         </Box>

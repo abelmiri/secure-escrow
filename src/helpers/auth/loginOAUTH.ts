@@ -92,14 +92,18 @@ function getTokenAfterTabLogin(props: { data?: { code?: string } }) {
   }
 }
 
-function loginOAUTH(props?: { redirect?: boolean }) {
-  const { redirect } = props || {}
+function loginOAUTH(props?: { redirect?: boolean; returnTo?: string }) {
+  const { redirect, returnTo } = props || {}
   const isLoginByTab = redirect
     ? null
     : getBrowser() === "chrome"
       ? (url: string) => window.open(url, "login-oAuth")
       : window.open("", "login-oAuth")
-  const redirectUrl = window.location.origin + getFullUrl().pathUrl
+  const safeReturnPath =
+    returnTo?.startsWith("/") && !returnTo.startsWith("//")
+      ? returnTo
+      : getFullUrl().pathUrl
+  const redirectUrl = window.location.origin + safeReturnPath
   const codeVerifier = generateRandomString(64)
 
   storeCodeVerifierAndRedirectUrl({

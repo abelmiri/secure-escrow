@@ -124,7 +124,14 @@
 }
 
 .footerText {
+  width: fit-content;
+  margin-inline: auto !important;
+  padding: 0;
+  border: 0;
+  background: transparent;
   text-align: center;
   font-size: 12px !important;
   color: #6a7282 !important;
+  font-family: inherit;
+  cursor: pointer;
 }

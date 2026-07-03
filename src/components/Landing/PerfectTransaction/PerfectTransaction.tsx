@@ -1,5 +1,10 @@
+"use client"
+
 import { Box, Typography, Button } from "@mui/material"
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
+import { useRouter } from "next/navigation"
+import useUser from "@/context/auth/hooks/useUser"
+import loginOAUTH from "@/helpers/auth/loginOAUTH"
 import GlobeIcon from "@/media/svg/GlobeIcon"
 import TrendingUpIcon from "@/media/svg/TrendingUpIcon"
 import LightningIcon from "@/media/svg/LightningIcon"
@@ -51,6 +56,18 @@ const categories = [
 ]
 
 export default function PerfectTransaction() {
+  const router = useRouter()
+  const { isLoggedIn } = useUser()
+
+  const handleStart = () => {
+    if (isLoggedIn) {
+      router.push("/contracts/create")
+      return
+    }
+
+    loginOAUTH({ redirect: true, returnTo: "/contracts/create" })
+  }
+
   return (
     <Box className={styles.container}>
       <Box className={styles.header}>
@@ -85,6 +102,7 @@ export default function PerfectTransaction() {
 
       <Button
         className={styles.viewAllButton}
+        onClick={handleStart}
         endIcon={<ArrowForwardIcon sx={{ transform: "rotate(180deg)" }} />}
       >
         مشاهده تمام دسته‌بندی‌ها

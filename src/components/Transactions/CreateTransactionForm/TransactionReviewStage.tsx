@@ -88,7 +88,7 @@ export default function TransactionReviewStage({
         />
         <span>
           من با{" "}
-          <a href="/terms" target="_blank" rel="noreferrer">
+          <a href="/terms-and-conditions" target="_blank" rel="noreferrer">
             شرایط استفاده
           </a>{" "}
           و{" "}

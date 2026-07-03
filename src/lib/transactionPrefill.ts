@@ -33,7 +33,7 @@ export function buildTransactionCreateUrl(
   if (data.categoryId) params.categoryId = data.categoryId
   if (data.amount) params.amount = data.amount
 
-  return `/transactions/create${createQueryString({ params })}`
+  return `/contracts/create${createQueryString({ params })}`
 }
 
 export function parseTransactionPrefillFromSearchParams(

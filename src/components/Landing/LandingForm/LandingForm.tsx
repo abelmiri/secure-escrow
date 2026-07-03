@@ -11,6 +11,8 @@ import {
   FormControl,
 } from "@mui/material"
 import { useRouter } from "next/navigation"
+import useUser from "@/context/auth/hooks/useUser"
+import loginOAUTH from "@/helpers/auth/loginOAUTH"
 import SmallArrow from "@/media/svg/SmallArrow"
 import { useCategories } from "@/hooks/deals/useCategories"
 import {
@@ -23,6 +25,7 @@ import styles from "./styles/LandingForm.module.scss"
 
 export default function LandingForm() {
   const router = useRouter()
+  const { isLoggedIn } = useUser()
   const { categories, isLoading: isCategoriesLoading } = useCategories()
   const [role, setRole] = useState<LandingRole>("seller")
   const [categoryId, setCategoryId] = useState("")
@@ -54,7 +57,23 @@ export default function LandingForm() {
   const handleSubmit = (): void => {
     const prefill = createPrefillFromLandingForm({ role, categoryId, amount })
     saveTransactionPrefill(prefill)
-    router.push(buildTransactionCreateUrl(prefill))
+    const destination = buildTransactionCreateUrl(prefill)
+
+    if (isLoggedIn) {
+      router.push(destination)
+      return
+    }
+
+    loginOAUTH({ redirect: true, returnTo: destination })
+  }
+
+  const handleProfile = (): void => {
+    if (isLoggedIn) {
+      router.push("/profile")
+      return
+    }
+
+    loginOAUTH({ redirect: true, returnTo: "/profile" })
   }
 
   return (
@@ -136,7 +155,12 @@ export default function LandingForm() {
         همین الان شروع کنید
       </Button>
 
-      <Typography className={styles.footerText}>
+      <Typography
+        component="button"
+        type="button"
+        onClick={handleProfile}
+        className={styles.footerText}
+      >
         برای ادامه باید یک حساب کاربری ایجاد کنید
       </Typography>
     </Box>

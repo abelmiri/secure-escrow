@@ -33,6 +33,7 @@ const resources = [
   { label: "اعتماد و امنیت", href: "/trust-and-safety" },
   { label: "نحوه‌ی عملکرد", href: "/how-it-works" },
   { label: "درباره ما", href: "/about" },
+  { label: "قوانین و مقررات", href: "/terms-and-conditions" },
   // { label: "وبلاگ", href: "#" },
   // { label: "مرکز راهنما", href: "#" },
   // { label: "مستندات API", href: "#" },
@@ -128,12 +129,10 @@ export default function Header() {
                 داشبورد
               </Typography>
             </Link>
-            <Link href="/transactions/create" className={styles.navLink}>
+            <Link href="/contracts/create" className={styles.navLink}>
               <Typography
                 className={`${styles.navItem} ${
-                  pathname === "/transactions/create"
-                    ? styles.activeNavItem
-                    : ""
+                  pathname === "/contracts/create" ? styles.activeNavItem : ""
                 }`}
               >
                 تراکنش جدید
@@ -334,7 +333,7 @@ export default function Header() {
 
               <ListItem disablePadding className={styles.drawerItem}>
                 <Link
-                  href="/transactions/create"
+                  href="/contracts/create"
                   style={{
                     textDecoration: "none",
                     color: "inherit",
