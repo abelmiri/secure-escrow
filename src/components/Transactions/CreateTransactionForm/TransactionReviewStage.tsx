@@ -92,7 +92,7 @@ export default function TransactionReviewStage({
             شرایط استفاده
           </a>{" "}
           و{" "}
-          <a href="/escrow-agreement" target="_blank" rel="noreferrer">
+          <a href="/terms-and-conditions" target="_blank" rel="noreferrer">
             قرارداد اسکرو
           </a>{" "}
           موافقم و تایید می‌کنم که معامله پس از تایید طرف دیگر ادامه خواهد یافت.
