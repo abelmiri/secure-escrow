@@ -89,13 +89,9 @@ export default function TransactionReviewStage({
         <span>
           من با{" "}
           <a href="/terms-and-conditions" target="_blank" rel="noreferrer">
-            شرایط استفاده
+            شرایط استفاده، قوانین و قرارداد عمومی معاملات امانی امان‌یار
           </a>{" "}
-          و{" "}
-          <a href="/terms-and-conditions" target="_blank" rel="noreferrer">
-            قرارداد اسکرو
-          </a>{" "}
-          موافقم و تایید می‌کنم که معامله پس از تایید طرف دیگر ادامه خواهد یافت.
+          موافقم و تأیید می‌کنم که معامله با تأیید طرف دیگر ادامه خواهد یافت.
         </span>
       </div>
 
