@@ -39,6 +39,28 @@ export interface DealDocument {
   uploaded_at?: string
 }
 
+export interface DealWorkflow {
+  group?: string
+  step?: string
+}
+
+export interface DealHistoryItem {
+  timestamp?: string | null
+  action_label?: string
+  from_step_name?: string
+  to_step_name?: string
+  step_group_name?: string
+  performed_party?: string
+}
+
+export interface DealNextAction {
+  transition_id: number
+  action: string
+  action_label: string
+  destination_step: number
+  destination_step_name: string
+}
+
 export interface DealDetail {
   id: number
   label?: string
@@ -51,6 +73,9 @@ export interface DealDetail {
   trace_number?: string
   created_at?: string
   updated_at?: string
+  current_workflow?: DealWorkflow | null
+  history?: DealHistoryItem[]
+  next_available_actions?: DealNextAction[]
 }
 
 function normalizeDeal(data: unknown): DealDetail | null {

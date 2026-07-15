@@ -10,6 +10,11 @@ import {
   Tab,
   Avatar,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material"
 import Link from "next/link"
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
@@ -28,8 +33,10 @@ import { dealsData } from "@/constants/deals"
 import type { Deal } from "@/constants/deals"
 import { authContext } from "@/context/auth/authProvider"
 import { useDeal } from "@/hooks/deals/useDeal"
+import { useDealWorkflowAction } from "@/hooks/deals/useDealWorkflowAction"
 import type {
   DealDetail,
+  DealHistoryItem,
   DealItem,
   DealParty,
 } from "@/hooks/deals/useDeal"
@@ -235,6 +242,90 @@ const mapParty = (party?: DealParty) => {
   }
 }
 
+const formatHistoryTimestamp = (timestamp?: string | null) => {
+  if (!timestamp) return { date: "", time: "" }
+
+  const parsedTimestamp = new Date(timestamp)
+  if (Number.isNaN(parsedTimestamp.getTime())) return { date: "", time: "" }
+
+  return {
+    date: parsedTimestamp.toLocaleDateString("fa-IR"),
+    time: parsedTimestamp.toLocaleTimeString("fa-IR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+  }
+}
+
+const mapHistoryItemToProgress = (
+  item: DealHistoryItem,
+  currentStep?: string,
+): Deal["progress"][number] => {
+  const isCurrentStep = Boolean(
+    currentStep && item.to_step_name === currentStep,
+  )
+  const status = isCurrentStep
+    ? "in_progress"
+    : item.timestamp
+      ? "completed"
+      : "pending"
+  const { date, time } = formatHistoryTimestamp(item.timestamp)
+
+  return {
+    title: item.to_step_name || item.from_step_name || "مرحله قرارداد",
+    description: item.step_group_name || "روند قرارداد",
+    date,
+    time,
+    status,
+    icon:
+      status === "completed"
+        ? "check"
+        : status === "in_progress"
+          ? "clock"
+          : "circle",
+  }
+}
+
+const resolveProgress = (
+  apiDeal: DealDetail,
+  fallbackProgress: Deal["progress"],
+) => {
+  if (!apiDeal.history?.length) return fallbackProgress
+
+  const completedTransitionKeys = new Set(
+    apiDeal.history
+      .filter((item) => Boolean(item.timestamp))
+      .map(
+        (item) =>
+          `${item.action_label}|${item.from_step_name}|${item.to_step_name}`,
+      ),
+  )
+  const normalizedHistory = apiDeal.history.filter((item) => {
+    if (item.timestamp) return true
+
+    const transitionKey = `${item.action_label}|${item.from_step_name}|${item.to_step_name}`
+    return !completedTransitionKeys.has(transitionKey)
+  })
+  const latestCompletedStep = normalizedHistory.reduce<{
+    step?: string
+    timestamp: number
+  } | null>((latest, item) => {
+    if (!item.timestamp) return latest
+
+    const timestamp = new Date(item.timestamp).getTime()
+    if (Number.isNaN(timestamp)) return latest
+    if (latest && latest.timestamp >= timestamp) return latest
+
+    return { step: item.to_step_name, timestamp }
+  }, null)
+  const currentStep =
+    latestCompletedStep?.step || apiDeal.current_workflow?.step
+
+  return normalizedHistory.map((item) =>
+    mapHistoryItemToProgress(item, currentStep),
+  )
+}
+
 const mapApiDealToUi = (
   apiDeal: DealDetail,
   staticTemplate: Deal,
@@ -259,6 +350,9 @@ const mapApiDealToUi = (
       )
     : apiDeal.parties?.[0]
   const amount = resolveAmount(apiDeal).toLocaleString("fa-IR")
+  const acceptAction = apiDeal.next_available_actions?.find(
+    (action) => action.action.toLowerCase() === "accept",
+  )
 
   return {
     ...staticTemplate,
@@ -280,6 +374,14 @@ const mapApiDealToUi = (
       : "",
     amount,
     currency: "ریال",
+    progress: resolveProgress(apiDeal, staticTemplate.progress),
+    requiredAction: acceptAction
+      ? {
+          text: `با پذیرش تحویل، قرارداد وارد مرحله «${acceptAction.destination_step_name}» می‌شود.`,
+          showAcceptButton: true,
+          showSupportButton: true,
+        }
+      : undefined,
     serviceFee: undefined,
     totalAmount: amount,
     paymentStatus: undefined,
@@ -303,6 +405,8 @@ export default function TransactionDetail({ id }: { id: string }) {
       ? numericId
       : null
   const { deal: apiDeal, isLoading, error } = useDeal(apiDealId)
+  const { submitWorkflowAction, isSubmitting: isSubmittingWorkflowAction } =
+    useDealWorkflowAction()
   const deal =
     staticDeal ||
     (apiDeal
@@ -314,6 +418,10 @@ export default function TransactionDetail({ id }: { id: string }) {
       : undefined)
   const [tabValue, setTabValue] = useState(2) // Default to Messages to match the image
   const [messageText, setMessageText] = useState("")
+  const [isAcceptDialogOpen, setIsAcceptDialogOpen] = useState(false)
+  const acceptAction = apiDeal?.next_available_actions?.find(
+    (action) => action.action.toLowerCase() === "accept",
+  )
 
   if (isLoading) {
     return (
@@ -356,6 +464,17 @@ export default function TransactionDetail({ id }: { id: string }) {
     }
   }
 
+  const handleAcceptDelivery = async () => {
+    if (!apiDealId || !acceptAction) return
+
+    try {
+      await submitWorkflowAction(apiDealId, acceptAction.transition_id)
+      setIsAcceptDialogOpen(false)
+    } catch {
+      // The request layer displays the API error and keeps the dialog open for retry.
+    }
+  }
+
   const getProgressIcon = (step: (typeof deal.progress)[0]) => {
     if (step.status === "completed" || step.icon === "check") {
       return <CustomCheckIcon className={styles.progressIconCompleted} />
@@ -372,7 +491,7 @@ export default function TransactionDetail({ id }: { id: string }) {
     <Box className={styles.mainWrapper}>
       <Box className={styles.container}>
         <Link href="/dashboard" className={styles.backButton}>
-          <ArrowForwardIcon sx={{ fontSize: 18, transform: "rotate(0deg)" }} />
+          <ArrowForwardIcon className={styles.backIcon} />
           بازگشت به داشبورد
         </Link>
 
@@ -384,7 +503,8 @@ export default function TransactionDetail({ id }: { id: string }) {
             </Typography>
             <Box className={styles.headerMeta}>
               <Typography className={styles.transactionId}>
-                شناسه معامله: {deal.id}
+                <span className={styles.transactionIdLabel}>شناسه معامله:</span>
+                <span className={styles.transactionIdValue}>{deal.id}</span>
               </Typography>
               <Box
                 className={`${styles.statusBadge} ${styles[deal.statusType]}`}
@@ -398,7 +518,7 @@ export default function TransactionDetail({ id }: { id: string }) {
             <Typography className={styles.amount}>
               {deal.amount} {deal.currency || "تومان"}
             </Typography>
-            <Typography className={styles.amountLabel}>مبلغ معامله</Typography>
+            <Typography className={styles.amountLabel}>مبلغ امانی</Typography>
           </Box>
         </Box>
 
@@ -419,7 +539,7 @@ export default function TransactionDetail({ id }: { id: string }) {
             {/* Transaction Progress Section */}
             <Box className={styles.sectionCard}>
               <Typography variant="h3" className={styles.sectionTitle}>
-                پیشرفت معامله
+                پیشرفت قرارداد
               </Typography>
               <Box className={styles.progressList}>
                 {deal.progress.map((step, index) => (
@@ -793,6 +913,12 @@ export default function TransactionDetail({ id }: { id: string }) {
                       variant="contained"
                       className={styles.acceptButton}
                       fullWidth
+                      onClick={
+                        acceptAction
+                          ? () => setIsAcceptDialogOpen(true)
+                          : undefined
+                      }
+                      disabled={isSubmittingWorkflowAction}
                     >
                       پذیرش تحویل
                     </Button>
@@ -912,6 +1038,47 @@ export default function TransactionDetail({ id }: { id: string }) {
           </Box>
         </Box>
       </Box>
+
+      <Dialog
+        open={isAcceptDialogOpen}
+        onClose={() => {
+          if (!isSubmittingWorkflowAction) setIsAcceptDialogOpen(false)
+        }}
+        slotProps={{
+          paper: {
+            sx: { direction: "rtl", borderRadius: "16px", width: "100%" },
+          },
+        }}
+      >
+        <DialogTitle>تأیید پذیرش تحویل</DialogTitle>
+        <DialogContent>
+          <DialogContentText sx={{ textAlign: "right", lineHeight: 1.8 }}>
+            آیا از پذیرش تحویل مطمئن هستید؟ پس از تأیید، قرارداد وارد مرحله
+            «{acceptAction?.destination_step_name}» می‌شود.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ padding: "8px 24px 20px", gap: "8px" }}>
+          <Button
+            variant="outlined"
+            onClick={() => setIsAcceptDialogOpen(false)}
+            disabled={isSubmittingWorkflowAction}
+          >
+            انصراف
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleAcceptDelivery}
+            disabled={isSubmittingWorkflowAction}
+            startIcon={
+              isSubmittingWorkflowAction ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : undefined
+            }
+          >
+            تأیید و ادامه
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

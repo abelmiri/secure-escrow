@@ -21,6 +21,8 @@ const API_URLS = {
   profile: "v1/auth/profile",
   deals: "v1/deals/u",
   deal: ({ id }: { id: number }) => `v1/deals/u/${id}`,
+  dealWorkflowActions: ({ id }: { id: number }) =>
+    `v1/deals/u/${id}/workflow-actions`,
   dealContractPdf: ({ id }: { id: number }) => `v1/deals/u/${id}/contract-pdf`,
   dealDocuments: ({ id }: { id: number }) => `v1/documents/deals/${id}/documents`,
   categories: "v1/deals/categories",
