@@ -2,6 +2,7 @@ import { useMemo } from "react"
 import useSWR from "swr"
 import request from "@/request/request"
 import API_URLS from "@/constants/urls/API_URLS"
+import type { DealParty } from "./useDeal"
 
 export type DealRole = "customer" | "beneficiary" | "broker"
 
@@ -15,7 +16,7 @@ export interface Deal {
   subState: number | null
   amount: number
   created_at: string
-  parties: Array<{ role: string; user: string }>
+  parties: DealParty[]
 }
 
 interface DealItem {
@@ -39,7 +40,7 @@ interface DealResult {
   id: number
   label: string
   items: DealItem[]
-  parties: Array<{ role: string; user: string }>
+  parties: DealParty[]
   state: string
   sub_state: number | null
   total_amount: number | string | null

@@ -4,7 +4,6 @@ import authActions from "@/context/auth/authActions"
 import getBrowser from "@/helpers/general/getBrowser"
 import createQueryString from "@/helpers/query-param/createQueryString"
 import parseQueryString from "@/helpers/query-param/parseQueryString"
-import getFullUrl from "@/helpers/query-param/getFullUrl"
 import type { Dispatch } from "react"
 import urlMaker from "@/request/urlMaker"
 import API_URLS from "@/constants/urls/API_URLS"
@@ -28,7 +27,7 @@ export function getTokenAfterRedirect({
     )
 
     const { state } = parseQueryString()
-    const { isLoginByTab, ...params } = parseQueryString({
+    const { isLoginByTab } = parseQueryString({
       query: decodeURIComponent(atob(typeof state === "string" ? state : "")),
     })
 
@@ -81,6 +80,9 @@ function getTokenAfterTabLogin(props: { data?: { code?: string } }) {
           },
           authDispatch: window.authDispatch,
         })
+        .then(() => {
+          window.location.replace(redirectUrlVar)
+        })
         .catch(() => {
           togglePageLoading({ isLoading: false })
         })
@@ -102,7 +104,7 @@ function loginOAUTH(props?: { redirect?: boolean; returnTo?: string }) {
   const safeReturnPath =
     returnTo?.startsWith("/") && !returnTo.startsWith("//")
       ? returnTo
-      : getFullUrl().pathUrl
+      : "/dashboard"
   const redirectUrl = window.location.origin + safeReturnPath
   const codeVerifier = generateRandomString(64)
 

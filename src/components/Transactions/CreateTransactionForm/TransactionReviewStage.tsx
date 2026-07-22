@@ -53,6 +53,7 @@ export default function TransactionReviewStage({
 }: TransactionReviewStageProps) {
   const isReviewLoading =
     isDealLoading || isContractPdfLoading || isDocumentsLoading
+  const confirmationRecipient = role === "beneficiary" ? "خریدار" : "فروشنده"
 
   return (
     <>
@@ -114,7 +115,7 @@ export default function TransactionReviewStage({
           {isSubmitting ? (
             <CircularProgress size={24} color="inherit" />
           ) : (
-            "ارسال برای تایید خریدار"
+            `ارسال برای تایید ${confirmationRecipient}`
           )}
         </Button>
       </div>

@@ -32,7 +32,7 @@ import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined"
 import { dealsData } from "@/constants/deals"
 import type { Deal } from "@/constants/deals"
 import { authContext } from "@/context/auth/authProvider"
-import { useDeal } from "@/hooks/deals/useDeal"
+import { getPartyMobileNumber, useDeal } from "@/hooks/deals/useDeal"
 import { useDealWorkflowAction } from "@/hooks/deals/useDealWorkflowAction"
 import type {
   DealDetail,
@@ -234,7 +234,7 @@ const resolveAmount = (apiDeal: DealDetail) => {
 const mapParty = (party?: DealParty) => {
   if (!party) return undefined
 
-  const identifier = party.mobile_number || party.user || ""
+  const identifier = getPartyMobileNumber(party)
   return {
     name: party.full_name || identifier || "نامشخص",
     email: party.email || identifier,
@@ -336,7 +336,7 @@ const mapApiDealToUi = (
   const currentParty = currentUserMobile
     ? apiDeal.parties?.find(
         (party) =>
-          party.user === currentUserMobile ||
+          getPartyMobileNumber(party) === currentUserMobile ||
           party.mobile_number === currentUserMobile,
       )
     : undefined
@@ -345,7 +345,7 @@ const mapApiDealToUi = (
   const counterparty = currentUserMobile
     ? apiDeal.parties?.find(
         (party) =>
-          party.user !== currentUserMobile &&
+          getPartyMobileNumber(party) !== currentUserMobile &&
           party.mobile_number !== currentUserMobile,
       )
     : apiDeal.parties?.[0]
@@ -574,7 +574,7 @@ export default function TransactionDetail({ id }: { id: string }) {
             </Box>
 
             {/* Tabs Section */}
-            <Box className={styles.sectionCard}>
+            <Box className={`${styles.sectionCard} ${styles.tabsCard}`}>
               <Box className={styles.tabsContainer}>
                 <Tabs
                   value={tabValue}

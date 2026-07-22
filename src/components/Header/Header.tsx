@@ -2,7 +2,7 @@
 
 import { useState, MouseEvent } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import {
   Box,
   Typography,
@@ -53,6 +53,7 @@ const solutions = [
 export default function Header() {
   const { isLoggedIn } = useUser()
   const pathname = usePathname()
+  const router = useRouter()
   const [anchorElResources, setAnchorElResources] =
     useState<null | HTMLElement>(null)
   const [anchorElSolutions, setAnchorElSolutions] =
@@ -94,11 +95,9 @@ export default function Header() {
   }
 
   const handleLogout = () => {
+    router.replace("/")
     resetDataManager
       .resetData({ isAfterLogin: false, sendLogoutReq: true })
-      .then(() => {
-        window.location.replace("/")
-      })
   }
 
   return (

@@ -20,6 +20,7 @@ import { dealsData } from "@/constants/deals"
 import { authContext } from "@/context/auth/authProvider"
 import { useDeals } from "@/hooks/deals/useDeals"
 import type { DealRole } from "@/hooks/deals/useDeals"
+import { getPartyMobileNumber } from "@/hooks/deals/useDeal"
 
 type RoleFilter = DealRole | ""
 type StatusType = "processing" | "pending" | "inspection" | "completed"
@@ -129,11 +130,15 @@ export default function DashboardDeals() {
 
   const mappedApiDeals: DashboardDealCard[] = apiDeals.map((deal) => {
     const currentParty = currentUserMobile
-      ? deal.parties.find((party) => party.user === currentUserMobile)
+      ? deal.parties.find(
+          (party) => getPartyMobileNumber(party) === currentUserMobile,
+        )
       : undefined
     const counterparty = currentUserMobile
-      ? deal.parties.find((party) => party.user !== currentUserMobile)
-      : deal.parties.find((party) => party.user)
+      ? deal.parties.find(
+          (party) => getPartyMobileNumber(party) !== currentUserMobile,
+        )
+      : deal.parties.find((party) => getPartyMobileNumber(party))
     const status = resolveStatusLabel(deal.state, deal.subState)
 
     return {
@@ -145,7 +150,7 @@ export default function DashboardDeals() {
       statusType: resolveStatusType(status),
       role: currentParty?.role ? roleLabels[currentParty.role] : "نامشخص",
       participant: counterparty
-        ? `طرف مقابل: ${counterparty.user}`
+        ? `طرف مقابل: ${getPartyMobileNumber(counterparty)}`
         : deal.traceNumber
           ? `کد پیگیری: ${deal.traceNumber}`
           : "طرف مقابل ثبت نشده",

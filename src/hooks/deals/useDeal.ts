@@ -2,12 +2,24 @@ import useSWR from "swr"
 import request from "@/request/request"
 import API_URLS from "@/constants/urls/API_URLS"
 
-export interface DealParty {
-  role?: string
-  user?: string
+export interface DealPartyUser {
   mobile_number?: string
   email?: string
   full_name?: string
+}
+
+export interface DealParty {
+  role?: string
+  user?: string | DealPartyUser
+  mobile_number?: string
+  email?: string
+  full_name?: string
+}
+
+export const getPartyMobileNumber = (party?: DealParty) => {
+  if (!party) return ""
+  if (typeof party.user === "string") return party.user
+  return party.user?.mobile_number || party.mobile_number || ""
 }
 
 export interface DealItem {

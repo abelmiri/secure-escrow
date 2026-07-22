@@ -1,7 +1,11 @@
 import type { ReactNode } from "react"
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined"
 import DownloadOutlinedIcon from "@mui/icons-material/DownloadOutlined"
-import type { DealDetail, DealItem } from "@/hooks/deals/useDeal"
+import {
+  getPartyMobileNumber,
+  type DealDetail,
+  type DealItem,
+} from "@/hooks/deals/useDeal"
 import type { UploadedDealDocument } from "@/hooks/documents/useDealDocuments"
 import IranLocationPicker, {
   isMapLocationValue,
@@ -148,15 +152,15 @@ export default function DealReview({
 }: DealReviewProps) {
   const item = deal?.items?.[0]
   const currentRole =
-    deal?.parties?.find((party) => party.user === userMobile)?.role || role
+    deal?.parties?.find((party) => getPartyMobileNumber(party) === userMobile)
+      ?.role || role
   const counterparty = deal?.parties?.find(
     (party) => party.role && party.role !== currentRole,
   )
   const counterpartyRoleLabel = counterparty?.role
     ? roleLabels[counterparty.role] || "طرف مقابل"
     : "طرف مقابل"
-  const counterpartyMobile =
-    counterparty?.user || counterparty?.mobile_number || ""
+  const counterpartyMobile = getPartyMobileNumber(counterparty)
   const itemProperties = item?.properties
     ? Object.entries(item.properties).filter(([, value]) => value !== "")
     : []
