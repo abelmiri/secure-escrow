@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -xe
 
 git pull
 
@@ -26,6 +26,7 @@ if $FULL_BUILD; then
     docker compose build base
 fi
 
+docker compose build app
 # Restart containers
 docker compose down
 docker compose up -d
