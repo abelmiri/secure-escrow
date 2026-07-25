@@ -49,3 +49,42 @@
   flex-direction: column;
   gap: 12px;
 }
+
+.emptyStateContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 0;
+  text-align: center;
+}
+
+.emptyStateMessage {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  flex-grow: 1;
+  width: 100%;
+  padding: 12px 8px;
+  border-radius: 8px;
+  margin-top: 12px;
+  border: 1px solid #e5e7eb;
+}
+
+.emptyStateIcon {
+  color: #d1d5db;
+  font-size: 48px;
+}
+
+.emptyStateText {
+  color: #667085;
+  font-size: 14px !important;
+  line-height: 1.6;
+  max-width: 280px;
+}
+
+.supportButton {
+  margin-top: 8px;
+  gap: 16px;
+}

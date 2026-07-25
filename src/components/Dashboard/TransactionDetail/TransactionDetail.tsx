@@ -41,6 +41,7 @@ import type {
   DealParty,
 } from "@/hooks/deals/useDeal"
 import RequiredAction from "./RequiredAction"
+import TransactionParties from "./TransactionParties"
 import styles from "./styles/TransactionDetail.module.scss"
 
 interface TabPanelProps {
@@ -257,8 +258,14 @@ const mapParty = (party?: DealParty) => {
   if (!party) return undefined
 
   const identifier = getPartyMobileNumber(party)
+  const user = typeof party.user === "object" ? party.user : undefined
+  const firstName = user?.first_name || party.first_name || ""
+  const lastName = user?.last_name || party.last_name || ""
+  const fullName =
+    user?.full_name || party.full_name || `${firstName} ${lastName}`.trim()
+
   return {
-    name: party.full_name || identifier || "نامشخص",
+    name: fullName || identifier || "نامشخص",
     email: party.email || identifier,
     isVerified: false,
   }
@@ -379,10 +386,7 @@ const mapApiDealToUi = (
   return {
     ...staticTemplate,
     id: apiDeal.label || apiDeal.id.toString(),
-    title:
-      firstItem?.name ||
-      firstItem?.description ||
-      "معامله بدون عنوان",
+    title: firstItem?.name || firstItem?.description || "معامله بدون عنوان",
     status,
     statusType: resolveStatusType(status),
     role: currentParty?.role
@@ -434,11 +438,7 @@ export default function TransactionDetail({ id }: { id: string }) {
   const deal =
     staticDeal ||
     (apiDeal
-      ? mapApiDealToUi(
-          apiDeal,
-          dealsData[0],
-          authState.user?.mobile_number,
-        )
+      ? mapApiDealToUi(apiDeal, dealsData[0], authState.user?.mobile_number)
       : undefined)
   const [tabValue, setTabValue] = useState(2) // Default to Messages to match the image
   const [messageText, setMessageText] = useState("")
@@ -484,11 +484,19 @@ export default function TransactionDetail({ id }: { id: string }) {
     }
   }
 
-  const handleActionClick = async (action: DealNextAction) => {
+  const handleActionClick = async (
+    action: DealNextAction,
+    formData?: Record<string, unknown>,
+    files?: Record<string, File[]>,
+  ) => {
     if (!apiDealId) return
 
     try {
-      await submitWorkflowAction(apiDealId, action.transition_id)
+      await submitWorkflowAction(apiDealId, {
+        transition_id: action.transition_id,
+        form: formData,
+        files,
+      })
     } catch {
       // The request layer displays the API error
     }
@@ -964,71 +972,19 @@ export default function TransactionDetail({ id }: { id: string }) {
           {/* Right Column */}
           <Box className={styles.rightColumn}>
             {/* Required Action Section */}
-            {apiDeal?.next_available_actions && apiDeal.next_available_actions.length > 0 && (
-              <RequiredAction
-                actions={apiDeal.next_available_actions as any}
-                isSubmitting={isSubmittingWorkflowAction}
-                creatorRole={apiDeal.parties?.[0]?.role}
-                onActionClick={handleActionClick}
-              />
-            )}
+            {apiDeal?.next_available_actions &&
+              apiDeal.next_available_actions.length >= 0 && (
+                <RequiredAction
+                  dealId={apiDealId || undefined}
+                  actions={apiDeal.next_available_actions}
+                  isSubmitting={isSubmittingWorkflowAction}
+                  creatorRole={apiDeal.parties?.[0]?.role}
+                  onActionClick={handleActionClick}
+                />
+              )}
 
             {/* Transaction Parties Section */}
-            {(deal.buyer || deal.seller) && (
-              <Box className={styles.sectionCard}>
-                <Typography variant="h3" className={styles.sectionTitle}>
-                  طرفین معامله
-                </Typography>
-                <Box className={styles.partiesContent}>
-                  {deal.buyer && (
-                    <Box className={styles.partyItem}>
-                      <Box className={styles.partyHeader}>
-                        <Typography className={styles.partyLabel}>
-                          خریدار
-                        </Typography>
-                        {deal.buyer.isVerified && (
-                          <Box className={styles.verifiedBadge}>
-                            <Typography className={styles.verifiedText}>
-                              تایید شده
-                            </Typography>
-                            <CustomCheckIcon className={styles.verifiedIcon} />
-                          </Box>
-                        )}
-                      </Box>
-                      <Typography className={styles.partyName}>
-                        {deal.buyer.name}
-                      </Typography>
-                      <Typography className={styles.partyEmail}>
-                        {deal.buyer.email}
-                      </Typography>
-                    </Box>
-                  )}
-                  {deal.seller && (
-                    <Box className={styles.partyItem}>
-                      <Box className={styles.partyHeader}>
-                        <Typography className={styles.partyLabel}>
-                          فروشنده
-                        </Typography>
-                        {deal.seller.isVerified && (
-                          <Box className={styles.verifiedBadge}>
-                            <Typography className={styles.verifiedText}>
-                              تایید شده
-                            </Typography>
-                            <CustomCheckIcon className={styles.verifiedIcon} />
-                          </Box>
-                        )}
-                      </Box>
-                      <Typography className={styles.partyName}>
-                        {deal.seller.name}
-                      </Typography>
-                      <Typography className={styles.partyEmail}>
-                        {deal.seller.email}
-                      </Typography>
-                    </Box>
-                  )}
-                </Box>
-              </Box>
-            )}
+            <TransactionParties parties={apiDeal?.parties} />
 
             {/* Payment Summary Section */}
             <Box className={styles.sectionCard}>
@@ -1057,8 +1013,7 @@ export default function TransactionDetail({ id }: { id: string }) {
                 <Box className={`${styles.paymentRow} ${styles.paymentTotal}`}>
                   <Typography className={styles.paymentLabel}>مجموع</Typography>
                   <Typography className={styles.paymentValue}>
-                    {deal.totalAmount || deal.amount}{" "}
-                    {deal.currency || "تومان"}
+                    {deal.totalAmount || deal.amount} {deal.currency || "تومان"}
                   </Typography>
                 </Box>
                 {deal.paymentStatus && (

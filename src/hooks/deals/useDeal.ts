@@ -9,6 +9,7 @@ export interface DealPartyUser {
 }
 
 export interface DealParty {
+  is_representative: any
   role?: string
   user?: string | DealPartyUser
   mobile_number?: string
