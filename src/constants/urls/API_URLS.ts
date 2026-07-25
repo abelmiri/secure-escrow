@@ -19,6 +19,7 @@ const API_URLS = {
   province: "v1/base/province",
   city: ({ id }: { id: number }) => `v1/base/province/${id}/city`,
   profile: "v1/auth/profile",
+  dashboardStats: "v1/deals/dashboard-stats",
   deals: "v1/deals/u",
   deal: ({ id }: { id: number }) => `v1/deals/u/${id}`,
   dealWorkflowActions: ({ id }: { id: number }) =>
