@@ -6,15 +6,21 @@ export interface DealPartyUser {
   mobile_number?: string
   email?: string
   full_name?: string
+  first_name?: string
+  last_name?: string
+  is_verified?: boolean
 }
 
 export interface DealParty {
-  is_representative: any
+  is_representative?: boolean
+  is_verified?: boolean
   role?: string
   user?: string | DealPartyUser
   mobile_number?: string
   email?: string
   full_name?: string
+  first_name?: string
+  last_name?: string
 }
 
 export const getPartyMobileNumber = (party?: DealParty) => {

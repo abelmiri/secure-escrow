@@ -1,28 +1,34 @@
 import getToken from "@/request/getToken"
-import decodeJWT from "@/helpers/auth/decodeJWT"
+
+const devPhases = new Set(["developement", "development"])
+
+const isDevUserPhase = () => {
+  const phase = process.env.NEXT_PUBLIC_PHASE || process.env.PHASE
+
+  return phase ? devPhases.has(phase.toLowerCase()) : false
+}
+
+const getDevUser = () =>
+  process.env.NEXT_PUBLIC_DEV_USER || process.env.DEV_USER
 
 function headerMaker({ headers }: { headers?: Record<string, string> } = {}) {
-  const token = getToken()
-  // const rawToken = getToken({ withoutTokenType: true })
-  // const decodedToken = rawToken ? decodeJWT(rawToken) : null
+  const shouldUseDevUser = isDevUserPhase()
+  const token = shouldUseDevUser ? "" : getToken()
+  const devUser = getDevUser()
+  const requestHeaders: Record<string, string> = {
+    "Accept-Language": "fa",
+  }
 
-  const gatewayHeaders: Record<string, string> = {}
+  if (token) {
+    requestHeaders.Authorization = token
+  }
 
-  // const isDev = process.env.NODE_ENV === "development"
-
-  // if (decodedToken && isDev) {
-  //   if (decodedToken.sub) {
-  //     gatewayHeaders["X-USER-ID"] = decodedToken.sub
-  //   }
-  //   if (decodedToken.preferred_username) {
-  //     gatewayHeaders["X-USERNAME"] = decodedToken.preferred_username
-  //   }
-  // }
+  if (shouldUseDevUser && devUser) {
+    requestHeaders["X-Dev-User"] = devUser
+  }
 
   return {
-    ...(token ? { Authorization: token } : {}),
-    ...gatewayHeaders,
-    "Accept-Language": "fa",
+    ...requestHeaders,
     ...(headers ? headers : {}),
   }
 }
