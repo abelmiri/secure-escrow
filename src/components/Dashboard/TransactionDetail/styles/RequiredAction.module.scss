@@ -1,0 +1,51 @@
+.sectionCard {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #f2f4f7;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.1);
+}
+
+.sectionTitle {
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  color: #101828;
+  margin-bottom: 16px;
+}
+
+.actionContent {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.actionText {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background-color: transparent;
+  border-radius: 8px;
+  border: 1px solid #00000015;
+  margin-block-start: 12px;
+}
+
+.actionIcon {
+  color: #2563eb;
+  font-size: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.actionMessage {
+  color: #475467;
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0 ۰;
+}
+
+.actionsButtonsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

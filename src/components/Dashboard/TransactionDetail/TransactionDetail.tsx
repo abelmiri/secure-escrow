@@ -10,11 +10,6 @@ import {
   Tab,
   Avatar,
   CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
 } from "@mui/material"
 import Link from "next/link"
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
@@ -33,6 +28,7 @@ import { dealsData } from "@/constants/deals"
 import type { Deal } from "@/constants/deals"
 import { authContext } from "@/context/auth/authProvider"
 import { getPartyMobileNumber, useDeal } from "@/hooks/deals/useDeal"
+import type { DealNextAction } from "@/hooks/deals/useDeal"
 import { useDealWorkflowAction } from "@/hooks/deals/useDealWorkflowAction"
 import {
   useDealDocuments,
@@ -44,6 +40,7 @@ import type {
   DealItem,
   DealParty,
 } from "@/hooks/deals/useDeal"
+import RequiredAction from "./RequiredAction"
 import styles from "./styles/TransactionDetail.module.scss"
 
 interface TabPanelProps {
@@ -445,10 +442,6 @@ export default function TransactionDetail({ id }: { id: string }) {
       : undefined)
   const [tabValue, setTabValue] = useState(2) // Default to Messages to match the image
   const [messageText, setMessageText] = useState("")
-  const [isAcceptDialogOpen, setIsAcceptDialogOpen] = useState(false)
-  const acceptAction = apiDeal?.next_available_actions?.find(
-    (action) => action.action.toLowerCase() === "accept",
-  )
 
   if (isLoading) {
     return (
@@ -491,14 +484,13 @@ export default function TransactionDetail({ id }: { id: string }) {
     }
   }
 
-  const handleAcceptDelivery = async () => {
-    if (!apiDealId || !acceptAction) return
+  const handleActionClick = async (action: DealNextAction) => {
+    if (!apiDealId) return
 
     try {
-      await submitWorkflowAction(apiDealId, acceptAction.transition_id)
-      setIsAcceptDialogOpen(false)
+      await submitWorkflowAction(apiDealId, action.transition_id)
     } catch {
-      // The request layer displays the API error and keeps the dialog open for retry.
+      // The request layer displays the API error
     }
   }
 
@@ -972,45 +964,13 @@ export default function TransactionDetail({ id }: { id: string }) {
           {/* Right Column */}
           <Box className={styles.rightColumn}>
             {/* Required Action Section */}
-            {deal.requiredAction && (
-              <Box className={styles.sectionCard}>
-                <Typography variant="h3" className={styles.sectionTitle}>
-                  اقدام مورد نیاز
-                </Typography>
-                <Box className={styles.actionContent}>
-                  <Box className={styles.actionText}>
-                    <AccessTimeOutlinedIcon className={styles.actionIcon} />
-                    <Typography className={styles.actionMessage}>
-                      {deal.requiredAction.text}
-                    </Typography>
-                  </Box>
-                  {deal.requiredAction.showAcceptButton && (
-                    <Button
-                      variant="contained"
-                      className={styles.acceptButton}
-                      fullWidth
-                      onClick={
-                        acceptAction
-                          ? () => setIsAcceptDialogOpen(true)
-                          : undefined
-                      }
-                      disabled={isSubmittingWorkflowAction}
-                    >
-                      پذیرش تحویل
-                    </Button>
-                  )}
-                  {deal.requiredAction.showSupportButton && (
-                    <Button
-                      variant="outlined"
-                      className={styles.supportButton}
-                      startIcon={<ChatBubbleOutlineIcon />}
-                      fullWidth
-                    >
-                      تماس با پشتیبانی
-                    </Button>
-                  )}
-                </Box>
-              </Box>
+            {apiDeal?.next_available_actions && apiDeal.next_available_actions.length > 0 && (
+              <RequiredAction
+                actions={apiDeal.next_available_actions as any}
+                isSubmitting={isSubmittingWorkflowAction}
+                creatorRole={apiDeal.parties?.[0]?.role}
+                onActionClick={handleActionClick}
+              />
             )}
 
             {/* Transaction Parties Section */}
@@ -1114,47 +1074,6 @@ export default function TransactionDetail({ id }: { id: string }) {
           </Box>
         </Box>
       </Box>
-
-      <Dialog
-        open={isAcceptDialogOpen}
-        onClose={() => {
-          if (!isSubmittingWorkflowAction) setIsAcceptDialogOpen(false)
-        }}
-        slotProps={{
-          paper: {
-            sx: { direction: "rtl", borderRadius: "16px", width: "100%" },
-          },
-        }}
-      >
-        <DialogTitle>تأیید پذیرش تحویل</DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{ textAlign: "right", lineHeight: 1.8 }}>
-            آیا از پذیرش تحویل مطمئن هستید؟ پس از تأیید، قرارداد وارد مرحله
-            «{acceptAction?.destination_step_name}» می‌شود.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions sx={{ padding: "8px 24px 20px", gap: "8px" }}>
-          <Button
-            variant="outlined"
-            onClick={() => setIsAcceptDialogOpen(false)}
-            disabled={isSubmittingWorkflowAction}
-          >
-            انصراف
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleAcceptDelivery}
-            disabled={isSubmittingWorkflowAction}
-            startIcon={
-              isSubmittingWorkflowAction ? (
-                <CircularProgress size={16} color="inherit" />
-              ) : undefined
-            }
-          >
-            تأیید و ادامه
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   )
 }

@@ -68,7 +68,9 @@ export interface DealHistoryItem {
 export interface DealNextAction {
   transition_id: number
   action: string
-  action_label: string
+  action_label?: string
+  action_text?: string
+  action_color?: "success" | "warning" | "error" | "info"
   destination_step: number
   destination_step_name: string
 }
