@@ -36,6 +36,7 @@ import {
 } from "@/hooks/documents/useDealDocuments"
 import type {
   DealDetail,
+  DealDocument,
   DealHistoryItem,
   DealItem,
   DealParty,
@@ -182,7 +183,53 @@ const resolveLocation = (item?: DealItem) => {
   return `${lat.toLocaleString("fa-IR")}، ${lng.toLocaleString("fa-IR")}`
 }
 
-const resolveAdditionalDetails = (apiDeal: DealDetail, item?: DealItem) => {
+const imageFileTypes = new Set([
+  "jpg",
+  "jpeg",
+  "png",
+  "gif",
+  "webp",
+  "bmp",
+  "svg",
+  "image/jpg",
+  "image/jpeg",
+  "image/png",
+  "image/gif",
+  "image/webp",
+  "image/bmp",
+  "image/svg+xml",
+])
+
+const getDocumentFileName = (
+  document: DealDocument | UploadedDealDocument,
+) =>
+  "file_name" in document
+    ? document.file_name
+    : document.name || document.title || document.file || document.url || ""
+
+const getDocumentFileType = (
+  document: DealDocument | UploadedDealDocument,
+) => {
+  const directType =
+    "file_type" in document ? document.file_type : undefined
+  if (directType) return directType.trim().toLowerCase().replace(/^\./, "")
+
+  const fileName = getDocumentFileName(document)
+  return fileName.split(".").pop()?.trim().toLowerCase() || ""
+}
+
+const resolveImageDocumentsCount = (
+  documents?: Array<DealDocument | UploadedDealDocument>,
+) =>
+  documents?.filter((document) =>
+    imageFileTypes.has(getDocumentFileType(document)),
+  ).length
+
+const resolveAdditionalDetails = (
+  apiDeal: DealDetail,
+  item?: DealItem,
+  documents?: Array<DealDocument | UploadedDealDocument>,
+) => {
   const details: Array<{ label: string; value: string }> = []
   const addDetail = (label: string, value: unknown) => {
     const formattedValue = formatDetailValue(value)
@@ -190,8 +237,7 @@ const resolveAdditionalDetails = (apiDeal: DealDetail, item?: DealItem) => {
   }
 
   addDetail("کد پیگیری", apiDeal.trace_number)
-  addDetail("تعداد", item?.quantity)
-  addDetail("تعداد تصاویر", item?.images_count)
+  addDetail("تعداد تصاویر", resolveImageDocumentsCount(documents))
   addDetail("مبلغ واحد (ریال)", item?.price)
   addDetail("مبلغ امانی (ریال)", item?.escrow_price)
   addDetail(
@@ -293,32 +339,63 @@ const formatHistoryTimestamp = (timestamp?: string | null) => {
   }
 }
 
+const mapHistoryStateToProgressStatus = (
+  state?: string,
+): Deal["progress"][number]["status"] => {
+  const normalizedState = state?.toLowerCase()
+
+  if (
+    normalizedState === "completed" ||
+    normalizedState === "complete" ||
+    normalizedState === "done"
+  ) {
+    return "completed"
+  }
+
+  if (
+    normalizedState === "pending" ||
+    normalizedState === "in_progress" ||
+    normalizedState === "current"
+  ) {
+    return "in_progress"
+  }
+
+  return "pending"
+}
+
+const getProgressIconName = (
+  status: Deal["progress"][number]["status"],
+): Deal["progress"][number]["icon"] =>
+  status === "completed"
+    ? "check"
+    : status === "in_progress"
+      ? "clock"
+      : "circle"
+
 const mapHistoryItemToProgress = (
   item: DealHistoryItem,
   currentStep?: string,
 ): Deal["progress"][number] => {
-  const isCurrentStep = Boolean(
-    currentStep && item.to_step_name === currentStep,
-  )
-  const status = isCurrentStep
-    ? "in_progress"
-    : item.timestamp
-      ? "completed"
-      : "pending"
+  const status = item.state
+    ? mapHistoryStateToProgressStatus(item.state)
+    : currentStep && item.to_step_name === currentStep
+      ? "in_progress"
+      : item.timestamp
+        ? "completed"
+        : "pending"
   const { date, time } = formatHistoryTimestamp(item.timestamp)
 
   return {
-    title: item.to_step_name || item.from_step_name || "مرحله قرارداد",
-    description: item.step_group_name || "روند قرارداد",
+    title:
+      item.group_name ||
+      item.to_step_name ||
+      item.from_step_name ||
+      "مرحله قرارداد",
+    description: item.description || item.step_group_name || "روند قرارداد",
     date,
     time,
     status,
-    icon:
-      status === "completed"
-        ? "check"
-        : status === "in_progress"
-          ? "clock"
-          : "circle",
+    icon: getProgressIconName(status),
   }
 }
 
@@ -327,6 +404,13 @@ const resolveProgress = (
   fallbackProgress: Deal["progress"],
 ) => {
   if (!apiDeal.history?.length) return fallbackProgress
+  const usesCurrentHistoryShape = apiDeal.history.some(
+    (item) => item.group_name || item.state || item.description,
+  )
+
+  if (usesCurrentHistoryShape) {
+    return apiDeal.history.map((item) => mapHistoryItemToProgress(item))
+  }
 
   const completedTransitionKeys = new Set(
     apiDeal.history
@@ -366,6 +450,7 @@ const mapApiDealToUi = (
   apiDeal: DealDetail,
   staticTemplate: Deal,
   currentUserMobile?: string,
+  documents?: UploadedDealDocument[],
 ): Deal => {
   const firstItem = apiDeal.items?.[0]
   const status = resolveStatus(apiDeal.state)
@@ -425,7 +510,11 @@ const mapApiDealToUi = (
       category: resolveSubcategory(firstItem),
       description: firstItem?.description || undefined,
       location: resolveLocation(firstItem),
-      additionalDetails: resolveAdditionalDetails(apiDeal, firstItem),
+      additionalDetails: resolveAdditionalDetails(
+        apiDeal,
+        firstItem,
+        documents?.length ? documents : apiDeal.documents,
+      ),
     },
   }
 }
@@ -446,7 +535,12 @@ export default function TransactionDetail({ id }: { id: string }) {
   const deal =
     staticDeal ||
     (apiDeal
-      ? mapApiDealToUi(apiDeal, dealsData[0], authState.user?.mobile_number)
+      ? mapApiDealToUi(
+          apiDeal,
+          dealsData[0],
+          authState.user?.mobile_number,
+          apiDocuments,
+        )
       : undefined)
   const [tabValue, setTabValue] = useState(2) // Default to Messages to match the image
   const [messageText, setMessageText] = useState("")

@@ -65,6 +65,9 @@ export interface DealWorkflow {
 
 export interface DealHistoryItem {
   timestamp?: string | null
+  state?: string
+  group_name?: string
+  description?: string | null
   action_label?: string
   from_step_name?: string
   to_step_name?: string
