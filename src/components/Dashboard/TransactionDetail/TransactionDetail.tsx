@@ -233,6 +233,13 @@ const resolveAmount = (apiDeal: DealDetail) => {
   )
 }
 
+const resolveEscrowAmount = (apiDeal: DealDetail) => {
+  const escrowAmount = Number(apiDeal.items?.[0]?.escrow_price)
+  if (Number.isFinite(escrowAmount)) return escrowAmount
+
+  return resolveAmount(apiDeal)
+}
+
 const formatFileSize = (size: number) => {
   if (size < 1024) return `${size} B`
   if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`
@@ -378,7 +385,8 @@ const mapApiDealToUi = (
           party.mobile_number !== currentUserMobile,
       )
     : apiDeal.parties?.[0]
-  const amount = resolveAmount(apiDeal).toLocaleString("fa-IR")
+  const escrowAmount = resolveEscrowAmount(apiDeal).toLocaleString("fa-IR")
+  const totalAmount = resolveAmount(apiDeal).toLocaleString("fa-IR")
   const acceptAction = apiDeal.next_available_actions?.find(
     (action) => action.action.toLowerCase() === "accept",
   )
@@ -398,7 +406,7 @@ const mapApiDealToUi = (
     date: apiDeal.created_at
       ? new Date(apiDeal.created_at).toLocaleDateString("fa-IR")
       : "",
-    amount,
+    amount: escrowAmount,
     currency: "ریال",
     progress: resolveProgress(apiDeal, staticTemplate.progress),
     requiredAction: acceptAction
@@ -409,7 +417,7 @@ const mapApiDealToUi = (
         }
       : undefined,
     serviceFee: undefined,
-    totalAmount: amount,
+    totalAmount,
     paymentStatus: undefined,
     buyer: apiDeal.parties ? mapParty(buyer) : staticTemplate.buyer,
     seller: apiDeal.parties ? mapParty(seller) : staticTemplate.seller,
@@ -994,7 +1002,7 @@ export default function TransactionDetail({ id }: { id: string }) {
               <Box className={styles.paymentContent}>
                 <Box className={styles.paymentRow}>
                   <Typography className={styles.paymentLabel}>
-                    مبلغ معامله
+                    مبلغ امانی
                   </Typography>
                   <Typography className={styles.paymentValue}>
                     {deal.amount} {deal.currency || "تومان"}

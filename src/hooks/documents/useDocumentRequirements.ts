@@ -10,6 +10,7 @@ export interface DocumentRequirement {
   files_min: number
   files_max: number
   maximum_size: number | null
+  allowed_file_types?: string | null
   allowed_upload_roles?: string[]
   condition_key?: string | null
   description?: string | null

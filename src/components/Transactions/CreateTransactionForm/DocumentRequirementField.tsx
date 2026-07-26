@@ -20,6 +20,26 @@ interface DocumentRequirementFieldProps {
   onRemove: (uploadId: string) => void
 }
 
+const resolveAllowedFileTypes = (requirement: DocumentRequirement) => {
+  const allowedFileTypes = requirement.allowed_file_types
+    ?.split(",")
+    .map((type) => type.trim())
+    .filter(Boolean)
+
+  if (allowedFileTypes?.length) return allowedFileTypes
+
+  return requirement.file_types?.map((type) => `.${type.replace(/^\./, "")}`)
+}
+
+const formatMaximumSize = (maximumSize?: number | null) => {
+  if (!maximumSize) return undefined
+
+  const maximumSizeInMb = maximumSize / 1000
+  return `${maximumSizeInMb.toLocaleString("fa-IR", {
+    maximumFractionDigits: 2,
+  })} MB`
+}
+
 export default function DocumentRequirementField({
   requirement,
   uploads,
@@ -38,11 +58,10 @@ export default function DocumentRequirementField({
   const maxFiles = requirement.files_max || 3
   const minFiles = requirement.files_min || (isRequired ? 1 : 0)
   const canSelectMore = uploads.length < maxFiles
-  const accept = requirement.file_types?.length
-    ? requirement.file_types
-        .map((type) => `.${type.replace(/^\./, "")}`)
-        .join(",")
-    : undefined
+  const allowedFileTypes = resolveAllowedFileTypes(requirement)
+  const accept = allowedFileTypes?.join(",")
+  const allowedFileTypesLabel = allowedFileTypes?.join("، ")
+  const maximumSizeLabel = formatMaximumSize(requirement.maximum_size)
 
   const selectFiles = (files: File[]) => {
     onFilesSelected(requirement, files)
@@ -102,6 +121,16 @@ export default function DocumentRequirementField({
           <span className={styles.fileUploadHint}>
             حداقل {minFiles} و حداکثر {maxFiles} فایل
           </span>
+          {allowedFileTypesLabel && (
+            <span className={styles.fileUploadHint}>
+              فرمت‌های مجاز: {allowedFileTypesLabel}
+            </span>
+          )}
+          {maximumSizeLabel && (
+            <span className={styles.fileUploadHint}>
+              حداکثر حجم مجاز: {maximumSizeLabel}
+            </span>
+          )}
         </label>
       </div>
 

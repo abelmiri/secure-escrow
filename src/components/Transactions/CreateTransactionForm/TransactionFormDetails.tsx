@@ -9,6 +9,7 @@ import API_URLS from "@/constants/urls/API_URLS"
 import { useCategories } from "@/hooks/deals/useCategories"
 import { useSubCategories } from "@/hooks/deals/useSubCategories"
 import { useDeal } from "@/hooks/deals/useDeal"
+import { useDealWorkflowAction } from "@/hooks/deals/useDealWorkflowAction"
 import { useUpdateDeal } from "@/hooks/deals/useUpdateDeal"
 import { useDealDocuments } from "@/hooks/documents/useDealDocuments"
 import { useDocumentRequirements } from "@/hooks/documents/useDocumentRequirements"
@@ -101,6 +102,8 @@ export default function TransactionFormDetails({
 
   const { categories, isLoading: isCategoriesLoading } = useCategories()
   const { updateDeal } = useUpdateDeal()
+  const { submitWorkflowAction, isSubmitting: isSubmittingWorkflowAction } =
+    useDealWorkflowAction()
   const selectedCategory = categories.find((c) => c.id === selectedCategoryId)
   const subCategoriesList = selectedCategory?.sub_categories || []
   const selectedSubCategory = subCategoriesList.find(
@@ -406,7 +409,28 @@ export default function TransactionFormDetails({
   const handleContinue = async () => {
     if (stageNumber === 3) {
       if (!isTermsAccepted) return
-      router.push("/dashboard")
+      if (!dealId) return
+
+      const reviewAction =
+        deal?.next_available_actions?.find(
+          (action) => action.action.toLowerCase() === "accept",
+        ) ||
+        deal?.next_available_actions?.find(
+          (action) => action.action.toLowerCase() !== "form",
+        ) ||
+        deal?.next_available_actions?.[0]
+
+      try {
+        if (reviewAction) {
+          await submitWorkflowAction(dealId, {
+            transition_id: reviewAction.transition_id,
+          })
+        }
+
+        router.push(`/dashboard/${dealId}`)
+      } catch (error) {
+        console.error("Error submitting review action:", error)
+      }
       return
     }
 
@@ -703,7 +727,7 @@ export default function TransactionFormDetails({
           isDealLoading={isDealLoading}
           isContractPdfLoading={false}
           isDocumentsLoading={isDealDocumentsLoading}
-          isSubmitting={isSubmitting}
+          isSubmitting={isSubmitting || isSubmittingWorkflowAction}
           isTermsAccepted={isTermsAccepted}
           userMobile={authState.user?.mobile_number}
           role={role}

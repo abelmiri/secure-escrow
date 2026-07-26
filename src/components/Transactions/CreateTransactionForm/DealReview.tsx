@@ -228,14 +228,14 @@ export default function DealReview({
         ]}
       />
 
-      <ReviewSection
+      {/* <ReviewSection
         title="جزئیات ارسال"
         rows={[
           { label: "نحوه ارسال:", value: "freight" },
           { label: "هزینه ارسال:", value: formatCurrency(0) },
           { label: "پرداخت‌کننده:", value: "" },
         ]}
-      />
+      /> */}
 
       <ReviewSection
         title={`اطلاعات ${counterpartyRoleLabel}`}
