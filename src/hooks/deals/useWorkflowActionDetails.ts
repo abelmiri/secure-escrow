@@ -52,7 +52,7 @@ export interface WorkflowActionDetails {
 export function useWorkflowActionDetails(dealId: number | null, transitionId: number | null) {
   const { data, error, isLoading } = useSWR<WorkflowActionDetails>(
     dealId && transitionId
-      ? [API_URLS.dealWorkflowActionDetails({ id: dealId, transitionId })]
+      ? API_URLS.dealWorkflowActionDetails({ id: dealId, transitionId })
       : null,
     async (url) => {
       const response = await request.get({
