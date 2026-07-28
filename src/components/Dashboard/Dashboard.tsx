@@ -12,6 +12,7 @@ import styles from "./styles/Dashboard.module.scss"
 import Link from "next/link"
 import request from "@/request/request"
 import API_URLS from "@/constants/urls/API_URLS"
+import { toShortNumber } from "@/lib"
 
 interface DashboardStatsResponse {
   total_amount: {
@@ -33,8 +34,15 @@ interface StatCardItem {
   title: string
   value: string
   change?: string
-  Icon: ComponentType<any>
+  Icon: ComponentType<DashboardIconProps>
   iconColor: string
+}
+
+interface DashboardIconProps {
+  width?: string
+  height?: string
+  color?: string
+  strokeColor?: string
 }
 
 const formatPersianNumber = (value: number | null | undefined) => {
@@ -121,10 +129,13 @@ export default function Dashboard() {
       ]
     }
 
+    const totalAmount = dashboardStats.total_amount.value
+    const totalAmountUnit = Math.abs(totalAmount) < 1000000 ? " ریال" : ""
+
     return [
       {
-        title: "حجم کل",
-        value: `${formatPersianNumber(dashboardStats.total_amount.value)} تومان`,
+        title: "ارزش کل",
+        value: `${toShortNumber(totalAmount)}${totalAmountUnit}`,
         change:
           dashboardStats.total_amount.change_rate !== null
             ? `${dashboardStats.total_amount.change_rate >= 0 ? "+" : ""}${formatPersianNumber(dashboardStats.total_amount.change_rate)}٪`
@@ -194,12 +205,10 @@ export default function Dashboard() {
                   />
                 ) : (
                   <stat.Icon
-                    width={40}
-                    height={40}
-                    {...({
-                      strokeColor: stat.iconColor,
-                      color: stat.iconColor,
-                    } as any)}
+                    width="40"
+                    height="40"
+                    strokeColor={stat.iconColor}
+                    color={stat.iconColor}
                   />
                 )}
               </Box>

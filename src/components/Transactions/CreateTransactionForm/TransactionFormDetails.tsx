@@ -15,6 +15,7 @@ import { useDealDocuments } from "@/hooks/documents/useDealDocuments"
 import { useDocumentRequirements } from "@/hooks/documents/useDocumentRequirements"
 import type { DocumentRequirement } from "@/hooks/documents/useDocumentRequirements"
 import request from "@/request/request"
+import RadioButton from "@/components/RadioButton/RadioButton"
 import {
   clearTransactionPrefill,
   loadTransactionPrefill,
@@ -38,6 +39,11 @@ const totalAmountLessThanEscrowMessage =
   "مبلغ نهایی کل معامله نمی‌تواند کمتر از مبلغ واریزی به حساب امانی باشد."
 
 const iranianMobilePattern = /^09[0-9]{9}$/
+
+const partyRoleLabels: Record<string, string> = {
+  customer: "خریدار",
+  beneficiary: "فروشنده",
+}
 
 const conditionalPropertyTypes = [
   "boolean_integer",
@@ -91,6 +97,7 @@ export default function TransactionFormDetails({
   const [paymentDescription, setPaymentDescription] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [counterpartyMobile, setCounterpartyMobile] = useState("")
+  const [isRepresentative, setIsRepresentative] = useState(false)
   const [isTermsAccepted, setIsTermsAccepted] = useState(false)
   const [documentUploads, setDocumentUploads] = useState<DocumentUpload[]>([])
   const [documentValidationMessage, setDocumentValidationMessage] = useState("")
@@ -525,9 +532,17 @@ export default function TransactionFormDetails({
         }
       })
 
-    const primaryParty = {
+    const primaryParty: {
+      user: string
+      role: string
+      is_representative?: boolean
+    } = {
       user: authState.user.mobile_number,
       role,
+    }
+
+    if (stageNumber === 2 && role !== "broker") {
+      primaryParty.is_representative = isRepresentative
     }
 
     const secondPartyMobile = counterpartyMobile.trim()
@@ -695,28 +710,52 @@ export default function TransactionFormDetails({
       )}
 
       {stageNumber === 2 && (
-        <ListInput
-          title={
-            role === "beneficiary"
-              ? "شماره موبایل خریدار"
-              : "شماره موبایل فروشنده"
-          }
-          placeholder={
-            role === "beneficiary"
-              ? "شماره موبایل خریدار"
-              : "شماره موبایل فروشنده"
-          }
-          value={counterpartyMobile}
-          onChange={(value) => {
-            setCounterpartyMobile(value)
-            resetValidationMessages()
-          }}
-          valueType="string"
-          regex={iranianMobilePattern}
-          rejectPersianDigits
-          required
-          error={fieldErrors.includes("counterpartyMobile")}
-        />
+        <>
+          <ListInput
+            title={
+              role === "beneficiary"
+                ? "شماره موبایل خریدار"
+                : "شماره موبایل فروشنده"
+            }
+            placeholder={
+              role === "beneficiary"
+                ? "شماره موبایل خریدار"
+                : "شماره موبایل فروشنده"
+            }
+            value={counterpartyMobile}
+            onChange={(value) => {
+              setCounterpartyMobile(value)
+              resetValidationMessages()
+            }}
+            valueType="string"
+            regex={iranianMobilePattern}
+            rejectPersianDigits
+            required
+            error={fieldErrors.includes("counterpartyMobile")}
+          />
+
+          {role !== "broker" && (
+            <div className={styles.roleSelect}>
+              <div className={styles.roleSelectText}>
+                آیا نماینده {partyRoleLabels[role]} هستید؟
+              </div>
+              <RadioButton
+                title={`خیر، خود ${partyRoleLabels[role]} هستم`}
+                name="is-representative"
+                value="false"
+                checked={!isRepresentative}
+                onChange={() => setIsRepresentative(false)}
+              />
+              <RadioButton
+                title={`بله، نماینده ${partyRoleLabels[role]} هستم`}
+                name="is-representative"
+                value="true"
+                checked={isRepresentative}
+                onChange={() => setIsRepresentative(true)}
+              />
+            </div>
+          )}
+        </>
       )}
 
       {stageNumber === 3 && (

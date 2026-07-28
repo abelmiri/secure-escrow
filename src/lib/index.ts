@@ -7,3 +7,4 @@
 // Example: Export utilities here
 // export { formatDate } from './utils/format';
 // export { validateEmail } from './utils/validation';
+export { addCommaToNumber, toShortNumber } from "./numberFormat"

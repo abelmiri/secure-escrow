@@ -8,6 +8,7 @@ export interface UpdateDealPayload {
   parties?: Array<{
     user: string
     role: string
+    is_representative?: boolean
   }>
 }
 
