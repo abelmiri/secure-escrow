@@ -12,6 +12,7 @@ import {
   CircularProgress,
 } from "@mui/material"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined"
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked"
@@ -546,6 +547,7 @@ const mapApiDealToUi = (
 }
 
 export default function TransactionDetail({ id }: { id: string }) {
+  const router = useRouter()
   const { authState } = useContext(authContext)
   const staticDeal = dealsData.find((deal) => deal.id === id)
   const numericId = Number(id)
@@ -618,6 +620,13 @@ export default function TransactionDetail({ id }: { id: string }) {
     files?: Record<string, File[]>,
   ) => {
     if (!apiDealId) return
+
+    if (action.action.toLowerCase() === "edit") {
+      router.push(
+        `/contracts/create?dealId=${apiDealId}&stage=1&workflowAction=edit`,
+      )
+      return
+    }
 
     try {
       await submitWorkflowAction(apiDealId, {

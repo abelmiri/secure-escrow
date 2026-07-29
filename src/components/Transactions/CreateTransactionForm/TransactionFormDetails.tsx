@@ -7,7 +7,7 @@ import ListInput from "@/components/ListInput/ListInput"
 import { authContext } from "@/context/auth/authProvider"
 import API_URLS from "@/constants/urls/API_URLS"
 import { useCategories } from "@/hooks/deals/useCategories"
-import { useSubCategories } from "@/hooks/deals/useSubCategories"
+import { useSubCategories, type Property } from "@/hooks/deals/useSubCategories"
 import { useDeal } from "@/hooks/deals/useDeal"
 import { useDealWorkflowAction } from "@/hooks/deals/useDealWorkflowAction"
 import { useUpdateDeal } from "@/hooks/deals/useUpdateDeal"
@@ -45,6 +45,17 @@ const partyRoleLabels: Record<string, string> = {
   beneficiary: "فروشنده",
 }
 
+const normalizeIranMobileForInput = (mobile?: string) => {
+  if (!mobile) return ""
+  if (mobile.startsWith("+98")) return `0${mobile.slice(3)}`
+  if (mobile.startsWith("98")) return `0${mobile.slice(2)}`
+  return mobile
+}
+
+const areSameIranMobile = (first?: string, second?: string) =>
+  Boolean(first && second) &&
+  normalizeIranMobileForInput(first) === normalizeIranMobileForInput(second)
+
 const conditionalPropertyTypes = [
   "boolean_integer",
   "boolean_string",
@@ -53,6 +64,70 @@ const conditionalPropertyTypes = [
 
 const isConditionalPropertyType = (fieldType: string) =>
   conditionalPropertyTypes.some((type) => type === fieldType)
+
+const normalizeOptionText = (value: unknown) =>
+  String(value ?? "")
+    .trim()
+    .replace(/[،,]+$/g, "")
+    .trim()
+
+const splitOptionText = (value: unknown) =>
+  String(value ?? "")
+    .split(/[،,]/)
+    .map(normalizeOptionText)
+    .filter(Boolean)
+
+const getOptionItems = (property: Property) =>
+  property.options?.map((option) =>
+    typeof option === "string"
+      ? { label: option, value: option }
+      : { label: option.label, value: option.value },
+  ) || []
+
+const normalizeSingleOptionValue = (property: Property, value: unknown) => {
+  const normalizedValue = normalizeOptionText(value)
+  if (!normalizedValue) return ""
+
+  const matchedOption = getOptionItems(property).find(
+    (option) =>
+      normalizeOptionText(option.value) === normalizedValue ||
+      normalizeOptionText(option.label) === normalizedValue,
+  )
+
+  return matchedOption?.value || normalizedValue
+}
+
+const normalizeBooleanOptionValue = (property: Property, value: unknown) => {
+  if (typeof value === "boolean") return value
+
+  const normalizedValue = normalizeSingleOptionValue(property, value)
+  if (["yes", "true", "بله"].includes(normalizedValue)) return true
+  if (["no", "false", "خیر"].includes(normalizedValue)) return false
+
+  return value
+}
+
+const normalizePropertyInputValue = (
+  property: Property,
+  value: unknown,
+): PropertyInputValue => {
+  if (property.field_type === "select" || property.field_type === "dropdown") {
+    return normalizeSingleOptionValue(property, value)
+  }
+
+  if (property.field_type === "multiselect") {
+    const values = Array.isArray(value) ? value : splitOptionText(value)
+    return values
+      .map((item) => normalizeSingleOptionValue(property, item))
+      .filter(Boolean)
+  }
+
+  if (isConditionalPropertyType(property.field_type)) {
+    return normalizeBooleanOptionValue(property, value) as PropertyInputValue
+  }
+
+  return value as PropertyInputValue
+}
 
 interface TransactionFormDetailsProps {
   stageNumber?: number
@@ -73,7 +148,9 @@ export default function TransactionFormDetails({
 }: TransactionFormDetailsProps) {
   const searchParams = useSearchParams()
   const router = useRouter()
+  const workflowAction = searchParams.get("workflowAction")?.toLowerCase()
   const prefillAppliedRef = useRef(false)
+  const dealPrefillAppliedRef = useRef<number | null>(null)
   const previousEscrowAmountRef = useRef("")
   const { authState } = useContext(authContext)
 
@@ -153,9 +230,7 @@ export default function TransactionFormDetails({
 
   const { documentRequirements, isLoading: isDocumentRequirementsLoading } =
     useDocumentRequirements(stageNumber === 2 ? selectedSubCategoryId : null)
-  const { deal, isLoading: isDealLoading } = useDeal(
-    stageNumber === 3 ? dealId || null : null,
-  )
+  const { deal, isLoading: isDealLoading } = useDeal(dealId || null)
   const { documents: dealDocuments, isLoading: isDealDocumentsLoading } =
     useDealDocuments(stageNumber === 3 ? dealId || null : null)
 
@@ -181,6 +256,109 @@ export default function TransactionFormDetails({
     stageNumber === 2
       ? applicableDocumentRequirements.length > 0
       : stageProperties.length > 0
+  const currentDealItemId = dealItemId || deal?.items?.[0]?.id || null
+
+  useEffect(() => {
+    if (!dealId || !deal || dealPrefillAppliedRef.current === dealId) return
+    if (categories.length === 0) return
+
+    const currentUserMobile = authState.user?.mobile_number
+    const firstItem = deal.items?.[0]
+    const itemSubcategory = firstItem?.subcategory
+    const subcategorySlug =
+      typeof itemSubcategory === "object" ? itemSubcategory.slug : undefined
+    const subcategoryName =
+      typeof itemSubcategory === "object" ? itemSubcategory.name : itemSubcategory
+
+    const matchedCategory = categories.find((category) =>
+      category.sub_categories.some(
+        (subCategory) =>
+          subCategory.slug === subcategorySlug ||
+          subCategory.name === subcategoryName,
+      ),
+    )
+    const matchedSubCategory = matchedCategory?.sub_categories.find(
+      (subCategory) =>
+        subCategory.slug === subcategorySlug ||
+        subCategory.name === subcategoryName,
+    )
+
+    const currentParty = currentUserMobile
+      ? deal.parties?.find((party) => {
+          const partyMobile =
+            typeof party.user === "object"
+              ? party.user?.mobile_number
+              : party.user || party.mobile_number
+          return areSameIranMobile(partyMobile, currentUserMobile)
+        })
+      : undefined
+    const counterparty = currentUserMobile
+      ? deal.parties?.find((party) => {
+          const partyMobile =
+            typeof party.user === "object"
+              ? party.user?.mobile_number
+              : party.user || party.mobile_number
+          return !areSameIranMobile(partyMobile, currentUserMobile)
+        })
+      : deal.parties?.[1]
+    const counterpartyMobile =
+      typeof counterparty?.user === "object"
+        ? counterparty.user?.mobile_number
+        : counterparty?.user || counterparty?.mobile_number
+
+    if (currentParty?.role) {
+      setRole(currentParty.role)
+    }
+    setIsRepresentative(Boolean(currentParty?.is_representative))
+    setCounterpartyMobile(normalizeIranMobileForInput(counterpartyMobile))
+
+    if (matchedCategory) setSelectedCategoryId(matchedCategory.id)
+    if (matchedSubCategory) setSelectedSubCategoryId(matchedSubCategory.id)
+
+    setTitle(firstItem?.name || "")
+    setDescription(firstItem?.description || "")
+    setEscrowAmount(
+      firstItem?.escrow_price !== undefined && firstItem?.escrow_price !== null
+        ? String(firstItem.escrow_price)
+        : "",
+    )
+    setTotalTransactionAmount(
+      firstItem?.price !== undefined && firstItem?.price !== null
+        ? String(firstItem.price)
+        : "",
+    )
+    setPaymentMethod(firstItem?.remaining_price_payment_method || "")
+    setPaymentDescription(firstItem?.remaining_price_payment_description || "")
+
+    dealPrefillAppliedRef.current = dealId
+  }, [authState.user?.mobile_number, categories, deal, dealId])
+
+  useEffect(() => {
+    if (!dealId || !deal || properties.length === 0) return
+
+    const itemProperties = deal.items?.[0]?.properties
+    if (!itemProperties) return
+
+    setPropertyValues((currentValues) => {
+      const nextValues = { ...currentValues }
+
+      properties.forEach((property) => {
+        const value =
+          itemProperties[property.slug] ??
+          itemProperties[property.name] ??
+          itemProperties[property.property_name]
+
+        if (value !== undefined) {
+          nextValues[property.slug] = normalizePropertyInputValue(
+            property,
+            value,
+          )
+        }
+      })
+
+      return nextValues
+    })
+  }, [deal, dealId, properties])
 
   const isEmptyValue = (value: PropertyInputValue | string | number | null) => {
     if (Array.isArray(value)) return value.length === 0
@@ -419,8 +597,13 @@ export default function TransactionFormDetails({
       if (!dealId) return
 
       const reviewAction =
-        deal?.next_available_actions?.find(
-          (action) => action.action.toLowerCase() === "accept",
+        (workflowAction
+          ? deal?.next_available_actions?.find(
+              (action) => action.action.toLowerCase() === workflowAction,
+            )
+          : undefined) ||
+        deal?.next_available_actions?.find((action) =>
+          ["join", "accept"].includes(action.action.toLowerCase()),
         ) ||
         deal?.next_available_actions?.find(
           (action) => action.action.toLowerCase() !== "form",
@@ -511,7 +694,7 @@ export default function TransactionFormDetails({
     properties
       .filter((prop) => prop.field_type !== "file")
       .forEach((prop) => {
-        const value = propertyValues[prop.slug]
+        const value = normalizePropertyInputValue(prop, propertyValues[prop.slug])
 
         if (
           prop.field_type === "integer" ||
@@ -558,7 +741,7 @@ export default function TransactionFormDetails({
         const payload = {
           items: [
             {
-              ...(dealId && dealItemId ? { id: dealItemId } : {}),
+              ...(dealId && currentDealItemId ? { id: currentDealItemId } : {}),
               subcategory: selectedSubCategory?.slug || "",
               name: title,
               description,

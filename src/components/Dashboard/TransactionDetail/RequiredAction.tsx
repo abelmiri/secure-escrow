@@ -11,10 +11,23 @@ import {
   DialogContentText,
   DialogTitle,
   CircularProgress,
+  TextField,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Checkbox,
+  ListItemText,
+  FormControlLabel,
 } from "@mui/material"
+import type { SelectChangeEvent } from "@mui/material/Select"
 import AccessTimeOutlinedIcon from "@mui/icons-material/AccessTimeOutlined"
-import { useWorkflowActionDetails } from "@/hooks/deals/useWorkflowActionDetails"
-import WorkflowActionForm from "./WorkflowActionForm"
+import CloudUploadOutlinedIcon from "@mui/icons-material/CloudUploadOutlined"
+import type {
+  WorkflowActionDetails,
+  WorkflowField,
+  WorkflowRequiredDocument,
+} from "@/hooks/deals/useWorkflowActionDetails"
 import styles from "./styles/RequiredAction.module.scss"
 
 export interface NextAvailableAction {
@@ -24,6 +37,12 @@ export interface NextAvailableAction {
   action_text?: string
   destination_step: number
   destination_step_name: string
+  inputs?: {
+    fields?: WorkflowActionDetails["fields"] | null
+    required_documents?: Array<
+      WorkflowRequiredDocument | WorkflowRequiredDocument[]
+    > | null
+  } | null
 }
 
 interface RequiredActionProps {
@@ -48,6 +67,45 @@ const roleLabels: Record<string, string> = {
   broker: "کارگزار",
 }
 
+const getActionDetailsFromAction = (
+  action: NextAvailableAction | null,
+): WorkflowActionDetails | null => {
+  if (!action || action.action !== "form") return null
+
+  const requiredDocuments = (action.inputs?.required_documents || []).flat()
+
+  return {
+    transition: {
+      transition_id: action.transition_id,
+      from_step: 0,
+      from_step_name: "",
+      to_step: action.destination_step,
+      to_step_name: action.destination_step_name,
+      actor_role: "",
+    },
+    action: action.action,
+    action_label: action.action_text || action.action,
+    fields: action.inputs?.fields || [],
+    required_documents: requiredDocuments,
+  }
+}
+
+const getDocumentUploadKey = (document: WorkflowRequiredDocument) =>
+  document.document_requirement_code || document.document_type_code
+
+const isEmptyFieldValue = (value: unknown) => {
+  if (Array.isArray(value)) return value.length === 0
+  if (typeof value === "boolean") return false
+  return value === undefined || value === null || String(value).trim() === ""
+}
+
+const getFieldOptions = (field: WorkflowField) =>
+  field.options?.map((option) =>
+    typeof option === "string"
+      ? { label: option, value: option }
+      : { label: option.label, value: option.value },
+  ) || []
+
 const SupportIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
     <g clipPath="url(#clip0_969_132)">
@@ -62,7 +120,6 @@ const SupportIcon = () => (
 )
 
 export default function RequiredAction({
-  dealId,
   actions = [],
   isSubmitting = false,
   creatorRole,
@@ -71,22 +128,72 @@ export default function RequiredAction({
 }: RequiredActionProps) {
   const [selectedAction, setSelectedAction] = useState<NextAvailableAction | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [isFormDialogOpen, setIsFormDialogOpen] = useState(false)
-  const { actionDetails, isLoading: isLoadingActionDetails } = useWorkflowActionDetails(
-    dealId || null,
-    selectedAction?.transition_id || null,
-  )
+  const [formData, setFormData] = useState<Record<string, unknown>>({})
+  const [uploadedFiles, setUploadedFiles] = useState<Record<string, File[]>>({})
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [fileErrors, setFileErrors] = useState<Record<string, string>>({})
+  const formAction =
+    actions.find((action) => action.action.toLowerCase() === "form") || null
+  const actionDetails = getActionDetailsFromAction(formAction)
+
+  const handleFieldChange = (fieldSlug: string, value: unknown) => {
+    setFieldErrors((prev) => {
+      const next = { ...prev }
+      delete next[fieldSlug]
+      return next
+    })
+    setFormData((prev) => ({ ...prev, [fieldSlug]: value }))
+  }
+
+  const handleFileSelect = (
+    uploadKey: string,
+    document: WorkflowRequiredDocument,
+    selectedFiles: FileList | null,
+  ) => {
+    if (!selectedFiles) return
+
+    const files = Array.from(selectedFiles)
+    const nextErrors: Record<string, string> = {}
+
+    if (files.length < document.files_min || files.length > document.files_max) {
+      nextErrors[uploadKey] =
+        `تعداد فایل باید بین ${document.files_min} تا ${document.files_max} باشد`
+    }
+
+    files.forEach((file) => {
+      const fileExtension = `.${file.name.split(".").pop()?.toLowerCase()}`
+      if (!document.allowed_file_types.includes(fileExtension)) {
+        nextErrors[uploadKey] =
+          `نوع فایل ${fileExtension} مجاز نیست. فایل‌های مجاز: ${document.allowed_file_types.join(", ")}`
+      }
+
+      if (file.size > document.maximum_size_bytes) {
+        nextErrors[uploadKey] =
+          `اندازه فایل بیش از حد مجاز است. حد مجاز: ${(document.maximum_size_bytes / 1024 / 1024).toFixed(2)} MB`
+      }
+    })
+
+    if (Object.keys(nextErrors).length > 0) {
+      setFileErrors((prev) => ({ ...prev, ...nextErrors }))
+      return
+    }
+
+    setFileErrors((prev) => {
+      const next = { ...prev }
+      delete next[uploadKey]
+      return next
+    })
+    setUploadedFiles((prev) => ({ ...prev, [uploadKey]: files }))
+  }
 
   const handleActionClick = (action: NextAvailableAction) => {
-    setSelectedAction(action)
-    
-    // If it's a form action, open the form dialog
-    if (action.action === "form") {
-      setIsFormDialogOpen(true)
-    } else {
-      // Otherwise, open the confirmation dialog
-      setIsDialogOpen(true)
+    if (action.action.toLowerCase() === "edit") {
+      void onActionClick(action)
+      return
     }
+
+    setSelectedAction(action)
+    setIsDialogOpen(true)
   }
 
   const handleConfirm = async () => {
@@ -97,18 +204,198 @@ export default function RequiredAction({
     }
   }
 
-  const handleFormSubmit = async (formData: Record<string, unknown>, files: Record<string, File[]>) => {
-    if (selectedAction) {
-      await onActionClick(selectedAction, formData, files)
-      setIsFormDialogOpen(false)
-      setSelectedAction(null)
+  const handleFormSubmit = async () => {
+    if (!formAction || !actionDetails) return
+
+    const nextFieldErrors: Record<string, string> = {}
+    const nextFileErrors: Record<string, string> = {}
+    const submittedFormData = actionDetails.fields.reduce<
+      Record<string, unknown>
+    >((fields, field) => {
+      fields[field.slug] = formData[field.slug] ?? field.default_value ?? ""
+      return fields
+    }, {})
+
+    actionDetails.fields.forEach((field) => {
+      if (field.required && isEmptyFieldValue(submittedFormData[field.slug])) {
+        nextFieldErrors[field.slug] = "این فیلد الزامی است."
+      }
+    })
+
+    actionDetails.required_documents.forEach((document) => {
+      const uploadKey = getDocumentUploadKey(document)
+      const uploadedCount = uploadedFiles[uploadKey]?.length || 0
+
+      if (
+        document.requirement_type === "required" &&
+        uploadedCount < document.files_min
+      ) {
+        nextFileErrors[uploadKey] = `حداقل ${document.files_min} فایل بارگذاری کنید.`
+      }
+    })
+
+    if (
+      Object.keys(nextFieldErrors).length > 0 ||
+      Object.keys(nextFileErrors).length > 0
+    ) {
+      setFieldErrors(nextFieldErrors)
+      setFileErrors((prev) => ({ ...prev, ...nextFileErrors }))
+      return
     }
+
+    await onActionClick(formAction, submittedFormData, uploadedFiles)
+    setFormData({})
+    setUploadedFiles({})
+    setFieldErrors({})
+    setFileErrors({})
   }
 
   const handleCancel = () => {
     setIsDialogOpen(false)
-    setIsFormDialogOpen(false)
     setSelectedAction(null)
+  }
+
+  const renderFormField = (field: WorkflowField) => {
+    const value = formData[field.slug] ?? field.default_value ?? ""
+    const error = fieldErrors[field.slug]
+    const commonTextFieldProps = {
+      fullWidth: true,
+      label: field.label,
+      required: field.required,
+      error: Boolean(error),
+      helperText: error,
+      className: styles.formField,
+      size: "small" as const,
+    }
+
+    if (field.field_type === "date") {
+      return (
+        <TextField
+          key={field.slug}
+          type="date"
+          value={value}
+          onChange={(event) => handleFieldChange(field.slug, event.target.value)}
+          InputLabelProps={{ shrink: true }}
+          {...commonTextFieldProps}
+        />
+      )
+    }
+
+    if (field.field_type === "number" || field.field_type === "integer") {
+      return (
+        <TextField
+          key={field.slug}
+          type="number"
+          value={value}
+          onChange={(event) => handleFieldChange(field.slug, event.target.value)}
+          {...commonTextFieldProps}
+        />
+      )
+    }
+
+    if (field.field_type === "checkbox" || field.field_type === "bool") {
+      return (
+        <Box key={field.slug} className={styles.checkboxField}>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={Boolean(value)}
+                onChange={(event) =>
+                  handleFieldChange(field.slug, event.target.checked)
+                }
+              />
+            }
+            label={field.label}
+          />
+          {error && <Typography className={styles.fieldError}>{error}</Typography>}
+        </Box>
+      )
+    }
+
+    if (
+      field.field_type === "select" ||
+      field.field_type === "dropdown" ||
+      field.field_type === "radio"
+    ) {
+      return (
+        <FormControl
+          key={field.slug}
+          fullWidth
+          size="small"
+          className={styles.formField}
+          error={Boolean(error)}
+        >
+          <InputLabel>{field.label}</InputLabel>
+          <Select
+            value={value}
+            label={field.label}
+            onChange={(event) =>
+              handleFieldChange(field.slug, event.target.value)
+            }
+          >
+            {getFieldOptions(field).map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Select>
+          {error && <Typography className={styles.fieldError}>{error}</Typography>}
+        </FormControl>
+      )
+    }
+
+    if (field.field_type === "multiselect") {
+      const selectedValues = Array.isArray(value) ? (value as string[]) : []
+
+      return (
+        <FormControl
+          key={field.slug}
+          fullWidth
+          size="small"
+          className={styles.formField}
+          error={Boolean(error)}
+        >
+          <InputLabel>{field.label}</InputLabel>
+          <Select<string[]>
+            multiple
+            value={selectedValues}
+            label={field.label}
+            onChange={(event: SelectChangeEvent<string[]>) => {
+              const selected = event.target.value
+              handleFieldChange(
+                field.slug,
+                typeof selected === "string" ? selected.split(",") : selected,
+              )
+            }}
+            renderValue={(selected) =>
+              getFieldOptions(field)
+                .filter((option) => selected.includes(option.value))
+                .map((option) => option.label)
+                .join("، ")
+            }
+          >
+            {getFieldOptions(field).map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                <Checkbox checked={selectedValues.includes(option.value)} />
+                <ListItemText primary={option.label} />
+              </MenuItem>
+            ))}
+          </Select>
+          {error && <Typography className={styles.fieldError}>{error}</Typography>}
+        </FormControl>
+      )
+    }
+
+    return (
+      <TextField
+        key={field.slug}
+        value={value}
+        onChange={(event) => handleFieldChange(field.slug, event.target.value)}
+        multiline={field.field_type === "text"}
+        rows={field.field_type === "text" ? 3 : undefined}
+        {...commonTextFieldProps}
+      />
+    )
   }
 
   return (
@@ -161,8 +448,78 @@ export default function RequiredAction({
                   : "برای ادامه معامله، یکی از اقدامات زیر را انتخاب کنید.")}
               </Typography>
             </Box>
+            {actionDetails && (
+              <Box className={styles.inlineForm}>
+                {actionDetails.required_documents.map((document) => {
+                  const uploadKey = getDocumentUploadKey(document)
+                  const files = uploadedFiles[uploadKey] || []
+
+                  return (
+                    <Box key={uploadKey} className={styles.uploadField}>
+                      <input
+                        id={`workflow-upload-${uploadKey}`}
+                        type="file"
+                        multiple={document.files_max > 1}
+                        accept={document.allowed_file_types.join(",")}
+                        onChange={(event) =>
+                          handleFileSelect(uploadKey, document, event.target.files)
+                        }
+                        className={styles.hiddenFileInput}
+                      />
+                      <label
+                        htmlFor={`workflow-upload-${uploadKey}`}
+                        className={styles.uploadBox}
+                      >
+                        <CloudUploadOutlinedIcon className={styles.uploadIcon} />
+                        <Typography className={styles.uploadTitle}>
+                          بارگذاری {document.title}
+                        </Typography>
+                        <Typography className={styles.uploadDescription}>
+                          فایل‌ها را اینجا بکشید یا کلیک کنید
+                        </Typography>
+                        <Button
+                          component="span"
+                          variant="outlined"
+                          className={styles.uploadButton}
+                        >
+                          انتخاب فایل
+                        </Button>
+                        <Typography className={styles.uploadHint}>
+                          حداقل {document.files_min} و حداکثر{" "}
+                          {document.files_max} فایل
+                        </Typography>
+                      </label>
+                      {files.length > 0 && (
+                        <Box className={styles.selectedFiles}>
+                          {files.map((file) => (
+                            <Typography
+                              key={`${uploadKey}-${file.name}`}
+                              className={styles.selectedFile}
+                            >
+                              {file.name}
+                            </Typography>
+                          ))}
+                        </Box>
+                      )}
+                      {fileErrors[uploadKey] && (
+                        <Typography className={styles.fieldError}>
+                          {fileErrors[uploadKey]}
+                        </Typography>
+                      )}
+                    </Box>
+                  )
+                })}
+
+                {actionDetails.fields
+                  .slice()
+                  .sort((a, b) => a.order - b.order)
+                  .map(renderFormField)}
+              </Box>
+            )}
             <Box className={styles.actionsButtonsContainer}>
-              {actions.map((action) => {
+              {actions
+                .filter((action) => action.action.toLowerCase() !== "form")
+                .map((action) => {
                 const color = (action.action_color || "info") as "success" | "warning" | "error" | "info"
                 const colorStyle = actionColorMap[color]
                 return (
@@ -203,6 +560,42 @@ export default function RequiredAction({
                   </Button>
                 )
               })}
+              {formAction && (
+                <Button
+                  variant="contained"
+                  fullWidth
+                  onClick={handleFormSubmit}
+                  disabled={isSubmitting}
+                  className={styles.submitFormButton}
+                >
+                  {isSubmitting ? (
+                    <CircularProgress size={18} color="inherit" />
+                  ) : (
+                    formAction.action_text || "ثبت اقدام"
+                  )}
+                </Button>
+              )}
+              <Button
+                variant="outlined"
+                startIcon={<SupportIcon />}
+                className={styles.supportButton}
+                sx={{
+                  width: "100%",
+                  color: "#101828",
+                  borderColor: "#e4e7ec",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  fontSize: "14px",
+                  padding: "10px 16px",
+                  borderRadius: "8px",
+                  "&:hover": {
+                    borderColor: "#d0d5dd",
+                    backgroundColor: "#f9fafb",
+                  },
+                }}
+              >
+                تماس با پشتیبانی
+              </Button>
             </Box>
           </Box>
         )}
@@ -246,17 +639,6 @@ export default function RequiredAction({
         </Dialog>
       )}
 
-      {/* Form-based Action Dialog */}
-      {selectedAction && selectedAction.action === "form" && (
-        <WorkflowActionForm
-          open={isFormDialogOpen}
-          actionDetails={actionDetails || null}
-          isLoading={isLoadingActionDetails}
-          isSubmitting={isSubmitting}
-          onClose={handleCancel}
-          onSubmit={handleFormSubmit}
-        />
-      )}
     </>
   )
 }

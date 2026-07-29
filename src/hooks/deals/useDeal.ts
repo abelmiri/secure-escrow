@@ -1,6 +1,10 @@
 import useSWR from "swr"
 import request from "@/request/request"
 import API_URLS from "@/constants/urls/API_URLS"
+import type {
+  WorkflowField,
+  WorkflowRequiredDocument,
+} from "@/hooks/deals/useWorkflowActionDetails"
 
 export interface DealPartyUser {
   mobile_number?: string
@@ -85,6 +89,12 @@ export interface DealNextAction {
   action_color?: "success" | "warning" | "error" | "info"
   destination_step: number
   destination_step_name: string
+  inputs?: {
+    fields?: WorkflowField[] | null
+    required_documents?: Array<
+      WorkflowRequiredDocument | WorkflowRequiredDocument[]
+    > | null
+  } | null
 }
 
 export interface DealDetail {

@@ -7,7 +7,18 @@ export interface WorkflowField {
   slug: string
   property_name: string
   label: string
-  field_type: "date" | "text" | "number" | "select" | "checkbox" | "radio"
+  field_type:
+    | "date"
+    | "text"
+    | "string"
+    | "number"
+    | "integer"
+    | "select"
+    | "dropdown"
+    | "multiselect"
+    | "checkbox"
+    | "bool"
+    | "radio"
   unit: string | null
   display_page: number
   order: number
@@ -19,6 +30,7 @@ export interface WorkflowField {
 
 export interface WorkflowRequiredDocument {
   id: number
+  document_requirement_code?: string
   document_type_code: string
   title: string
   description: string

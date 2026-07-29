@@ -24,7 +24,6 @@ import type {
   WorkflowField,
   WorkflowRequiredDocument,
 } from "@/hooks/deals/useWorkflowActionDetails"
-import styles from "./styles/WorkflowActionForm.module.scss"
 
 interface WorkflowActionFormProps {
   open: boolean
@@ -39,6 +38,7 @@ const renderFormField = (
   field: WorkflowField,
   value: unknown,
   onChange: (value: unknown) => void,
+  error?: string,
 ) => {
   const commonProps = {
     fullWidth: true,
@@ -46,6 +46,8 @@ const renderFormField = (
     required: field.required,
     size: "small" as const,
     sx: { mb: 2 },
+    error: Boolean(error),
+    helperText: error,
   }
 
   switch (field.field_type) {
@@ -89,7 +91,13 @@ const renderFormField = (
     case "select":
     case "radio":
       return (
-        <FormControl key={field.id} fullWidth size="small" sx={{ mb: 2 }}>
+        <FormControl
+          key={field.id}
+          fullWidth
+          size="small"
+          sx={{ mb: 2 }}
+          error={Boolean(error)}
+        >
           <InputLabel>{field.label}</InputLabel>
           <Select
             value={value || ""}
@@ -102,6 +110,11 @@ const renderFormField = (
               </MenuItem>
             ))}
           </Select>
+          {error && (
+            <Typography variant="caption" sx={{ color: "#ef4444", mt: 0.5 }}>
+              {error}
+            </Typography>
+          )}
         </FormControl>
       )
 
@@ -120,6 +133,9 @@ const renderFormField = (
   }
 }
 
+const getDocumentUploadKey = (document: WorkflowRequiredDocument) =>
+  document.document_requirement_code || document.document_type_code
+
 export default function WorkflowActionForm({
   open,
   actionDetails,
@@ -131,8 +147,14 @@ export default function WorkflowActionForm({
   const [formData, setFormData] = useState<Record<string, unknown>>({})
   const [uploadedFiles, setUploadedFiles] = useState<Record<string, File[]>>({})
   const [fileErrors, setFileErrors] = useState<Record<string, string>>({})
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   const handleFieldChange = (fieldId: string, value: unknown) => {
+    setFieldErrors((prev) => {
+      const next = { ...prev }
+      delete next[fieldId]
+      return next
+    })
     setFormData((prev) => ({
       ...prev,
       [fieldId]: value,
@@ -172,6 +194,11 @@ export default function WorkflowActionForm({
     }))
 
     if (Object.keys(errors).length === 0) {
+      setFileErrors((prev) => {
+        const next = { ...prev }
+        delete next[documentTypeCode]
+        return next
+      })
       setUploadedFiles((prev) => ({
         ...prev,
         [documentTypeCode]: files,
@@ -180,11 +207,44 @@ export default function WorkflowActionForm({
   }
 
   const handleSubmit = async () => {
+    const nextFieldErrors: Record<string, string> = {}
+    const nextFileErrors: Record<string, string> = {}
+
+    actionDetails?.fields.forEach((field) => {
+      const value = formData[field.slug]
+      const isEmpty =
+        value === undefined || value === null || String(value).trim() === ""
+
+      if (field.required && isEmpty) {
+        nextFieldErrors[field.slug] = "این فیلد الزامی است."
+      }
+    })
+
+    actionDetails?.required_documents.forEach((document) => {
+      const uploadKey = getDocumentUploadKey(document)
+      const uploadedCount = uploadedFiles[uploadKey]?.length || 0
+      const isRequired = document.requirement_type === "required"
+
+      if (isRequired && uploadedCount < document.files_min) {
+        nextFileErrors[uploadKey] = `حداقل ${document.files_min} فایل بارگذاری کنید.`
+      }
+    })
+
+    if (
+      Object.keys(nextFieldErrors).length > 0 ||
+      Object.keys(nextFileErrors).length > 0
+    ) {
+      setFieldErrors(nextFieldErrors)
+      setFileErrors((prev) => ({ ...prev, ...nextFileErrors }))
+      return
+    }
+
     await onSubmit(formData, uploadedFiles)
     // Reset form
     setFormData({})
     setUploadedFiles({})
     setFileErrors({})
+    setFieldErrors({})
   }
 
   if (!actionDetails) return null
@@ -215,6 +275,7 @@ export default function WorkflowActionForm({
                       field,
                       formData[field.slug],
                       (value) => handleFieldChange(field.slug, value),
+                      fieldErrors[field.slug],
                     ),
                   )}
               </Box>
@@ -228,7 +289,7 @@ export default function WorkflowActionForm({
                     اسناد مورد نیاز
                   </Typography>
                   {actionDetails.required_documents.map((document) => (
-                    <Box key={document.document_type_code} sx={{ mb: 2 }}>
+                    <Box key={getDocumentUploadKey(document)} sx={{ mb: 2 }}>
                       <Typography
                         variant="body2"
                         sx={{
@@ -275,7 +336,7 @@ export default function WorkflowActionForm({
                           accept={document.allowed_file_types.join(",")}
                           onChange={(e) =>
                             handleFileSelect(
-                              document.document_type_code,
+                              getDocumentUploadKey(document),
                               document,
                               e.target.files,
                             )
@@ -291,9 +352,9 @@ export default function WorkflowActionForm({
                         </Typography>
                       </Box>
 
-                      {uploadedFiles[document.document_type_code] && (
+                      {uploadedFiles[getDocumentUploadKey(document)] && (
                         <Box sx={{ mt: 1 }}>
-                          {uploadedFiles[document.document_type_code].map(
+                          {uploadedFiles[getDocumentUploadKey(document)].map(
                             (file, idx) => (
                               <Typography
                                 key={idx}
@@ -311,12 +372,12 @@ export default function WorkflowActionForm({
                         </Box>
                       )}
 
-                      {fileErrors[document.document_type_code] && (
+                      {fileErrors[getDocumentUploadKey(document)] && (
                         <Typography
                           variant="caption"
                           sx={{ display: "block", color: "#ef4444", mt: 1 }}
                         >
-                          {fileErrors[document.document_type_code]}
+                          {fileErrors[getDocumentUploadKey(document)]}
                         </Typography>
                       )}
                     </Box>
