@@ -45,6 +45,19 @@ export default function TransactionDetail({ id }: { id: string }) {
           apiDocuments,
         )
       : undefined)
+  const hasOnlyOneParty = apiDeal?.parties?.length === 1
+  const requiredActions =
+    hasOnlyOneParty && apiDeal?.next_available_actions
+      ? apiDeal.next_available_actions.map((action) =>
+          action.action.toLowerCase() === "accept"
+            ? {
+                ...action,
+                action: "complete_contract",
+                action_text: "تکمیل قرارداد",
+              }
+            : action,
+        )
+      : apiDeal?.next_available_actions
   const [tabValue, setTabValue] = useState(2) // Default to Messages to match the image
   const [messageText, setMessageText] = useState("")
 
@@ -96,6 +109,13 @@ export default function TransactionDetail({ id }: { id: string }) {
   ) => {
     if (!apiDealId) return
 
+    if (action.action.toLowerCase() === "complete_contract") {
+      router.push(
+        `/contracts/create?dealId=${apiDealId}&stage=1&returnToDeal=true`,
+      )
+      return
+    }
+
     if (action.action.toLowerCase() === "edit") {
       router.push(
         `/contracts/create?dealId=${apiDealId}&stage=1&workflowAction=edit`,
@@ -144,15 +164,15 @@ export default function TransactionDetail({ id }: { id: string }) {
           </Box>
 
           <Box className={styles.rightColumn}>
-            {apiDeal?.next_available_actions &&
-              apiDeal.next_available_actions.length >= 0 && (
+            {requiredActions &&
+              requiredActions.length >= 0 && (
                 <RequiredAction
                   dealId={apiDealId || undefined}
-                  actions={apiDeal.next_available_actions}
+                  actions={requiredActions}
                   isSubmitting={isSubmittingWorkflowAction}
-                  creatorRole={apiDeal.parties?.[0]?.role}
+                  creatorRole={apiDeal?.parties?.[0]?.role}
                   actorDescription={
-                    apiDeal.current_workflow?.actor_description
+                    apiDeal?.current_workflow?.actor_description
                   }
                   onActionClick={handleActionClick}
                 />

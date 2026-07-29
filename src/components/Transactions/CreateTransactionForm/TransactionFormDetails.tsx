@@ -149,6 +149,8 @@ export default function TransactionFormDetails({
   const searchParams = useSearchParams()
   const router = useRouter()
   const workflowAction = searchParams.get("workflowAction")?.toLowerCase()
+  const shouldReturnToDealAfterCompletion =
+    searchParams.get("returnToDeal") === "true"
   const prefillAppliedRef = useRef(false)
   const dealPrefillAppliedRef = useRef<number | null>(null)
   const previousEscrowAmountRef = useRef("")
@@ -792,6 +794,12 @@ export default function TransactionFormDetails({
           successMessage: "اطلاعات با موفقیت به‌روزرسانی شد",
           failMessage: "خطا در به‌روزرسانی اطلاعات",
         })
+
+        if (shouldReturnToDealAfterCompletion) {
+          router.push(`/dashboard/${dealId}`)
+          return
+        }
+
         onStageTwoCompleted?.()
       }
     } catch (error) {

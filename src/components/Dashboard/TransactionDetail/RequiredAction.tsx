@@ -187,7 +187,10 @@ export default function RequiredAction({
   }
 
   const handleActionClick = (action: NextAvailableAction) => {
-    if (action.action.toLowerCase() === "edit") {
+    if (
+      action.action.toLowerCase() === "edit" ||
+      action.action.toLowerCase() === "complete_contract"
+    ) {
       void onActionClick(action)
       return
     }
