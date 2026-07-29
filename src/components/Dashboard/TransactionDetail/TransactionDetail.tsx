@@ -40,6 +40,7 @@ import type {
   DealHistoryItem,
   DealItem,
   DealParty,
+  DealWorkflow,
 } from "@/hooks/deals/useDeal"
 import RequiredAction from "./RequiredAction"
 import TransactionParties from "./TransactionParties"
@@ -341,6 +342,7 @@ const formatHistoryTimestamp = (timestamp?: string | null) => {
 
 const mapHistoryStateToProgressStatus = (
   state?: string,
+  isCurrentWorkflowItem = false,
 ): Deal["progress"][number]["status"] => {
   const normalizedState = state?.toLowerCase()
 
@@ -353,11 +355,22 @@ const mapHistoryStateToProgressStatus = (
   }
 
   if (
-    normalizedState === "pending" ||
+    normalizedState === "not_started" ||
+    normalizedState === "not-started" ||
+    normalizedState === "not started"
+  ) {
+    return "pending"
+  }
+
+  if (
     normalizedState === "in_progress" ||
     normalizedState === "current"
   ) {
     return "in_progress"
+  }
+
+  if (normalizedState === "pending") {
+    return isCurrentWorkflowItem ? "in_progress" : "pending"
   }
 
   return "pending"
@@ -372,12 +385,23 @@ const getProgressIconName = (
       ? "clock"
       : "circle"
 
+const getProgressStatusLabel = (
+  status?: Deal["progress"][number]["status"],
+) => {
+  if (status === "in_progress") return "در حال انجام"
+  if (status === "completed") return "تکمیل شده"
+  return "در انتظار"
+}
+
 const mapHistoryItemToProgress = (
   item: DealHistoryItem,
   currentStep?: string,
+  currentWorkflow?: DealWorkflow | null,
 ): Deal["progress"][number] => {
+  const isCurrentWorkflowItem =
+    Boolean(currentWorkflow?.group) && item.group_name === currentWorkflow?.group
   const status = item.state
-    ? mapHistoryStateToProgressStatus(item.state)
+    ? mapHistoryStateToProgressStatus(item.state, isCurrentWorkflowItem)
     : currentStep && item.to_step_name === currentStep
       ? "in_progress"
       : item.timestamp
@@ -409,7 +433,9 @@ const resolveProgress = (
   )
 
   if (usesCurrentHistoryShape) {
-    return apiDeal.history.map((item) => mapHistoryItemToProgress(item))
+    return apiDeal.history.map((item) =>
+      mapHistoryItemToProgress(item, undefined, apiDeal.current_workflow),
+    )
   }
 
   const completedTransitionKeys = new Set(
@@ -656,8 +682,8 @@ export default function TransactionDetail({ id }: { id: string }) {
           <Box className={styles.alertContent}>
             <InfoOutlinedIcon className={styles.alertIcon} />
             <Typography className={styles.alertText}>
-              فروشنده در حال انتقال دامنه است. زمانی که برای بازرسی شما آماده شد
-              به شما اطلاع داده می‌شود.
+              {apiDeal?.current_workflow?.header_description ||
+                "فروشنده در حال انتقال دامنه است. زمانی که برای بازرسی شما آماده شد به شما اطلاع داده می‌شود."}
             </Typography>
           </Box>
         </Box>
@@ -691,9 +717,9 @@ export default function TransactionDetail({ id }: { id: string }) {
                           <div>{step.time}</div>
                         </Typography>
                       )}
-                      {!step.date && step.status === "pending" && (
+                      {!step.date && (
                         <Typography className={styles.progressStatus}>
-                          در انتظار
+                          {getProgressStatusLabel(step.status)}
                         </Typography>
                       )}
                     </Box>
@@ -1081,6 +1107,9 @@ export default function TransactionDetail({ id }: { id: string }) {
                   actions={apiDeal.next_available_actions}
                   isSubmitting={isSubmittingWorkflowAction}
                   creatorRole={apiDeal.parties?.[0]?.role}
+                  actorDescription={
+                    apiDeal.current_workflow?.actor_description
+                  }
                   onActionClick={handleActionClick}
                 />
               )}

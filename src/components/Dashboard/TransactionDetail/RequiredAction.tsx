@@ -31,6 +31,7 @@ interface RequiredActionProps {
   actions?: NextAvailableAction[]
   isSubmitting?: boolean
   creatorRole?: string
+  actorDescription?: string | null
   onActionClick: (action: NextAvailableAction, formData?: Record<string, unknown>, files?: Record<string, File[]>) => Promise<void>
 }
 
@@ -65,6 +66,7 @@ export default function RequiredAction({
   actions = [],
   isSubmitting = false,
   creatorRole,
+  actorDescription,
   onActionClick,
 }: RequiredActionProps) {
   const [selectedAction, setSelectedAction] = useState<NextAvailableAction | null>(null)
@@ -153,9 +155,10 @@ export default function RequiredAction({
             <Box className={styles.actionText}>
               <AccessTimeOutlinedIcon className={styles.actionIcon} />
               <Typography className={styles.actionMessage}>
-                {creatorRole
+                {actorDescription ||
+                (creatorRole
                   ? `معامله توسط ${roleLabels[creatorRole] || creatorRole} ایجاد شده است`
-                  : "برای ادامه معامله، یکی از اقدامات زیر را انتخاب کنید."}
+                  : "برای ادامه معامله، یکی از اقدامات زیر را انتخاب کنید.")}
               </Typography>
             </Box>
             <Box className={styles.actionsButtonsContainer}>

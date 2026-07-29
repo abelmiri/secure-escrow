@@ -61,6 +61,8 @@ export interface DealDocument {
 export interface DealWorkflow {
   group?: string
   step?: string
+  header_description?: string | null
+  actor_description?: string | null
 }
 
 export interface DealHistoryItem {
