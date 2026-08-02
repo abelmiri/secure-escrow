@@ -10,6 +10,7 @@ import {
 } from "@/api/chat/dealMessages"
 
 export const DEAL_MESSAGE_MAX_LENGTH = 250
+const DEAL_MESSAGES_PAGE_LIMIT = 30
 
 function getLatestMessageId(messages: DealChatMessage[]) {
   return messages.reduce<string | number | null>((latestId, message) => {
@@ -77,19 +78,51 @@ function isCanceledRequest(error: unknown) {
   )
 }
 
+function getPaginatedNextUrl(data: unknown) {
+  if (!data || typeof data !== "object" || Array.isArray(data)) return null
+
+  const next = (data as Record<string, unknown>).next
+  return typeof next === "string" ? next : null
+}
+
+function getOffsetFromUrl(url: string | null) {
+  if (!url) return null
+
+  try {
+    return Number(new URL(url).searchParams.get("offset"))
+  } catch {
+    const query = url.split("?")[1]
+    if (!query) return null
+    return Number(new URLSearchParams(query).get("offset"))
+  }
+}
+
+function resolveNextOffset(data: unknown) {
+  const offset = getOffsetFromUrl(getPaginatedNextUrl(data))
+  return offset !== null && Number.isFinite(offset) ? offset : null
+}
+
 export function useDealMessages(dealId: number | null) {
   const [messages, setMessages] = useState<DealChatMessage[]>([])
   const [messageText, setMessageText] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingPrevious, setIsLoadingPrevious] = useState(false)
   const [isSending, setIsSending] = useState(false)
   const [error, setError] = useState<unknown>(null)
   const requestCancelToken = useRef<AbortController | null>(null)
+  const pageRequestCancelToken = useRef<AbortController | null>(null)
   const pollGeneration = useRef(0)
   const lastMessageId = useRef<string | number | null>(null)
+  const nextOffset = useRef<number | null>(null)
 
   const stopCurrentRequest = useCallback(() => {
     requestCancelToken.current?.abort()
     requestCancelToken.current = null
+  }, [])
+
+  const stopPageRequest = useCallback(() => {
+    pageRequestCancelToken.current?.abort()
+    pageRequestCancelToken.current = null
   }, [])
 
   const startPolling = useCallback(
@@ -141,8 +174,10 @@ export function useDealMessages(dealId: number | null) {
       setMessages([])
       setMessageText("")
       setIsLoading(false)
+      setIsLoadingPrevious(false)
       setError(null)
       lastMessageId.current = null
+      nextOffset.current = null
       return
     }
 
@@ -152,7 +187,12 @@ export function useDealMessages(dealId: number | null) {
     setError(null)
     stopCurrentRequest()
 
-    getDealMessages({ dealId, cancelToken: requestCancelToken })
+    getDealMessages({
+      dealId,
+      limit: DEAL_MESSAGES_PAGE_LIMIT,
+      offset: 0,
+      cancelToken: requestCancelToken,
+    })
       .then((data) => {
         if (pollGeneration.current !== generation) return
 
@@ -160,6 +200,7 @@ export function useDealMessages(dealId: number | null) {
         const latestInitialMessageId = getLatestMessageId(initialMessages)
         setMessages(initialMessages)
         lastMessageId.current = latestInitialMessageId
+        nextOffset.current = resolveNextOffset(data)
         setIsLoading(false)
 
         if (latestInitialMessageId !== null) {
@@ -175,8 +216,9 @@ export function useDealMessages(dealId: number | null) {
     return () => {
       pollGeneration.current += 1
       stopCurrentRequest()
+      stopPageRequest()
     }
-  }, [dealId, startPolling, stopCurrentRequest])
+  }, [dealId, startPolling, stopCurrentRequest, stopPageRequest])
 
   const submitMessage = useCallback(async () => {
     const content = messageText.trim().slice(0, DEAL_MESSAGE_MAX_LENGTH)
@@ -209,12 +251,43 @@ export function useDealMessages(dealId: number | null) {
     }
   }, [dealId, isSending, messageText, restartPolling])
 
+  const loadPreviousMessages = useCallback(async () => {
+    if (!dealId || isLoadingPrevious || nextOffset.current === null) return
+
+    setIsLoadingPrevious(true)
+    setError(null)
+
+    try {
+      const data = await getDealMessages({
+        dealId,
+        limit: DEAL_MESSAGES_PAGE_LIMIT,
+        offset: nextOffset.current,
+        cancelToken: pageRequestCancelToken,
+      })
+      const previousMessages = sortMessages(normalizeDealChatMessages(data))
+
+      setMessages((currentMessages) =>
+        mergeMessages(currentMessages, previousMessages),
+      )
+      nextOffset.current = resolveNextOffset(data)
+    } catch (loadError) {
+      if (!isCanceledRequest(loadError)) {
+        setError(loadError)
+      }
+    } finally {
+      setIsLoadingPrevious(false)
+    }
+  }, [dealId, isLoadingPrevious])
+
   return {
     messages,
     messageText,
     setMessageText: updateMessageText,
     submitMessage,
+    loadPreviousMessages,
+    hasPreviousMessages: nextOffset.current !== null,
     isLoading,
+    isLoadingPrevious,
     isSending,
     error,
   }

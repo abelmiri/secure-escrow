@@ -39,7 +39,10 @@ export default function TransactionDetail({ id }: { id: string }) {
     messageText,
     setMessageText,
     submitMessage,
+    loadPreviousMessages,
+    hasPreviousMessages,
     isLoading: isMessagesLoading,
+    isLoadingPrevious: isLoadingPreviousMessages,
     isSending: isSendingMessage,
   } = useDealMessages(apiDealId)
   const { submitWorkflowAction, isSubmitting: isSubmittingWorkflowAction } =
@@ -160,11 +163,14 @@ export default function TransactionDetail({ id }: { id: string }) {
               currentUserId={authState.user?.id}
               isDocumentsLoading={isDocumentsLoading}
               isMessagesLoading={isMessagesLoading}
+              isLoadingPreviousMessages={isLoadingPreviousMessages}
               isSendingMessage={isSendingMessage}
+              hasPreviousMessages={hasPreviousMessages}
               messageText={messageText}
               onTabChange={handleTabChange}
               onMessageTextChange={setMessageText}
               onSendMessage={submitMessage}
+              onLoadPreviousMessages={loadPreviousMessages}
             />
           </Box>
 

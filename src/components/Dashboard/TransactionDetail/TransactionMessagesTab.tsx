@@ -7,6 +7,7 @@ import {
   Typography,
 } from "@mui/material"
 import { useEffect, useRef, type KeyboardEvent } from "react"
+import type { UIEvent } from "react"
 import PersonIcon from "@mui/icons-material/Person"
 import type { Deal, Message } from "@/constants/deals"
 import type { DealChatMessage } from "@/api/chat/dealMessages"
@@ -18,10 +19,13 @@ interface TransactionMessagesTabProps {
   apiMessages?: DealChatMessage[]
   currentUserId?: string | number
   isLoadingMessages?: boolean
+  isLoadingPreviousMessages?: boolean
   isSendingMessage?: boolean
+  hasPreviousMessages?: boolean
   messageText: string
   onMessageTextChange: (value: string) => void
   onSendMessage: () => void
+  onLoadPreviousMessages?: () => Promise<void>
 }
 
 function resolveSenderName(message: DealChatMessage) {
@@ -104,14 +108,21 @@ export default function TransactionMessagesTab({
   apiMessages,
   currentUserId,
   isLoadingMessages,
+  isLoadingPreviousMessages,
   isSendingMessage,
+  hasPreviousMessages,
   messageText,
   onMessageTextChange,
   onSendMessage,
+  onLoadPreviousMessages,
 }: TransactionMessagesTabProps) {
   const messagesListRef = useRef<HTMLDivElement | null>(null)
   const messageInputRef = useRef<HTMLTextAreaElement | null>(null)
   const wasSendingMessageRef = useRef(false)
+  const previousPageScrollRef = useRef<{
+    scrollHeight: number
+    scrollTop: number
+  } | null>(null)
   const messages = apiMessages
     ? apiMessages.map((message) => mapApiMessageToUi(message, currentUserId))
     : deal.messages
@@ -120,6 +131,16 @@ export default function TransactionMessagesTab({
   useEffect(() => {
     const messagesList = messagesListRef.current
     if (!messagesList) return
+
+    if (previousPageScrollRef.current) {
+      const previousScroll = previousPageScrollRef.current
+      messagesList.scrollTop =
+        messagesList.scrollHeight -
+        previousScroll.scrollHeight +
+        previousScroll.scrollTop
+      previousPageScrollRef.current = null
+      return
+    }
 
     messagesList.scrollTop = messagesList.scrollHeight
   }, [lastMessageId, messages?.length])
@@ -143,6 +164,24 @@ export default function TransactionMessagesTab({
     onSendMessage()
   }
 
+  const handleMessagesScroll = (event: UIEvent<HTMLDivElement>) => {
+    const messagesList = event.currentTarget
+    if (
+      messagesList.scrollTop > 32 ||
+      !hasPreviousMessages ||
+      isLoadingPreviousMessages ||
+      !onLoadPreviousMessages
+    ) {
+      return
+    }
+
+    previousPageScrollRef.current = {
+      scrollHeight: messagesList.scrollHeight,
+      scrollTop: messagesList.scrollTop,
+    }
+    void onLoadPreviousMessages()
+  }
+
   const messageLength = messageText.length
 
   return (
@@ -153,7 +192,16 @@ export default function TransactionMessagesTab({
         </Box>
       ) : messages && messages.length > 0 ? (
         <>
-          <Box className={styles.messagesList} ref={messagesListRef}>
+          <Box
+            className={styles.messagesList}
+            ref={messagesListRef}
+            onScroll={handleMessagesScroll}
+          >
+            {isLoadingPreviousMessages && (
+              <Box className={styles.previousMessagesLoading}>
+                <CircularProgress size={20} />
+              </Box>
+            )}
             {messages.map((message) => (
               <Box
                 key={message.id}

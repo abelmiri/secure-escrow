@@ -40,15 +40,30 @@ export interface SendDealMessageBody {
   content: string
 }
 
+export interface PaginatedDealChatMessagesResponse {
+  count: number
+  next: string | null
+  previous: string | null
+  results: DealChatMessage[]
+}
+
 export function getDealMessages({
   dealId,
+  limit,
+  offset,
   cancelToken,
 }: {
   dealId: number
+  limit?: number
+  offset?: number
   cancelToken?: RefObject<AbortController | null>
 }) {
   return request.get({
     url: API_URLS.dealMessages({ id: dealId }),
+    params: {
+      ...(limit !== undefined ? { limit } : {}),
+      ...(offset !== undefined ? { offset } : {}),
+    },
     cancelToken,
     dontToast: true,
   })

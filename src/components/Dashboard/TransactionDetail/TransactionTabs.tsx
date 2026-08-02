@@ -20,11 +20,14 @@ interface TransactionTabsProps {
   currentUserId?: string | number
   isDocumentsLoading: boolean
   isMessagesLoading: boolean
+  isLoadingPreviousMessages: boolean
   isSendingMessage: boolean
+  hasPreviousMessages: boolean
   messageText: string
   onTabChange: (_event: React.SyntheticEvent, newValue: number) => void
   onMessageTextChange: (value: string) => void
   onSendMessage: () => void
+  onLoadPreviousMessages: () => Promise<void>
 }
 
 const tabItems = [
@@ -42,11 +45,14 @@ export default function TransactionTabs({
   currentUserId,
   isDocumentsLoading,
   isMessagesLoading,
+  isLoadingPreviousMessages,
   isSendingMessage,
+  hasPreviousMessages,
   messageText,
   onTabChange,
   onMessageTextChange,
   onSendMessage,
+  onLoadPreviousMessages,
 }: TransactionTabsProps) {
   return (
     <Box className={`${styles.sectionCard} ${styles.tabsCard}`}>
@@ -115,10 +121,13 @@ export default function TransactionTabs({
           apiMessages={apiDealId ? apiMessages : undefined}
           currentUserId={currentUserId}
           isLoadingMessages={apiDealId ? isMessagesLoading : false}
+          isLoadingPreviousMessages={isLoadingPreviousMessages}
           isSendingMessage={isSendingMessage}
+          hasPreviousMessages={hasPreviousMessages}
           messageText={messageText}
           onMessageTextChange={onMessageTextChange}
           onSendMessage={onSendMessage}
+          onLoadPreviousMessages={onLoadPreviousMessages}
         />
       </TabPanel>
     </Box>
