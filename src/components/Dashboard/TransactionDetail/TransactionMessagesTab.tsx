@@ -10,6 +10,7 @@ import { useEffect, useRef, type KeyboardEvent } from "react"
 import PersonIcon from "@mui/icons-material/Person"
 import type { Deal, Message } from "@/constants/deals"
 import type { DealChatMessage } from "@/api/chat/dealMessages"
+import { DEAL_MESSAGE_MAX_LENGTH } from "@/hooks/chat/useDealMessages"
 import styles from "./styles/TransactionDetail.module.scss"
 
 interface TransactionMessagesTabProps {
@@ -142,6 +143,8 @@ export default function TransactionMessagesTab({
     onSendMessage()
   }
 
+  const messageLength = messageText.length
+
   return (
     <Box className={styles.messagesContainer}>
       {isLoadingMessages ? (
@@ -194,7 +197,13 @@ export default function TransactionMessagesTab({
               disabled={isSendingMessage}
               className={styles.messageInput}
               variant="outlined"
+              slotProps={{
+                htmlInput: { maxLength: DEAL_MESSAGE_MAX_LENGTH },
+              }}
             />
+            <Typography className={styles.messageCounter}>
+              {messageLength}/{DEAL_MESSAGE_MAX_LENGTH}
+            </Typography>
             <Button
               variant="contained"
               className={styles.sendButton}
@@ -223,7 +232,13 @@ export default function TransactionMessagesTab({
               disabled={isSendingMessage}
               className={styles.messageInput}
               variant="outlined"
+              slotProps={{
+                htmlInput: { maxLength: DEAL_MESSAGE_MAX_LENGTH },
+              }}
             />
+            <Typography className={styles.messageCounter}>
+              {messageLength}/{DEAL_MESSAGE_MAX_LENGTH}
+            </Typography>
             <Button
               variant="contained"
               className={styles.sendButton}

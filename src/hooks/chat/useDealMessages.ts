@@ -9,6 +9,8 @@ import {
   type DealChatMessage,
 } from "@/api/chat/dealMessages"
 
+export const DEAL_MESSAGE_MAX_LENGTH = 250
+
 function getLatestMessageId(messages: DealChatMessage[]) {
   return messages.reduce<string | number | null>((latestId, message) => {
     if (latestId === null) return message.id
@@ -129,6 +131,10 @@ export function useDealMessages(dealId: number | null) {
     void startPolling(pollGeneration.current)
   }, [startPolling, stopCurrentRequest])
 
+  const updateMessageText = useCallback((value: string) => {
+    setMessageText(value.slice(0, DEAL_MESSAGE_MAX_LENGTH))
+  }, [])
+
   useEffect(() => {
     if (!dealId) {
       stopCurrentRequest()
@@ -173,7 +179,7 @@ export function useDealMessages(dealId: number | null) {
   }, [dealId, startPolling, stopCurrentRequest])
 
   const submitMessage = useCallback(async () => {
-    const content = messageText.trim()
+    const content = messageText.trim().slice(0, DEAL_MESSAGE_MAX_LENGTH)
     if (!dealId || !content || isSending) return
 
     setIsSending(true)
@@ -206,7 +212,7 @@ export function useDealMessages(dealId: number | null) {
   return {
     messages,
     messageText,
-    setMessageText,
+    setMessageText: updateMessageText,
     submitMessage,
     isLoading,
     isSending,
