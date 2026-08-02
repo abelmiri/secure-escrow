@@ -769,6 +769,8 @@
   font-size: 16px;
   color: #1d2939;
   line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 .messageCurrentUser {

@@ -6,7 +6,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, type KeyboardEvent } from "react"
 import PersonIcon from "@mui/icons-material/Person"
 import type { Deal, Message } from "@/constants/deals"
 import type { DealChatMessage } from "@/api/chat/dealMessages"
@@ -109,6 +109,8 @@ export default function TransactionMessagesTab({
   onSendMessage,
 }: TransactionMessagesTabProps) {
   const messagesListRef = useRef<HTMLDivElement | null>(null)
+  const messageInputRef = useRef<HTMLTextAreaElement | null>(null)
+  const wasSendingMessageRef = useRef(false)
   const messages = apiMessages
     ? apiMessages.map((message) => mapApiMessageToUi(message, currentUserId))
     : deal.messages
@@ -120,6 +122,25 @@ export default function TransactionMessagesTab({
 
     messagesList.scrollTop = messagesList.scrollHeight
   }, [lastMessageId, messages?.length])
+
+  useEffect(() => {
+    if (
+      wasSendingMessageRef.current &&
+      !isSendingMessage &&
+      !messageText.trim()
+    ) {
+      messageInputRef.current?.focus()
+    }
+
+    wasSendingMessageRef.current = !!isSendingMessage
+  }, [isSendingMessage, messageText])
+
+  const handleMessageKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key !== "Enter" || event.shiftKey) return
+
+    event.preventDefault()
+    onSendMessage()
+  }
 
   return (
     <Box className={styles.messagesContainer}>
@@ -168,6 +189,8 @@ export default function TransactionMessagesTab({
               placeholder="پیام خود را تایپ کنید..."
               value={messageText}
               onChange={(event) => onMessageTextChange(event.target.value)}
+              onKeyDown={handleMessageKeyDown}
+              inputRef={messageInputRef}
               disabled={isSendingMessage}
               className={styles.messageInput}
               variant="outlined"
@@ -195,6 +218,8 @@ export default function TransactionMessagesTab({
               placeholder="پیام خود را تایپ کنید..."
               value={messageText}
               onChange={(event) => onMessageTextChange(event.target.value)}
+              onKeyDown={handleMessageKeyDown}
+              inputRef={messageInputRef}
               disabled={isSendingMessage}
               className={styles.messageInput}
               variant="outlined"
