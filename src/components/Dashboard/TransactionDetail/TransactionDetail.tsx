@@ -11,6 +11,7 @@ import { useDeal } from "@/hooks/deals/useDeal"
 import type { DealNextAction } from "@/hooks/deals/useDeal"
 import { useDealWorkflowAction } from "@/hooks/deals/useDealWorkflowAction"
 import { useDealDocuments } from "@/hooks/documents/useDealDocuments"
+import { useDealMessages } from "@/hooks/chat/useDealMessages"
 import RequiredAction from "./RequiredAction"
 import PaymentSummary from "./PaymentSummary"
 import TransactionParties from "./TransactionParties"
@@ -33,6 +34,14 @@ export default function TransactionDetail({ id }: { id: string }) {
   const { deal: apiDeal, isLoading, error } = useDeal(apiDealId)
   const { documents: apiDocuments, isLoading: isDocumentsLoading } =
     useDealDocuments(apiDealId)
+  const {
+    messages: apiMessages,
+    messageText,
+    setMessageText,
+    submitMessage,
+    isLoading: isMessagesLoading,
+    isSending: isSendingMessage,
+  } = useDealMessages(apiDealId)
   const { submitWorkflowAction, isSubmitting: isSubmittingWorkflowAction } =
     useDealWorkflowAction()
   const deal =
@@ -59,7 +68,6 @@ export default function TransactionDetail({ id }: { id: string }) {
         )
       : apiDeal?.next_available_actions
   const [tabValue, setTabValue] = useState(2) // Default to Messages to match the image
-  const [messageText, setMessageText] = useState("")
 
   if (isLoading) {
     return (
@@ -93,13 +101,6 @@ export default function TransactionDetail({ id }: { id: string }) {
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue)
-  }
-
-  const handleSendMessage = () => {
-    if (messageText.trim()) {
-      // Handle message sending logic here
-      setMessageText("")
-    }
   }
 
   const handleActionClick = async (
@@ -155,28 +156,29 @@ export default function TransactionDetail({ id }: { id: string }) {
               tabValue={tabValue}
               apiDealId={apiDealId}
               apiDocuments={apiDocuments}
+              apiMessages={apiMessages}
+              currentUserId={authState.user?.id}
               isDocumentsLoading={isDocumentsLoading}
+              isMessagesLoading={isMessagesLoading}
+              isSendingMessage={isSendingMessage}
               messageText={messageText}
               onTabChange={handleTabChange}
               onMessageTextChange={setMessageText}
-              onSendMessage={handleSendMessage}
+              onSendMessage={submitMessage}
             />
           </Box>
 
           <Box className={styles.rightColumn}>
-            {requiredActions &&
-              requiredActions.length >= 0 && (
-                <RequiredAction
-                  dealId={apiDealId || undefined}
-                  actions={requiredActions}
-                  isSubmitting={isSubmittingWorkflowAction}
-                  creatorRole={apiDeal?.parties?.[0]?.role}
-                  actorDescription={
-                    apiDeal?.current_workflow?.actor_description
-                  }
-                  onActionClick={handleActionClick}
-                />
-              )}
+            {requiredActions && requiredActions.length >= 0 && (
+              <RequiredAction
+                dealId={apiDealId || undefined}
+                actions={requiredActions}
+                isSubmitting={isSubmittingWorkflowAction}
+                creatorRole={apiDeal?.parties?.[0]?.role}
+                actorDescription={apiDeal?.current_workflow?.actor_description}
+                onActionClick={handleActionClick}
+              />
+            )}
 
             <TransactionParties parties={apiDeal?.parties} />
             <PaymentSummary deal={deal} />

@@ -708,6 +708,12 @@
   }
 }
 
+.messagesLoading {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
 .messageItem {
   display: flex;
   flex-direction: column;

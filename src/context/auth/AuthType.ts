@@ -1,4 +1,5 @@
 export interface UserType {
+  id?: string | number
   first_name: string
   last_name: string
   mobile_number: string
@@ -19,7 +20,13 @@ export interface UserType {
 
 export interface UpdateUserType extends Omit<
   UserType,
-  "image" | "mobile_number" | "username" | "email_verified" | "national_code_verified" | "shaba_number_verified" | "identity_verified"
+  | "image"
+  | "mobile_number"
+  | "username"
+  | "email_verified"
+  | "national_code_verified"
+  | "shaba_number_verified"
+  | "identity_verified"
 > {
   image: File | string | null
 }
@@ -53,6 +60,4 @@ export interface SetGettingUserActionType {
 }
 
 export type AuthActionType =
-  | SetUserActionType
-  | ResetDataActionType
-  | SetGettingUserActionType
+  SetUserActionType | ResetDataActionType | SetGettingUserActionType

@@ -24,10 +24,27 @@ const API_URLS = {
   deal: ({ id }: { id: number }) => `v1/deals/u/${id}`,
   dealWorkflowActions: ({ id }: { id: number }) =>
     `v1/deals/u/${id}/workflow-actions`,
-  dealWorkflowActionDetails: ({ id, transitionId }: { id: number; transitionId: number }) =>
+  dealWorkflowActionDetails: ({
+    id,
+    transitionId,
+  }: {
+    id: number
+    transitionId: number
+  }) =>
     `v1/deals/u/${id}/workflow-actions/details?transition_id=${transitionId}`,
   dealContractPdf: ({ id }: { id: number }) => `v1/deals/u/${id}/contract-pdf`,
-  dealDocuments: ({ id }: { id: number }) => `v1/documents/deals/${id}/documents`,
+  dealDocuments: ({ id }: { id: number }) =>
+    `v1/documents/deals/${id}/documents`,
+  dealMessages: ({ id }: { id: number }) => `v1/chat/deals/${id}/messages`,
+  dealMessagesPoll: ({
+    id,
+    afterId,
+  }: {
+    id: number
+    afterId: string | number
+  }) =>
+    `v1/chat/deals/${id}/messages/poll?after_id=${encodeURIComponent(afterId)}`,
+  dealMessageSend: ({ id }: { id: number }) => `v1/chat/deals/${id}/send`,
   categories: "v1/deals/categories",
   subCategories: ({ id }: { id: number }) =>
     `v1/deals/categories/sub-category/${id}`,

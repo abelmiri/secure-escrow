@@ -3,6 +3,7 @@ import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline"
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined"
 import SecurityOutlinedIcon from "@mui/icons-material/SecurityOutlined"
 import type { Deal } from "@/constants/deals"
+import type { DealChatMessage } from "@/api/chat/dealMessages"
 import type { UploadedDealDocument } from "@/hooks/documents/useDealDocuments"
 import TabPanel from "./TabPanel"
 import TransactionDetailsTab from "./TransactionDetailsTab"
@@ -15,7 +16,11 @@ interface TransactionTabsProps {
   tabValue: number
   apiDealId: number | null
   apiDocuments: UploadedDealDocument[]
+  apiMessages: DealChatMessage[]
+  currentUserId?: string | number
   isDocumentsLoading: boolean
+  isMessagesLoading: boolean
+  isSendingMessage: boolean
   messageText: string
   onTabChange: (_event: React.SyntheticEvent, newValue: number) => void
   onMessageTextChange: (value: string) => void
@@ -33,7 +38,11 @@ export default function TransactionTabs({
   tabValue,
   apiDealId,
   apiDocuments,
+  apiMessages,
+  currentUserId,
   isDocumentsLoading,
+  isMessagesLoading,
+  isSendingMessage,
   messageText,
   onTabChange,
   onMessageTextChange,
@@ -103,6 +112,10 @@ export default function TransactionTabs({
       <TabPanel value={tabValue} index={2}>
         <TransactionMessagesTab
           deal={deal}
+          apiMessages={apiDealId ? apiMessages : undefined}
+          currentUserId={currentUserId}
+          isLoadingMessages={apiDealId ? isMessagesLoading : false}
+          isSendingMessage={isSendingMessage}
           messageText={messageText}
           onMessageTextChange={onMessageTextChange}
           onSendMessage={onSendMessage}
