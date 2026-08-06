@@ -140,7 +140,7 @@ export default function PartnerProfile({ brokerId }: { brokerId: string }) {
     <main className={styles.page}>
       <Box className={styles.container}>
         <Box className={styles.header}>
-          <Typography component="h1" className={styles.title}>
+          <Typography variant="h1" className={styles.title}>
             تنظیمات حساب کاربری
           </Typography>
           <Typography className={styles.subtitle}>
@@ -175,8 +175,6 @@ export default function PartnerProfile({ brokerId }: { brokerId: string }) {
               </Typography>
             </Box>
           </Box>
-
-          <Box className={styles.divider} />
 
           <Box className={styles.grid}>
             {renderField({

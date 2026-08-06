@@ -109,10 +109,7 @@ export default function Header() {
   const headerProfileImage =
     selectedHeaderProfile?.type === "personal" ? user?.image : null
   const headerProfileInitial = getInitial(selectedHeaderProfile?.name ?? "")
-  const profileHref =
-    selectedHeaderProfile?.type === "partner"
-      ? `/partners/${selectedHeaderProfile.id}/profile`
-      : "/profile"
+  const profileHref = "/profile"
 
   const handleOpenResources = (event: MouseEvent<HTMLElement>) => {
     setAnchorElResources(event.currentTarget)
