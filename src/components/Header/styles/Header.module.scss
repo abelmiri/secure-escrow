@@ -26,6 +26,12 @@
   gap: 32px; // Increased gap to accommodate desktopNav
 }
 
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .desktopNav {
   display: flex;
   align-items: center;
@@ -57,6 +63,43 @@
     background-color: #f9fafb !important;
     border-color: #d0d5dd !important;
   }
+}
+
+.profileButton {
+  width: 48px !important;
+  height: 48px !important;
+  padding: 3px !important;
+  border: 2px solid rgba(62, 88, 255, 0.72) !important;
+  background: #ffffff !important;
+
+  &:hover {
+    background: #f9fafb !important;
+    border-color: #e05a67 !important;
+  }
+
+  @media (max-width: 768px) {
+    width: 42px !important;
+    height: 42px !important;
+  }
+}
+
+.profileAvatar {
+  width: 38px !important;
+  height: 38px !important;
+  background: linear-gradient(135deg, #3e58ff 0%, #00a66c 100%) !important;
+  color: #ffffff !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+
+  @media (max-width: 768px) {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 17px !important;
+  }
+}
+
+.partnerProfileAvatar {
+  background: linear-gradient(135deg, #3e58ff 0%, #00a66c 100%) !important;
 }
 
 .iconContainer {
@@ -189,6 +232,79 @@
   &:last-child {
     margin-bottom: 0 !important;
   }
+}
+
+.profileMenuList {
+  padding: 8px !important;
+  min-width: 280px;
+}
+
+.profileMenuItem {
+  min-height: 64px;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 10px 12px !important;
+  border-radius: 8px !important;
+  color: #101828 !important;
+
+  &:hover {
+    background-color: #f9fafb !important;
+  }
+}
+
+.selectedProfileMenuItem {
+  background-color: #f0f7ff !important;
+}
+
+.profileMenuAvatar {
+  width: 42px !important;
+  height: 42px !important;
+  flex: 0 0 42px;
+  background: #eef4ff !important;
+  color: var(--color-secondary) !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+}
+
+.partnerMenuAvatar {
+  background: linear-gradient(135deg, #3e58ff 0%, #00a66c 100%) !important;
+  color: #ffffff !important;
+}
+
+.profileMenuText {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profileMenuTitle {
+  color: #101828 !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 1.5 !important;
+  overflow-wrap: anywhere;
+}
+
+.profileMenuSubtitle {
+  color: #667085 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  line-height: 1.5 !important;
+}
+
+.profileMenuTypeIcon {
+  width: 18px !important;
+  height: 18px !important;
+  color: #98a2b3 !important;
+}
+
+.profileMenuCheckIcon {
+  width: 18px !important;
+  height: 18px !important;
+  color: var(--color-secondary) !important;
 }
 
 .mobileMenuButton {

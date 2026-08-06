@@ -1,3 +1,8 @@
+export interface RepresentedPartnerType {
+  id: string | number
+  name: string
+}
+
 export interface UserType {
   id?: string | number
   first_name: string
@@ -12,10 +17,11 @@ export interface UserType {
   shaba_number: string | null
   shaba_number_verified: boolean
   identity_verified: boolean
-  city: string | null
-  province: string | null
+  city: string | number | null
+  province: string | number | null
   postal_code: string | null
   full_address: string | null
+  represented_partners?: RepresentedPartnerType[]
 }
 
 export interface UpdateUserType extends Omit<

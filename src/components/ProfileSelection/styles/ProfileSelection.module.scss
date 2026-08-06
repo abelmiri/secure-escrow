@@ -1,0 +1,156 @@
+.page {
+  min-height: 100vh;
+  background: #f9fafb;
+  border-bottom: 1px solid #000000;
+}
+
+.container {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 128px 48px 80px;
+  direction: rtl;
+
+  @media (max-width: 768px) {
+    padding: 96px 20px 48px;
+  }
+}
+
+.header {
+  max-width: 640px;
+  margin-bottom: 40px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  margin-bottom: 16px !important;
+  border: 1px solid #dbe4ff;
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--color-secondary);
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+
+.title {
+  color: #101828;
+  font-size: 34px !important;
+  font-weight: 600 !important;
+  line-height: 1.45 !important;
+  margin-bottom: 10px !important;
+
+  @media (max-width: 768px) {
+    font-size: 26px !important;
+  }
+}
+
+.subtitle {
+  color: #4a5565;
+  font-size: 16px !important;
+  line-height: 1.9 !important;
+}
+
+.optionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.profileCard {
+  width: 100%;
+  min-height: 304px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 28px 24px;
+  border: 1px solid #eaecf0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: inherit;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: center;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+
+  &:hover,
+  &:focus-visible {
+    border-color: rgba(62, 88, 255, 0.45);
+    box-shadow: 0 18px 36px -22px rgba(16, 24, 40, 0.45);
+    transform: translateY(-2px);
+    outline: none;
+  }
+}
+
+.avatarFrame {
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #f2f4f7;
+  border: 1px solid #eaecf0;
+}
+
+.avatar {
+  width: 108px !important;
+  height: 108px !important;
+  background: #eef4ff !important;
+  color: var(--color-secondary) !important;
+  font-size: 42px !important;
+  font-weight: 700 !important;
+}
+
+.partnerAvatar {
+  background: linear-gradient(135deg, #3e58ff 0%, #00a66c 100%) !important;
+  color: #ffffff !important;
+}
+
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.optionTitle {
+  color: #101828;
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  line-height: 1.5 !important;
+  overflow-wrap: anywhere;
+}
+
+.optionSubtitle {
+  color: #667085;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.selectButton {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 18px;
+  border-radius: 8px;
+  background: #101828;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.buttonIcon {
+  width: 18px !important;
+  height: 18px !important;
+}

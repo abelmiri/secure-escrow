@@ -51,6 +51,9 @@ const API_URLS = {
   documentRequirements: ({ id }: { id: number }) =>
     `v1/documents/sub-category/${id}/document-requirements`,
   documentUpload: () => `v1/documents/upload`,
+  partnershipRequest: "v1/partners/request",
+  partnerProfile: ({ brokerId }: { brokerId: string | number }) =>
+    `v1/partners/${brokerId}/profile`,
 }
 
 export default API_URLS
