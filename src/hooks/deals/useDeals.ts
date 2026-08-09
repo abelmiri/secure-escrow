@@ -60,6 +60,7 @@ type DealsResponse = DealResult[] | PaginatedDealsResponse
 interface UseDealsProps {
   search?: string
   role?: DealRole
+  brokerId?: string | number | null
   limit?: number
   offset?: number
 }
@@ -77,8 +78,7 @@ const resolveDealAmount = (deal: DealResult) => {
 
   return (
     deal.items?.reduce(
-      (sum, item) =>
-        sum + Number(item.price || 0) * Number(item.quantity || 1),
+      (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1),
       0,
     ) || 0
   )
@@ -87,13 +87,24 @@ const resolveDealAmount = (deal: DealResult) => {
 export function useDeals({
   search = "",
   role,
+  brokerId,
   limit = 10,
   offset = 0,
 }: UseDealsProps = {}) {
   const normalizedSearch = search.trim()
+  const normalizedBrokerId =
+    brokerId !== null && brokerId !== undefined ? String(brokerId) : ""
   const { data, error, isLoading } = useSWR<DealsResponse>(
-    [API_URLS.deals, normalizedSearch, role || "", limit, offset],
-    ([url, searchValue, roleValue, pageLimit, pageOffset]: [
+    [
+      API_URLS.deals,
+      normalizedSearch,
+      role || "",
+      normalizedBrokerId,
+      limit,
+      offset,
+    ],
+    ([url, searchValue, roleValue, brokerIdValue, pageLimit, pageOffset]: [
+      string,
       string,
       string,
       string,
@@ -105,6 +116,7 @@ export function useDeals({
         params: {
           ...(searchValue ? { search: searchValue } : {}),
           ...(roleValue ? { role: roleValue } : {}),
+          ...(brokerIdValue ? { broker_id: brokerIdValue } : {}),
           limit: pageLimit,
           offset: pageOffset,
         },

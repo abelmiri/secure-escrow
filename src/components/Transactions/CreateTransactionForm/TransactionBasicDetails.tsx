@@ -6,6 +6,7 @@ import styles from "./styles/TransactionFormDetails.module.scss"
 
 interface TransactionBasicDetailsProps {
   role: string
+  allowBrokerRole?: boolean
   categories: Category[]
   subCategories: SubCategory[]
   selectedCategoryId: number | null
@@ -29,6 +30,7 @@ const roles = [
 
 export default function TransactionBasicDetails({
   role,
+  allowBrokerRole = false,
   categories,
   subCategories,
   selectedCategoryId,
@@ -43,11 +45,15 @@ export default function TransactionBasicDetails({
   onTitleChange,
   onDescriptionChange,
 }: TransactionBasicDetailsProps) {
+  const visibleRoles = allowBrokerRole
+    ? roles
+    : roles.filter((item) => item.value !== "broker")
+
   return (
     <>
       <div className={styles.roleSelect}>
         <div className={styles.roleSelectText}>نقش شما در این معامله</div>
-        {roles.map((item) => (
+        {visibleRoles.map((item) => (
           <RadioButton
             key={item.value}
             title={item.title}

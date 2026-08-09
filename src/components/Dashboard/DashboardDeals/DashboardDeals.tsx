@@ -20,7 +20,12 @@ import { dealsData } from "@/constants/deals"
 import { authContext } from "@/context/auth/authProvider"
 import { useDeals } from "@/hooks/deals/useDeals"
 import type { DealRole } from "@/hooks/deals/useDeals"
-import { getPartyMobileNumber } from "@/hooks/deals/useDeal"
+import { getPartyMobileNumber, getPartyPartnerId } from "@/hooks/deals/useDeal"
+import {
+  getSelectedRepresentedPartner,
+  profileSelectionChangedEvent,
+  type SelectedRepresentedPartner,
+} from "@/helpers/auth/profileSelection"
 
 type RoleFilter = DealRole | ""
 type StatusType = "processing" | "pending" | "inspection" | "completed"
@@ -85,8 +90,19 @@ export default function DashboardDeals() {
   const [statusFilter, setStatusFilter] = useState("همه")
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("")
   const [orderFilter, setOrderFilter] = useState("newest")
+  const [selectedProfile, setSelectedProfile] =
+    useState<SelectedRepresentedPartner | null>(() =>
+      getSelectedRepresentedPartner(),
+    )
   const [page, setPage] = useState(1)
   const limit = 10
+  const selectedBrokerId =
+    selectedProfile?.type === "partner" &&
+    authState.user?.represented_partners?.some(
+      (partner) => String(partner.id) === String(selectedProfile.id),
+    )
+      ? selectedProfile.id
+      : null
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -97,6 +113,27 @@ export default function DashboardDeals() {
     return () => window.clearTimeout(timeoutId)
   }, [searchTerm])
 
+  useEffect(() => {
+    const handleProfileSelectionChange = () => {
+      setSelectedProfile(getSelectedRepresentedPartner())
+      setPage(1)
+    }
+
+    window.addEventListener(
+      profileSelectionChangedEvent,
+      handleProfileSelectionChange,
+    )
+    window.addEventListener("storage", handleProfileSelectionChange)
+
+    return () => {
+      window.removeEventListener(
+        profileSelectionChangedEvent,
+        handleProfileSelectionChange,
+      )
+      window.removeEventListener("storage", handleProfileSelectionChange)
+    }
+  }, [])
+
   const {
     deals: apiDeals,
     isLoading,
@@ -104,40 +141,50 @@ export default function DashboardDeals() {
   } = useDeals({
     search: debouncedSearchTerm,
     role: roleFilter || undefined,
+    brokerId: selectedBrokerId,
     limit,
     offset: (page - 1) * limit,
   })
 
   const currentUserMobile = authState.user?.mobile_number
 
-  const filteredMockDeals: DashboardDealCard[] = dealsData.filter((deal) => {
-    const matchesSearch =
-      deal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      deal.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      deal.participant.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesRole =
-      roleFilter === "" || deal.role === roleLabels[roleFilter]
+  const filteredMockDeals: DashboardDealCard[] = dealsData
+    .filter((deal) => {
+      const matchesSearch =
+        deal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        deal.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        deal.participant.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesRole =
+        roleFilter === "" || deal.role === roleLabels[roleFilter]
 
-    return matchesSearch && matchesRole
-  }).map((deal) => ({
-    ...deal,
-    label: deal.id,
-    href: `/dashboard/${deal.id}`,
-    timestamp: getTimestamp(deal.date),
-    currency: "تومان",
-    isMock: true,
-  }))
+      return matchesSearch && matchesRole
+    })
+    .map((deal) => ({
+      ...deal,
+      label: deal.id,
+      href: `/dashboard/${deal.id}`,
+      timestamp: getTimestamp(deal.date),
+      currency: "تومان",
+      isMock: true,
+    }))
 
   const mappedApiDeals: DashboardDealCard[] = apiDeals.map((deal) => {
-    const currentParty = currentUserMobile
+    const currentParty = selectedBrokerId
       ? deal.parties.find(
-          (party) => getPartyMobileNumber(party) === currentUserMobile,
+          (party) =>
+            party.role === "broker" &&
+            getPartyPartnerId(party) === String(selectedBrokerId),
         )
-      : undefined
+      : currentUserMobile
+        ? deal.parties.find(
+            (party) => getPartyMobileNumber(party) === currentUserMobile,
+          )
+        : undefined
     const counterparty = currentUserMobile
-      ? deal.parties.find(
-          (party) => getPartyMobileNumber(party) !== currentUserMobile,
-        )
+      ? deal.parties.find((party) => {
+          const partyMobile = getPartyMobileNumber(party)
+          return partyMobile && partyMobile !== currentUserMobile
+        })
       : deal.parties.find((party) => getPartyMobileNumber(party))
     const status = resolveStatusLabel(deal.state, deal.subState)
 
@@ -165,12 +212,12 @@ export default function DashboardDeals() {
   const allDeals = [...filteredMockDeals, ...mappedApiDeals]
     .filter((deal) => statusFilter === "همه" || deal.status === statusFilter)
     .sort((a, b) => {
-    if (orderFilter === "newest") {
-      return b.timestamp - a.timestamp
-    } else {
-      return a.timestamp - b.timestamp
-    }
-  })
+      if (orderFilter === "newest") {
+        return b.timestamp - a.timestamp
+      } else {
+        return a.timestamp - b.timestamp
+      }
+    })
 
   const handlePageChange = (
     _event: React.ChangeEvent<unknown>,
@@ -305,9 +352,7 @@ export default function DashboardDeals() {
                     <Box className={styles.dealAmountContainer}>
                       <Typography className={styles.dealAmount}>
                         {deal.amount}{" "}
-                        <span className={styles.currency}>
-                          {deal.currency}
-                        </span>
+                        <span className={styles.currency}>{deal.currency}</span>
                       </Typography>
                     </Box>
                   </Box>

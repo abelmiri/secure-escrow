@@ -15,11 +15,17 @@ export interface DealPartyUser {
   is_verified?: boolean
 }
 
+export interface DealPartyPartner {
+  id?: string | number
+  name?: string
+}
+
 export interface DealParty {
   is_representative?: boolean
   is_verified?: boolean
   role?: string
   user?: string | DealPartyUser
+  partner?: string | number | DealPartyPartner
   mobile_number?: string
   email?: string
   full_name?: string
@@ -31,6 +37,14 @@ export const getPartyMobileNumber = (party?: DealParty) => {
   if (!party) return ""
   if (typeof party.user === "string") return party.user
   return party.user?.mobile_number || party.mobile_number || ""
+}
+
+export const getPartyPartnerId = (party?: DealParty) => {
+  if (!party) return ""
+  if (typeof party.partner === "string" || typeof party.partner === "number") {
+    return String(party.partner)
+  }
+  return party.partner?.id !== undefined ? String(party.partner.id) : ""
 }
 
 export interface DealItem {

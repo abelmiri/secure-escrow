@@ -6,8 +6,9 @@ import request from "@/request/request"
 export interface UpdateDealPayload {
   items?: Array<Record<string, unknown>>
   parties?: Array<{
-    user: string
     role: string
+    user?: string
+    partner?: string | number
     is_representative?: boolean
   }>
 }

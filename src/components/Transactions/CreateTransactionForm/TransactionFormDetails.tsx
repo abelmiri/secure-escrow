@@ -22,6 +22,11 @@ import {
   parseTransactionPrefillFromSearchParams,
   tomanToRial,
 } from "@/lib/transactionPrefill"
+import {
+  getSelectedRepresentedPartner,
+  profileSelectionChangedEvent,
+  type SelectedRepresentedPartner,
+} from "@/helpers/auth/profileSelection"
 import { isDocumentRequirementAllowedForRole } from "@/lib/transactionDocumentRequirements"
 import DocumentRequirementField, {
   type DocumentUpload,
@@ -43,6 +48,13 @@ const iranianMobilePattern = /^09[0-9]{9}$/
 const partyRoleLabels: Record<string, string> = {
   customer: "خریدار",
   beneficiary: "فروشنده",
+}
+
+type DealPartyPayload = {
+  role: string
+  user?: string
+  partner?: string | number
+  is_representative?: boolean
 }
 
 const normalizeIranMobileForInput = (mobile?: string) => {
@@ -176,7 +188,13 @@ export default function TransactionFormDetails({
   const [paymentDescription, setPaymentDescription] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [counterpartyMobile, setCounterpartyMobile] = useState("")
+  const [buyerMobile, setBuyerMobile] = useState("")
+  const [sellerMobile, setSellerMobile] = useState("")
   const [isRepresentative, setIsRepresentative] = useState(false)
+  const [selectedProfile, setSelectedProfile] =
+    useState<SelectedRepresentedPartner | null>(() =>
+      getSelectedRepresentedPartner(),
+    )
   const [isTermsAccepted, setIsTermsAccepted] = useState(false)
   const [documentUploads, setDocumentUploads] = useState<DocumentUpload[]>([])
   const [documentValidationMessage, setDocumentValidationMessage] = useState("")
@@ -195,6 +213,41 @@ export default function TransactionFormDetails({
   const selectedSubCategory = subCategoriesList.find(
     (subCategory) => subCategory.id === selectedSubCategoryId,
   )
+  const allowBrokerRole =
+    selectedProfile?.type === "partner" &&
+    authState.user?.represented_partners?.some(
+      (partner) => String(partner.id) === String(selectedProfile.id),
+    )
+  const selectedBrokerId =
+    allowBrokerRole && selectedProfile?.type === "partner"
+      ? selectedProfile.id
+      : null
+
+  useEffect(() => {
+    const handleProfileSelectionChange = () => {
+      setSelectedProfile(getSelectedRepresentedPartner())
+    }
+
+    window.addEventListener(
+      profileSelectionChangedEvent,
+      handleProfileSelectionChange,
+    )
+    window.addEventListener("storage", handleProfileSelectionChange)
+
+    return () => {
+      window.removeEventListener(
+        profileSelectionChangedEvent,
+        handleProfileSelectionChange,
+      )
+      window.removeEventListener("storage", handleProfileSelectionChange)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!allowBrokerRole && role === "broker") {
+      setRole("customer")
+    }
+  }, [allowBrokerRole, role])
 
   useEffect(() => {
     if (prefillAppliedRef.current) return
@@ -203,7 +256,7 @@ export default function TransactionFormDetails({
     const fromUrl = parseTransactionPrefillFromSearchParams(searchParams)
     const prefill = { ...fromStorage, ...fromUrl }
 
-    if (prefill.role) {
+    if (prefill.role && (prefill.role !== "broker" || allowBrokerRole)) {
       setRole(prefill.role)
     }
 
@@ -221,7 +274,7 @@ export default function TransactionFormDetails({
 
     clearTransactionPrefill()
     prefillAppliedRef.current = true
-  }, [searchParams])
+  }, [allowBrokerRole, searchParams])
 
   const {
     properties,
@@ -270,7 +323,9 @@ export default function TransactionFormDetails({
     const subcategorySlug =
       typeof itemSubcategory === "object" ? itemSubcategory.slug : undefined
     const subcategoryName =
-      typeof itemSubcategory === "object" ? itemSubcategory.name : itemSubcategory
+      typeof itemSubcategory === "object"
+        ? itemSubcategory.name
+        : itemSubcategory
 
     const matchedCategory = categories.find((category) =>
       category.sub_categories.some(
@@ -307,12 +362,26 @@ export default function TransactionFormDetails({
       typeof counterparty?.user === "object"
         ? counterparty.user?.mobile_number
         : counterparty?.user || counterparty?.mobile_number
+    const buyerParty = deal.parties?.find((party) => party.role === "customer")
+    const sellerParty = deal.parties?.find(
+      (party) => party.role === "beneficiary",
+    )
+    const buyerPartyMobile =
+      typeof buyerParty?.user === "object"
+        ? buyerParty.user?.mobile_number
+        : buyerParty?.user || buyerParty?.mobile_number
+    const sellerPartyMobile =
+      typeof sellerParty?.user === "object"
+        ? sellerParty.user?.mobile_number
+        : sellerParty?.user || sellerParty?.mobile_number
 
     if (currentParty?.role) {
       setRole(currentParty.role)
     }
     setIsRepresentative(Boolean(currentParty?.is_representative))
     setCounterpartyMobile(normalizeIranMobileForInput(counterpartyMobile))
+    setBuyerMobile(normalizeIranMobileForInput(buyerPartyMobile))
+    setSellerMobile(normalizeIranMobileForInput(sellerPartyMobile))
 
     if (matchedCategory) setSelectedCategoryId(matchedCategory.id)
     if (matchedSubCategory) setSelectedSubCategoryId(matchedSubCategory.id)
@@ -427,21 +496,42 @@ export default function TransactionFormDetails({
     }
 
     if (stageNumber === 2) {
-      const counterpartyMobileLabel =
-        role === "beneficiary"
-          ? "شماره موبایل خریدار"
-          : "شماره موبایل فروشنده"
+      if (role === "broker") {
+        issues.push(
+          ...(!iranianMobilePattern.test(buyerMobile.trim())
+            ? [
+                {
+                  key: "buyerMobile",
+                  label: "شماره موبایل خریدار",
+                },
+              ]
+            : []),
+          ...(!iranianMobilePattern.test(sellerMobile.trim())
+            ? [
+                {
+                  key: "sellerMobile",
+                  label: "شماره موبایل فروشنده",
+                },
+              ]
+            : []),
+        )
+      } else {
+        const counterpartyMobileLabel =
+          role === "beneficiary"
+            ? "شماره موبایل خریدار"
+            : "شماره موبایل فروشنده"
 
-      issues.push(
-        ...(!iranianMobilePattern.test(counterpartyMobile.trim())
-          ? [
-              {
-                key: "counterpartyMobile",
-                label: counterpartyMobileLabel,
-              },
-            ]
-          : []),
-      )
+        issues.push(
+          ...(!iranianMobilePattern.test(counterpartyMobile.trim())
+            ? [
+                {
+                  key: "counterpartyMobile",
+                  label: counterpartyMobileLabel,
+                },
+              ]
+            : []),
+        )
+      }
 
       applicableDocumentRequirements.forEach((requirement) => {
         const isRequired =
@@ -570,14 +660,12 @@ export default function TransactionFormDetails({
 
     if (files.length === 0) return
 
-    const uploads = files.map(
-      (file, index): DocumentUpload => ({
-        id: `${requirement.id}-${Date.now()}-${index}-${file.name}`,
-        file,
-        requirementId: requirement.id,
-        status: "uploading",
-      }),
-    )
+    const uploads = files.map((file, index): DocumentUpload => ({
+      id: `${requirement.id}-${Date.now()}-${index}-${file.name}`,
+      file,
+      requirementId: requirement.id,
+      status: "uploading",
+    }))
 
     setDocumentValidationMessage("")
     resetValidationMessages()
@@ -696,7 +784,10 @@ export default function TransactionFormDetails({
     properties
       .filter((prop) => prop.field_type !== "file")
       .forEach((prop) => {
-        const value = normalizePropertyInputValue(prop, propertyValues[prop.slug])
+        const value = normalizePropertyInputValue(
+          prop,
+          propertyValues[prop.slug],
+        )
 
         if (
           prop.field_type === "integer" ||
@@ -717,25 +808,36 @@ export default function TransactionFormDetails({
         }
       })
 
-    const primaryParty: {
-      user: string
-      role: string
-      is_representative?: boolean
-    } = {
-      user: authState.user.mobile_number,
-      role,
-    }
+    const primaryParty: DealPartyPayload =
+      role === "broker" && selectedBrokerId
+        ? {
+            partner: selectedBrokerId,
+            role,
+          }
+        : {
+            user: authState.user.mobile_number,
+            role,
+          }
 
     if (stageNumber === 2 && role !== "broker") {
       primaryParty.is_representative = isRepresentative
     }
 
-    const secondPartyMobile = counterpartyMobile.trim()
-    const secondPartyRole = role === "beneficiary" ? "customer" : "beneficiary"
+    const parties: DealPartyPayload[] = [primaryParty]
 
-    const parties = [primaryParty]
-    if (secondPartyMobile) {
-      parties.push({ user: secondPartyMobile, role: secondPartyRole })
+    if (stageNumber === 2 && role === "broker") {
+      parties.push(
+        { user: buyerMobile.trim(), role: "customer" },
+        { user: sellerMobile.trim(), role: "beneficiary" },
+      )
+    } else {
+      const secondPartyMobile = counterpartyMobile.trim()
+      const secondPartyRole =
+        role === "beneficiary" ? "customer" : "beneficiary"
+
+      if (secondPartyMobile) {
+        parties.push({ user: secondPartyMobile, role: secondPartyRole })
+      }
     }
 
     try {
@@ -870,6 +972,7 @@ export default function TransactionFormDetails({
       {stageNumber === 1 && (
         <TransactionBasicDetails
           role={role}
+          allowBrokerRole={allowBrokerRole}
           categories={categories}
           subCategories={subCategoriesList}
           selectedCategoryId={selectedCategoryId}
@@ -902,49 +1005,83 @@ export default function TransactionFormDetails({
 
       {stageNumber === 2 && (
         <>
-          <ListInput
-            title={
-              role === "beneficiary"
-                ? "شماره موبایل خریدار"
-                : "شماره موبایل فروشنده"
-            }
-            placeholder={
-              role === "beneficiary"
-                ? "شماره موبایل خریدار"
-                : "شماره موبایل فروشنده"
-            }
-            value={counterpartyMobile}
-            onChange={(value) => {
-              setCounterpartyMobile(value)
-              resetValidationMessages()
-            }}
-            valueType="string"
-            regex={iranianMobilePattern}
-            rejectPersianDigits
-            required
-            error={fieldErrors.includes("counterpartyMobile")}
-          />
+          {role === "broker" ? (
+            <>
+              <ListInput
+                title="شماره موبایل خریدار"
+                placeholder="شماره موبایل خریدار"
+                value={buyerMobile}
+                onChange={(value) => {
+                  setBuyerMobile(value)
+                  resetValidationMessages()
+                }}
+                valueType="string"
+                regex={iranianMobilePattern}
+                rejectPersianDigits
+                required
+                error={fieldErrors.includes("buyerMobile")}
+              />
 
-          {role !== "broker" && (
-            <div className={styles.roleSelect}>
-              <div className={styles.roleSelectText}>
-                آیا نماینده {partyRoleLabels[role]} هستید؟
+              <ListInput
+                title="شماره موبایل فروشنده"
+                placeholder="شماره موبایل فروشنده"
+                value={sellerMobile}
+                onChange={(value) => {
+                  setSellerMobile(value)
+                  resetValidationMessages()
+                }}
+                valueType="string"
+                regex={iranianMobilePattern}
+                rejectPersianDigits
+                required
+                error={fieldErrors.includes("sellerMobile")}
+              />
+            </>
+          ) : (
+            <>
+              <ListInput
+                title={
+                  role === "beneficiary"
+                    ? "شماره موبایل خریدار"
+                    : "شماره موبایل فروشنده"
+                }
+                placeholder={
+                  role === "beneficiary"
+                    ? "شماره موبایل خریدار"
+                    : "شماره موبایل فروشنده"
+                }
+                value={counterpartyMobile}
+                onChange={(value) => {
+                  setCounterpartyMobile(value)
+                  resetValidationMessages()
+                }}
+                valueType="string"
+                regex={iranianMobilePattern}
+                rejectPersianDigits
+                required
+                error={fieldErrors.includes("counterpartyMobile")}
+              />
+
+              <div className={styles.roleSelect}>
+                <div className={styles.roleSelectText}>
+                  آیا نماینده {partyRoleLabels[role]} هستید؟
+                </div>
+                <RadioButton
+                  title={`خیر، خود ${partyRoleLabels[role]} هستم`}
+                  name="is-representative"
+                  value="false"
+                  checked={!isRepresentative}
+                  onChange={() => setIsRepresentative(false)}
+                />
+                <RadioButton
+                  title={`بله، نماینده ${partyRoleLabels[role]} هستم`}
+                  name="is-representative"
+                  value="true"
+                  checked={isRepresentative}
+                  onChange={() => setIsRepresentative(true)}
+                />
               </div>
-              <RadioButton
-                title={`خیر، خود ${partyRoleLabels[role]} هستم`}
-                name="is-representative"
-                value="false"
-                checked={!isRepresentative}
-                onChange={() => setIsRepresentative(false)}
-              />
-              <RadioButton
-                title={`بله، نماینده ${partyRoleLabels[role]} هستم`}
-                name="is-representative"
-                value="true"
-                checked={isRepresentative}
-                onChange={() => setIsRepresentative(true)}
-              />
-            </div>
+            </>
           )}
         </>
       )}
