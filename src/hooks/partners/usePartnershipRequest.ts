@@ -15,12 +15,14 @@ export interface PartnershipRequestPayload {
 
 export type PartnershipRequestResponse = {
   id?: string | number
+  slug?: string
   tracking_id?: string | number
   tracking_code?: string | number
   reference_id?: string | number
   code?: string | number
   data?: {
     id?: string | number
+    slug?: string
     tracking_id?: string | number
     tracking_code?: string | number
     reference_id?: string | number

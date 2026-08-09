@@ -72,60 +72,27 @@
   gap: 8px;
 }
 
-.label {
-  color: #0a0a0a;
+.validationBox {
+  margin-top: 24px;
+  padding: 14px 16px;
+  background-color: #fff1f3;
+  border: 1px solid #fda29b;
+  border-radius: 8px;
+}
+
+.validationTitle {
+  color: #b42318 !important;
   font-size: 14px !important;
   font-weight: 600 !important;
-  line-height: 1.6 !important;
+  line-height: 1.8 !important;
 }
 
-.input {
-  :global(.MuiOutlinedInput-root) {
-    min-height: 36px;
-    background-color: #f3f3f5;
-    border-radius: 8px;
-    align-items: flex-start;
-
-    &:hover {
-      background-color: #eeeef1;
-    }
-
-    &.Mui-focused {
-      background-color: #ffffff;
-      box-shadow: 0 0 0 4px #eef1ff;
-
-      :global(.MuiOutlinedInput-notchedOutline) {
-        border-color: #9aa8ff;
-      }
-    }
-
-    :global(.MuiOutlinedInput-notchedOutline) {
-      border: 1px solid transparent;
-    }
-  }
-
-  :global(.MuiOutlinedInput-input) {
-    padding: 8px 12px;
-    color: #0a0a0a;
-    font-size: 14px;
-    line-height: 20px;
-    text-align: right;
-
-    &::placeholder {
-      color: #717182;
-      opacity: 1;
-    }
-  }
-
-  :global(textarea.MuiOutlinedInput-input) {
-    min-height: 82px;
-    resize: vertical;
-  }
-}
-
-.errorText {
-  color: #d92d20 !important;
-  font-size: 12px !important;
+.validationList {
+  margin: 8px 18px 0 0;
+  padding: 0;
+  color: #b42318;
+  font-size: 13px;
+  line-height: 1.9;
 }
 
 .successBox {

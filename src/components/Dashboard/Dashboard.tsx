@@ -1,6 +1,12 @@
 "use client"
 
-import { useEffect, useMemo, useState, type ComponentType } from "react"
+import {
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ComponentType,
+} from "react"
 import { Box, Typography, Button, Skeleton } from "@mui/material"
 import AddIcon from "@mui/icons-material/Add"
 import DollarSign from "@/media/svg/DollarSign"
@@ -13,6 +19,12 @@ import Link from "next/link"
 import request from "@/request/request"
 import API_URLS from "@/constants/urls/API_URLS"
 import { toShortNumber } from "@/lib"
+import { authContext } from "@/context/auth/authProvider"
+import {
+  getSelectedRepresentedPartner,
+  profileSelectionChangedEvent,
+  type SelectedRepresentedPartner,
+} from "@/helpers/auth/profileSelection"
 
 interface DashboardStatsResponse {
   total_amount: {
@@ -54,17 +66,54 @@ const formatPersianNumber = (value: number | null | undefined) => {
 }
 
 export default function Dashboard() {
+  const { authState } = useContext(authContext)
   const [dashboardStats, setDashboardStats] =
     useState<DashboardStatsResponse | null>(null)
   const [isStatsLoading, setIsStatsLoading] = useState(true)
+  const [selectedProfile, setSelectedProfile] =
+    useState<SelectedRepresentedPartner | null>(() =>
+      getSelectedRepresentedPartner(),
+    )
+  const selectedBrokerId =
+    selectedProfile?.type === "partner" &&
+    authState.user?.represented_partners?.some(
+      (partner) => String(partner.id) === String(selectedProfile.id),
+    )
+      ? selectedProfile.id
+      : null
+
+  useEffect(() => {
+    const handleProfileSelectionChange = () => {
+      setSelectedProfile(getSelectedRepresentedPartner())
+    }
+
+    window.addEventListener(
+      profileSelectionChangedEvent,
+      handleProfileSelectionChange,
+    )
+    window.addEventListener("storage", handleProfileSelectionChange)
+
+    return () => {
+      window.removeEventListener(
+        profileSelectionChangedEvent,
+        handleProfileSelectionChange,
+      )
+      window.removeEventListener("storage", handleProfileSelectionChange)
+    }
+  }, [])
 
   useEffect(() => {
     let isMounted = true
 
     const loadDashboardStats = async () => {
+      setIsStatsLoading(true)
+
       try {
         const response = (await request.get({
           url: API_URLS.dashboardStats,
+          params: {
+            ...(selectedBrokerId ? { broker_id: selectedBrokerId } : {}),
+          },
           dontToast: true,
         })) as DashboardStatsResponse
 
@@ -87,7 +136,7 @@ export default function Dashboard() {
     return () => {
       isMounted = false
     }
-  }, [])
+  }, [selectedBrokerId])
 
   const stats = useMemo<StatCardItem[]>(() => {
     if (isStatsLoading) {

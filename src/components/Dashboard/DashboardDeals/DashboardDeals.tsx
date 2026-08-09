@@ -16,7 +16,6 @@ import {
 import SearchIcon from "@/media/svg/SearchIcon"
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined"
 import styles from "./styles/DashboardDeals.module.scss"
-import { dealsData } from "@/constants/deals"
 import { authContext } from "@/context/auth/authProvider"
 import { useDeals } from "@/hooks/deals/useDeals"
 import type { DealRole } from "@/hooks/deals/useDeals"
@@ -148,25 +147,8 @@ export default function DashboardDeals() {
 
   const currentUserMobile = authState.user?.mobile_number
 
-  const filteredMockDeals: DashboardDealCard[] = dealsData
-    .filter((deal) => {
-      const matchesSearch =
-        deal.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        deal.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        deal.participant.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesRole =
-        roleFilter === "" || deal.role === roleLabels[roleFilter]
-
-      return matchesSearch && matchesRole
-    })
-    .map((deal) => ({
-      ...deal,
-      label: deal.id,
-      href: `/dashboard/${deal.id}`,
-      timestamp: getTimestamp(deal.date),
-      currency: "تومان",
-      isMock: true,
-    }))
+  // Static sample deals are intentionally hidden; dashboard now shows API data only.
+  const filteredMockDeals: DashboardDealCard[] = []
 
   const mappedApiDeals: DashboardDealCard[] = apiDeals.map((deal) => {
     const currentParty = selectedBrokerId

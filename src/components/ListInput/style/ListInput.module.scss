@@ -8,7 +8,7 @@
 .title {
   font-weight: 400;
   font-size: 14px;
-  color: #0A0A0A;
+  color: #0a0a0a;
 }
 
 .input,
@@ -38,15 +38,15 @@
 
 .input.invalid,
 .textarea.invalid {
-  border: 1px solid red;
+  border: 1px solid #d92d20;
 }
 
 .textareaInvalid {
-  border: 1px solid red;
+  border: 1px solid #d92d20;
 }
 
 .inputInvalid {
-  border: 1px solid red;
+  border: 1px solid #d92d20;
 }
 
 .placeholder {
