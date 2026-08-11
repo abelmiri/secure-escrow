@@ -48,6 +48,7 @@ interface StatCardItem {
   change?: string
   Icon: ComponentType<DashboardIconProps>
   iconColor: string
+  activityFilter?: ActivityFilter
 }
 
 interface DashboardIconProps {
@@ -56,6 +57,9 @@ interface DashboardIconProps {
   color?: string
   strokeColor?: string
 }
+
+type ActivityFilter = "active" | "completed"
+type ActivityFilters = Record<ActivityFilter, boolean>
 
 const formatPersianNumber = (value: number | null | undefined) => {
   if (value === null || value === undefined || Number.isNaN(value)) {
@@ -70,6 +74,10 @@ export default function Dashboard() {
   const [dashboardStats, setDashboardStats] =
     useState<DashboardStatsResponse | null>(null)
   const [isStatsLoading, setIsStatsLoading] = useState(true)
+  const [activityFilters, setActivityFilters] = useState<ActivityFilters>({
+    active: false,
+    completed: false,
+  })
   const [selectedProfile, setSelectedProfile] =
     useState<SelectedRepresentedPartner | null>(() =>
       getSelectedRepresentedPartner(),
@@ -158,16 +166,18 @@ export default function Dashboard() {
           iconColor: "#2563eb",
         },
         {
-          title: "تراکنش‌های فعال",
+          title: "معامله‌های فعال",
           value: "—",
           Icon: CircleTime,
           iconColor: "#2563eb",
+          activityFilter: "active",
         },
         {
           title: "تکمیل شده",
           value: "—",
           Icon: CircleCheckIcon,
           iconColor: "#2563eb",
+          activityFilter: "completed",
         },
         {
           title: "نرخ موفقیت",
@@ -193,7 +203,7 @@ export default function Dashboard() {
         iconColor: "#2563eb",
       },
       {
-        title: "تراکنش‌های فعال",
+        title: "معامله‌های فعال",
         value: formatPersianNumber(dashboardStats.active_deals.value),
         change:
           dashboardStats.active_deals.change !== null
@@ -201,6 +211,7 @@ export default function Dashboard() {
             : undefined,
         Icon: CircleTime,
         iconColor: "#2563eb",
+        activityFilter: "active",
       },
       {
         title: "تکمیل شده",
@@ -211,6 +222,7 @@ export default function Dashboard() {
             : undefined,
         Icon: CircleCheckIcon,
         iconColor: "#2563eb",
+        activityFilter: "completed",
       },
       {
         title: "نرخ موفقیت",
@@ -220,6 +232,17 @@ export default function Dashboard() {
       },
     ]
   }, [dashboardStats, isStatsLoading])
+
+  const toggleActivityFilter = (filter: ActivityFilter) => {
+    setActivityFilters((currentFilters) => ({
+      ...currentFilters,
+      [filter]: !currentFilters[filter],
+    }))
+  }
+
+  const clearActivityFilters = () => {
+    setActivityFilters({ active: false, completed: false })
+  }
 
   return (
     <Box className={styles.mainWrapper}>
@@ -242,75 +265,97 @@ export default function Dashboard() {
         </Box>
 
         <Box className={styles.statsGrid}>
-          {stats.map((stat, index) => (
-            <Box key={index} className={styles.statCard}>
-              <Box className={styles.statIconContainer}>
-                {isStatsLoading ? (
-                  <Skeleton
-                    variant="circular"
-                    width={40}
-                    height={40}
-                    animation="wave"
-                  />
-                ) : (
-                  <stat.Icon
-                    width="40"
-                    height="40"
-                    strokeColor={stat.iconColor}
-                    color={stat.iconColor}
-                  />
-                )}
+          {stats.map((stat, index) => {
+            const isFilterCard = Boolean(stat.activityFilter)
+            const isFilterActive =
+              stat.activityFilter && activityFilters[stat.activityFilter]
+
+            return (
+              <Box
+                key={index}
+                component={isFilterCard ? "button" : "div"}
+                className={`${styles.statCard} ${
+                  isFilterCard ? styles.filterableStatCard : ""
+                } ${isFilterActive ? styles.activeStatCard : ""}`}
+                onClick={
+                  stat.activityFilter
+                    ? () => toggleActivityFilter(stat.activityFilter!)
+                    : undefined
+                }
+                aria-pressed={isFilterCard ? isFilterActive : undefined}
+              >
+                <Box className={styles.statIconContainer}>
+                  {isStatsLoading ? (
+                    <Skeleton
+                      variant="circular"
+                      width={40}
+                      height={40}
+                      animation="wave"
+                    />
+                  ) : (
+                    <stat.Icon
+                      width="40"
+                      height="40"
+                      strokeColor={stat.iconColor}
+                      color={stat.iconColor}
+                    />
+                  )}
+                </Box>
+                <Box className={styles.statInfo}>
+                  {isStatsLoading ? (
+                    <>
+                      <Skeleton
+                        variant="text"
+                        width={100}
+                        height={20}
+                        animation="wave"
+                      />
+                      <Skeleton
+                        variant="text"
+                        width={120}
+                        height={32}
+                        animation="wave"
+                      />
+                      <Skeleton
+                        variant="text"
+                        width={70}
+                        height={20}
+                        animation="wave"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <Typography className={styles.statTitle}>
+                        {stat.title}
+                      </Typography>
+                      <Typography className={styles.statValue}>
+                        {stat.value}
+                      </Typography>
+                      {stat.change && (
+                        <Box className={styles.statChangeContainer}>
+                          <Typography className={styles.statChange}>
+                            {stat.change}
+                            <TrendingUpIcon
+                              width={14}
+                              height={14}
+                              strokeColor="#10b981"
+                            />
+                          </Typography>
+                        </Box>
+                      )}
+                    </>
+                  )}
+                </Box>
               </Box>
-              <Box className={styles.statInfo}>
-                {isStatsLoading ? (
-                  <>
-                    <Skeleton
-                      variant="text"
-                      width={100}
-                      height={20}
-                      animation="wave"
-                    />
-                    <Skeleton
-                      variant="text"
-                      width={120}
-                      height={32}
-                      animation="wave"
-                    />
-                    <Skeleton
-                      variant="text"
-                      width={70}
-                      height={20}
-                      animation="wave"
-                    />
-                  </>
-                ) : (
-                  <>
-                    <Typography className={styles.statTitle}>
-                      {stat.title}
-                    </Typography>
-                    <Typography className={styles.statValue}>
-                      {stat.value}
-                    </Typography>
-                    {stat.change && (
-                      <Box className={styles.statChangeContainer}>
-                        <Typography className={styles.statChange}>
-                          {stat.change}
-                          <TrendingUpIcon
-                            width={14}
-                            height={14}
-                            strokeColor="#10b981"
-                          />
-                        </Typography>
-                      </Box>
-                    )}
-                  </>
-                )}
-              </Box>
-            </Box>
-          ))}
+            )
+          })}
         </Box>
 
-        <DashboardDeals />
+        <DashboardDeals
+          activityFilters={activityFilters}
+          onActivityFilterToggle={toggleActivityFilter}
+          onActivityFiltersClear={clearActivityFilters}
+        />
       </Box>
     </Box>
   )

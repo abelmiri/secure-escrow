@@ -48,7 +48,18 @@
   width: 40px;
   border: 1px solid #d0d5dd !important;
   border-radius: 8px !important;
-  //padding: 10px !important;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease !important;
+
+  &:hover {
+    background-color: #f9fafb;
+  }
+}
+
+.filterButtonActive {
+  border-color: var(--color-secondary) !important;
+  background-color: rgba(130, 0, 219, 0.06) !important;
 }
 
 .searchInput {
@@ -131,6 +142,111 @@
     font-size: 14px;
     display: flex;
     align-items: center;
+  }
+}
+
+.filterDialogPaper {
+  direction: rtl;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 48px rgba(16, 24, 40, 0.18) !important;
+}
+
+.filterDialog {
+  padding: 24px;
+}
+
+.filterDialogHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.filterDialogTitle {
+  color: #101828;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+}
+
+.filterDialogDescription {
+  margin-top: 6px !important;
+  color: #667085;
+  font-size: 14px !important;
+}
+
+.filterDialogCloseButton {
+  color: #667085 !important;
+}
+
+.filterDialogDivider {
+  margin: 20px 0 !important;
+  border-color: #eaecf0 !important;
+}
+
+.filterOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filterOption {
+  direction: ltr;
+  width: 100%;
+  margin: 0 !important;
+  padding: 12px;
+  border: 1px solid #eaecf0;
+  border-radius: 10px;
+  justify-content: space-between;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+
+  &:has(:global(.Mui-checked)) {
+    border-color: var(--color-secondary);
+    background-color: rgba(130, 0, 219, 0.05);
+  }
+
+  :global(.MuiFormControlLabel-label) {
+    color: #344054;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  :global(.MuiCheckbox-root) {
+    color: #98a2b3;
+    padding: 0;
+
+    &.Mui-checked {
+      color: var(--color-secondary);
+    }
+  }
+}
+
+.filterDialogActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.clearFiltersButton {
+  color: #667085 !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+}
+
+.confirmFiltersButton {
+  min-width: 96px !important;
+  background-color: var(--color-secondary) !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+
+  &:hover {
+    background-color: #7000bd !important;
+    box-shadow: none !important;
   }
 }
 

@@ -240,7 +240,7 @@ export default function Header() {
                   pathname === "/contracts/create" ? styles.activeNavItem : ""
                 }`}
               >
-                تراکنش جدید
+                معامله جدید
               </Typography>
             </Link>
             <Box
@@ -571,7 +571,7 @@ export default function Header() {
                 >
                   <ListItemButton>
                     <ListItemText
-                      primary="تراکنش جدید"
+                      primary="معامله جدید"
                       className={styles.drawerItemText}
                     />
                   </ListItemButton>

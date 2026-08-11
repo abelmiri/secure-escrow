@@ -12,9 +12,15 @@ import {
   MenuItem,
   CircularProgress,
   Pagination,
+  Button,
+  Checkbox,
+  Dialog,
+  Divider,
+  FormControlLabel,
 } from "@mui/material"
 import SearchIcon from "@/media/svg/SearchIcon"
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined"
+import CloseIcon from "@mui/icons-material/Close"
 import styles from "./styles/DashboardDeals.module.scss"
 import { authContext } from "@/context/auth/authProvider"
 import { useDeals } from "@/hooks/deals/useDeals"
@@ -28,6 +34,15 @@ import {
 
 type RoleFilter = DealRole | ""
 type StatusType = "processing" | "pending" | "inspection" | "completed"
+type ActivityFilter = "active" | "completed"
+type ActivityFilters = Record<ActivityFilter, boolean>
+
+interface DashboardDealsProps {
+  activityFilters: ActivityFilters
+  onActivityFilterToggle: (filter: ActivityFilter) => void
+  onActivityFiltersClear: () => void
+}
+
 type DashboardDealCard = {
   id: string
   label: string
@@ -82,13 +97,23 @@ const getTimestamp = (date: string) => {
   return Number.isNaN(timestamp) ? 0 : timestamp
 }
 
-export default function DashboardDeals() {
+const activityFilterOptions: Array<{ value: ActivityFilter; label: string }> = [
+  { value: "active", label: "نمایش معامله‌های فعال" },
+  { value: "completed", label: "نمایش معامله‌های تکمیل‌شده" },
+]
+
+export default function DashboardDeals({
+  activityFilters,
+  onActivityFilterToggle,
+  onActivityFiltersClear,
+}: DashboardDealsProps) {
   const { authState } = useContext(authContext)
   const [searchTerm, setSearchTerm] = useState("")
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("همه")
   const [roleFilter, setRoleFilter] = useState<RoleFilter>("")
   const [orderFilter, setOrderFilter] = useState("newest")
+  const [isFilterDialogOpen, setIsFilterDialogOpen] = useState(false)
   const [selectedProfile, setSelectedProfile] =
     useState<SelectedRepresentedPartner | null>(() =>
       getSelectedRepresentedPartner(),
@@ -208,6 +233,8 @@ export default function DashboardDeals() {
     setPage(value)
   }
 
+  const hasActiveActivityFilter = Object.values(activityFilters).some(Boolean)
+
   return (
     <Box className={styles.container}>
       <Box className={styles.header}>
@@ -229,8 +256,21 @@ export default function DashboardDeals() {
               ),
             }}
           />
-          <IconButton className={styles.filterButton}>
-            <FilterAltOutlinedIcon sx={{ color: "#667085" }} />
+          <IconButton
+            className={`${styles.filterButton} ${
+              hasActiveActivityFilter ? styles.filterButtonActive : ""
+            }`}
+            onClick={() => setIsFilterDialogOpen(true)}
+            aria-label="فیلتر وضعیت معامله‌ها"
+            aria-pressed={hasActiveActivityFilter}
+          >
+            <FilterAltOutlinedIcon
+              sx={{
+                color: hasActiveActivityFilter
+                  ? "var(--color-secondary)"
+                  : "#667085",
+              }}
+            />
           </IconButton>
         </Box>
       </Box>
@@ -257,6 +297,7 @@ export default function DashboardDeals() {
               setPage(1)
             }}
             className={styles.filterSelect}
+            displayEmpty
           >
             <MenuItem value="">همه</MenuItem>
             <MenuItem value="customer">خریدار</MenuItem>
@@ -266,11 +307,12 @@ export default function DashboardDeals() {
         </Box>
 
         <Box className={styles.filterGroup}>
-          <Typography className={styles.filterLabel}>حالت معامله</Typography>
+          <Typography className={styles.filterLabel}>وضعیت معامله</Typography>
           <Select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             className={styles.filterSelect}
+            disabled
           >
             <MenuItem value="همه">همه</MenuItem>
             <MenuItem value="در حال انجام">در حال انجام</MenuItem>
@@ -356,6 +398,71 @@ export default function DashboardDeals() {
           </>
         )}
       </Box>
+
+      <Dialog
+        open={isFilterDialogOpen}
+        onClose={() => setIsFilterDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        slotProps={{
+          paper: { className: styles.filterDialogPaper },
+        }}
+      >
+        <Box className={styles.filterDialog}>
+          <Box className={styles.filterDialogHeader}>
+            <Box>
+              <Typography className={styles.filterDialogTitle}>
+                فیلتر معامله‌ها
+              </Typography>
+              <Typography className={styles.filterDialogDescription}>
+                وضعیت معامله‌هایی که می‌خواهید مشاهده کنید را انتخاب کنید.
+              </Typography>
+            </Box>
+            <IconButton
+              className={styles.filterDialogCloseButton}
+              onClick={() => setIsFilterDialogOpen(false)}
+              aria-label="بستن فیلترها"
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Box>
+
+          <Divider className={styles.filterDialogDivider} />
+
+          <Box className={styles.filterOptions}>
+            {activityFilterOptions.map((option) => (
+              <FormControlLabel
+                key={option.value}
+                className={styles.filterOption}
+                control={
+                  <Checkbox
+                    checked={activityFilters[option.value]}
+                    onChange={() => onActivityFilterToggle(option.value)}
+                  />
+                }
+                label={option.label}
+              />
+            ))}
+          </Box>
+
+          <Box className={styles.filterDialogActions}>
+            <Button
+              className={styles.clearFiltersButton}
+              onClick={onActivityFiltersClear}
+              disabled={!hasActiveActivityFilter}
+            >
+              پاک کردن
+            </Button>
+            <Button
+              variant="contained"
+              className={styles.confirmFiltersButton}
+              onClick={() => setIsFilterDialogOpen(false)}
+            >
+              تأیید
+            </Button>
+          </Box>
+        </Box>
+      </Dialog>
     </Box>
   )
 }
