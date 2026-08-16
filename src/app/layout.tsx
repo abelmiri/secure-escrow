@@ -9,10 +9,10 @@ import { ReactNode } from "react"
 import AuthProvider from "@/context/auth/authProvider"
 
 export const metadata: Metadata = {
-  title: "262333019",
+  title: "۲۶۲۳۳۳۰۱۹",
   description: "امان یار - مورد اعتمادترین",
   other: {
-    enamad: "262333019",
+    enamad: "۲۶۲۳۳۳۰۱۹",
   },
 }
 
