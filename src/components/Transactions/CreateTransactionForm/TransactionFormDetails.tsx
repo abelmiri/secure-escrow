@@ -1106,6 +1106,7 @@ export default function TransactionFormDetails({
           isCategoriesLoading={isCategoriesLoading}
           title={title}
           description={description}
+          roleReadOnly={isEditWorkflow}
           onRoleChange={(nextRole) => {
             setRole(nextRole)
             setDocumentValidationMessage("")

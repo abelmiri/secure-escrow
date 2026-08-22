@@ -15,6 +15,7 @@ interface TransactionBasicDetailsProps {
   title: string
   description: string
   fieldErrors?: string[]
+  roleReadOnly?: boolean
   onRoleChange: (role: string) => void
   onCategoryChange: (categoryId: number) => void
   onSubCategoryChange: (subCategoryId: number) => void
@@ -39,6 +40,7 @@ export default function TransactionBasicDetails({
   title,
   description,
   fieldErrors = [],
+  roleReadOnly = false,
   onRoleChange,
   onCategoryChange,
   onSubCategoryChange,
@@ -61,6 +63,7 @@ export default function TransactionBasicDetails({
             value={item.value}
             checked={role === item.value}
             onChange={() => onRoleChange(item.value)}
+            disabled={roleReadOnly}
           />
         ))}
       </div>

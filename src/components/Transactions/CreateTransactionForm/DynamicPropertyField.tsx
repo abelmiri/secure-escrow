@@ -47,9 +47,7 @@ const widthClassNames: Record<PropertyFieldWidth, string> = {
 }
 
 type ConditionalFieldType =
-  | "boolean_integer"
-  | "boolean_string"
-  | "boolean_date"
+  "boolean_integer" | "boolean_string" | "boolean_date"
 
 const isConditionalFieldType = (
   fieldType: Property["field_type"],
@@ -87,7 +85,8 @@ export default function DynamicPropertyField({
         ? { label: option, value: option }
         : { label: option.label, value: option.value },
     ) || []
-  const stringValue = typeof value === "string" ? value : ""
+  const stringValue =
+    typeof value === "string" || typeof value === "number" ? String(value) : ""
   const stringArrayValue =
     Array.isArray(value) && value.every((item) => typeof item === "string")
       ? value
