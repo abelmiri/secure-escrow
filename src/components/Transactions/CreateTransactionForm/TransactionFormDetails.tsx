@@ -8,7 +8,7 @@ import { authContext } from "@/context/auth/authProvider"
 import API_URLS from "@/constants/urls/API_URLS"
 import { useCategories } from "@/hooks/deals/useCategories"
 import { useSubCategories, type Property } from "@/hooks/deals/useSubCategories"
-import { useDeal } from "@/hooks/deals/useDeal"
+import { getPartyPartnerId, useDeal } from "@/hooks/deals/useDeal"
 import { useDealWorkflowAction } from "@/hooks/deals/useDealWorkflowAction"
 import { useUpdateDeal } from "@/hooks/deals/useUpdateDeal"
 import { useDealDocuments } from "@/hooks/documents/useDealDocuments"
@@ -165,7 +165,7 @@ export default function TransactionFormDetails({
   const shouldReturnToDealAfterCompletion =
     searchParams.get("returnToDeal") === "true"
   const prefillAppliedRef = useRef(false)
-  const dealPrefillAppliedRef = useRef<number | null>(null)
+  const dealPrefillAppliedRef = useRef<string | null>(null)
   const previousEscrowAmountRef = useRef("")
   const { authState } = useContext(authContext)
 
@@ -222,6 +222,12 @@ export default function TransactionFormDetails({
   const selectedBrokerId =
     allowBrokerRole && selectedProfile?.type === "partner"
       ? selectedProfile.id
+      : null
+  const dealBrokerId =
+    selectedBrokerId &&
+    (isEditWorkflow ||
+      ((stageNumber === 2 || stageNumber === 3) && role === "broker"))
+      ? selectedBrokerId
       : null
 
   useEffect(() => {
@@ -288,9 +294,7 @@ export default function TransactionFormDetails({
     useDocumentRequirements(stageNumber === 2 ? dealId || null : null)
   const { deal, isLoading: isDealLoading } = useDeal(
     dealId || null,
-    (stageNumber === 2 || stageNumber === 3) && role === "broker"
-      ? selectedBrokerId
-      : null,
+    dealBrokerId,
   )
   const { documents: dealDocuments, isLoading: isDealDocumentsLoading } =
     useDealDocuments(stageNumber === 3 ? dealId || null : null)
@@ -323,8 +327,11 @@ export default function TransactionFormDetails({
   const currentDealItemId = dealItemId || deal?.item?.id || null
 
   useEffect(() => {
-    if (!dealId || !deal || dealPrefillAppliedRef.current === dealId) return
+    if (!dealId || !deal) return
     if (categories.length === 0) return
+
+    const dealPrefillKey = `${dealId}:${dealBrokerId || "personal"}`
+    if (dealPrefillAppliedRef.current === dealPrefillKey) return
 
     const currentUserMobile = authState.user?.mobile_number
     const firstItem = deal.item
@@ -349,32 +356,38 @@ export default function TransactionFormDetails({
         subCategory.name === subcategoryName,
     )
 
-    const currentParty = currentUserMobile
-      ? deal.parties?.find((party) => {
-          const partyMobile =
-            typeof party.user === "object"
-              ? party.user?.mobile_number
-              : party.user || party.mobile_number
-          return areSameIranMobile(partyMobile, currentUserMobile)
-        })
+    const brokerParty = dealBrokerId
+      ? deal.parties?.find(
+          (party) =>
+            party.role === "broker" &&
+            getPartyPartnerId(party) === String(dealBrokerId),
+        )
       : undefined
-    const counterparty = currentUserMobile
-      ? deal.parties?.find((party) => {
-          const partyMobile =
-            typeof party.user === "object"
-              ? party.user?.mobile_number
-              : party.user || party.mobile_number
-          return !areSameIranMobile(partyMobile, currentUserMobile)
-        })
-      : deal.parties?.[1]
-    const counterpartyMobile =
-      typeof counterparty?.user === "object"
-        ? counterparty.user?.mobile_number
-        : counterparty?.user || counterparty?.mobile_number
+    const currentParty =
+      brokerParty ||
+      (currentUserMobile
+        ? deal.parties?.find((party) => {
+            const partyMobile =
+              typeof party.user === "object"
+                ? party.user?.mobile_number
+                : party.user || party.mobile_number
+            return areSameIranMobile(partyMobile, currentUserMobile)
+          })
+        : undefined)
     const buyerParty = deal.parties?.find((party) => party.role === "customer")
     const sellerParty = deal.parties?.find(
       (party) => party.role === "beneficiary",
     )
+    const counterparty =
+      currentParty?.role === "customer"
+        ? sellerParty
+        : currentParty?.role === "beneficiary"
+          ? buyerParty
+          : undefined
+    const counterpartyMobile =
+      typeof counterparty?.user === "object"
+        ? counterparty.user?.mobile_number
+        : counterparty?.user || counterparty?.mobile_number
     const buyerPartyMobile =
       typeof buyerParty?.user === "object"
         ? buyerParty.user?.mobile_number
@@ -391,6 +404,18 @@ export default function TransactionFormDetails({
     setCounterpartyMobile(normalizeIranMobileForInput(counterpartyMobile))
     setBuyerMobile(normalizeIranMobileForInput(buyerPartyMobile))
     setSellerMobile(normalizeIranMobileForInput(sellerPartyMobile))
+    setFieldErrors((currentErrors) =>
+      currentErrors.filter(
+        (key) =>
+          !["buyerMobile", "sellerMobile", "counterpartyMobile"].includes(key),
+      ),
+    )
+    setRequiredValidationMessage((currentMessages) =>
+      currentMessages.filter(
+        (label) =>
+          !["شماره موبایل خریدار", "شماره موبایل فروشنده"].includes(label),
+      ),
+    )
 
     if (matchedCategory) setSelectedCategoryId(matchedCategory.id)
     if (matchedSubCategory) setSelectedSubCategoryId(matchedSubCategory.id)
@@ -410,8 +435,8 @@ export default function TransactionFormDetails({
     setPaymentMethod(firstItem?.remaining_price_payment_method || "")
     setPaymentDescription(firstItem?.remaining_price_payment_description || "")
 
-    dealPrefillAppliedRef.current = dealId
-  }, [authState.user?.mobile_number, categories, deal, dealId])
+    dealPrefillAppliedRef.current = dealPrefillKey
+  }, [authState.user?.mobile_number, categories, deal, dealBrokerId, dealId])
 
   useEffect(() => {
     if (!dealId || !deal || properties.length === 0) return

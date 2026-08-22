@@ -23,11 +23,14 @@ export function useDealWorkflowAction() {
       const dealUrl = brokerId
         ? API_URLS.brokerDeal({ brokerId, id: dealId })
         : API_URLS.deal({ id: dealId })
+      const workflowActionUrl = brokerId
+        ? API_URLS.brokerDealWorkflowAction({ brokerId, id: dealId })
+        : API_URLS.dealWorkflowActions({ id: dealId })
 
       try {
         if (!submission.files || Object.keys(submission.files).length === 0) {
           const response = await request.post({
-            url: API_URLS.dealWorkflowActions({ id: dealId }),
+            url: workflowActionUrl,
             data: {
               transition_id: submission.transition_id,
               ...(submission.form ? { form: submission.form } : {}),
@@ -65,7 +68,7 @@ export function useDealWorkflowAction() {
         }
 
         const response = await request.post({
-          url: API_URLS.dealWorkflowActions({ id: dealId }),
+          url: workflowActionUrl,
           data: formData,
           successMessage: "اقدام با موفقیت ثبت شد.",
           failMessage: "ثبت اقدام با خطا مواجه شد.",

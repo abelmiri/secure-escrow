@@ -23,16 +23,18 @@ const API_URLS = {
   deals: "v1/deals/u",
   brokerDeals: ({ brokerId }: { brokerId: string | number }) =>
     `v1/deals/${brokerId}/p`,
-  brokerDeal: ({
+  brokerDeal: ({ brokerId, id }: { brokerId: string | number; id: number }) =>
+    `v1/deals/${brokerId}/p/${id}`,
+  deal: ({ id }: { id: number }) => `v1/deals/u/${id}`,
+  dealWorkflowActions: ({ id }: { id: number }) =>
+    `v1/deals/u/${id}/workflow-actions`,
+  brokerDealWorkflowAction: ({
     brokerId,
     id,
   }: {
     brokerId: string | number
     id: number
-  }) => `v1/deals/${brokerId}/p/${id}`,
-  deal: ({ id }: { id: number }) => `v1/deals/u/${id}`,
-  dealWorkflowActions: ({ id }: { id: number }) =>
-    `v1/deals/u/${id}/workflow-actions`,
+  }) => `v1/${brokerId}/deals/p/${id}/workflow-action`,
   dealWorkflowActionDetails: ({
     id,
     transitionId,
