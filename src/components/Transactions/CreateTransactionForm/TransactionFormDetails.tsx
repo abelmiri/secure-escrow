@@ -161,6 +161,7 @@ export default function TransactionFormDetails({
   const searchParams = useSearchParams()
   const router = useRouter()
   const workflowAction = searchParams.get("workflowAction")?.toLowerCase()
+  const isEditWorkflow = workflowAction === "edit"
   const shouldReturnToDealAfterCompletion =
     searchParams.get("returnToDeal") === "true"
   const prefillAppliedRef = useRef(false)
@@ -1106,6 +1107,7 @@ export default function TransactionFormDetails({
                 regex={iranianMobilePattern}
                 rejectPersianDigits
                 required
+                readOnly={isEditWorkflow}
                 error={fieldErrors.includes("buyerMobile")}
               />
 
@@ -1121,6 +1123,7 @@ export default function TransactionFormDetails({
                 regex={iranianMobilePattern}
                 rejectPersianDigits
                 required
+                readOnly={isEditWorkflow}
                 error={fieldErrors.includes("sellerMobile")}
               />
             </>
@@ -1146,6 +1149,7 @@ export default function TransactionFormDetails({
                 regex={iranianMobilePattern}
                 rejectPersianDigits
                 required
+                readOnly={isEditWorkflow}
                 error={fieldErrors.includes("counterpartyMobile")}
               />
 

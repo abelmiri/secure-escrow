@@ -13,6 +13,7 @@ type ListInputProps = {
   rejectPersianDigits?: boolean
   required?: boolean
   error?: boolean
+  readOnly?: boolean
 }
 
 export default function ListInput({
@@ -26,10 +27,11 @@ export default function ListInput({
   rejectPersianDigits = false,
   required = false,
   error = false,
+  readOnly = false,
 }: ListInputProps) {
   const isInvalid = regex && value !== "" && !regex.test(value)
 
-  const inputClassName = `${styles.input}${
+  const inputClassName = `${styles.input}${readOnly ? ` ${styles.readOnly}` : ""}${
     isInvalid || error
       ? ` ${styles.inputInvalid}`
       : !value
@@ -37,7 +39,7 @@ export default function ListInput({
         : ""
   }`
 
-  const textareaClassName = `${styles.textarea}${
+  const textareaClassName = `${styles.textarea}${readOnly ? ` ${styles.readOnly}` : ""}${
     isInvalid || error
       ? ` ${styles.textareaInvalid}`
       : !value
@@ -91,6 +93,8 @@ export default function ListInput({
           placeholder={placeholder}
           value={displayValue}
           onChange={(e) => handleChange(e.target.value)}
+          readOnly={readOnly}
+          aria-readonly={readOnly}
         />
       ) : (
         <input
@@ -100,6 +104,8 @@ export default function ListInput({
           placeholder={placeholder}
           value={displayValue}
           onChange={(e) => handleChange(e.target.value)}
+          readOnly={readOnly}
+          aria-readonly={readOnly}
           style={
             isNumber
               ? {
