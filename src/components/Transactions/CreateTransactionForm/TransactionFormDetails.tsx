@@ -420,20 +420,33 @@ export default function TransactionFormDetails({
     if (matchedCategory) setSelectedCategoryId(matchedCategory.id)
     if (matchedSubCategory) setSelectedSubCategoryId(matchedSubCategory.id)
 
-    setTitle(firstItem?.name || "")
-    setDescription(firstItem?.description || "")
-    setEscrowAmount(
+    const escrowValue =
       firstItem?.escrow_price !== undefined && firstItem?.escrow_price !== null
         ? String(firstItem.escrow_price)
-        : "",
-    )
-    setTotalTransactionAmount(
+        : ""
+    const totalValue =
       firstItem?.price !== undefined && firstItem?.price !== null
         ? String(firstItem.price)
-        : "",
+        : ""
+    const paymentMethodValue =
+      firstItem?.remaining_price_payment_method?.trim() || ""
+    const hasSeparateTotalAmount =
+      Boolean(totalValue) &&
+      (!escrowValue || Number(totalValue) !== Number(escrowValue))
+    const hasRemainingPaymentData =
+      hasSeparateTotalAmount || Boolean(paymentMethodValue)
+    const nextIsTotalCost = hasRemainingPaymentData ? "no" : "yes"
+
+    setTitle(firstItem?.name || "")
+    setDescription(firstItem?.description || "")
+    setEscrowAmount(escrowValue)
+    setTotalTransactionAmount(
+      nextIsTotalCost === "yes" ? escrowValue : totalValue,
     )
-    setPaymentMethod(firstItem?.remaining_price_payment_method || "")
+    setIsTotalCost(nextIsTotalCost)
+    setPaymentMethod(paymentMethodValue)
     setPaymentDescription(firstItem?.remaining_price_payment_description || "")
+    previousEscrowAmountRef.current = escrowValue
 
     dealPrefillAppliedRef.current = dealPrefillKey
   }, [authState.user?.mobile_number, categories, deal, dealBrokerId, dealId])
@@ -1255,8 +1268,12 @@ export default function TransactionFormDetails({
               onEscrowAmountChange={handleEscrowAmountChange}
               onIsTotalCostChange={(value) => {
                 setIsTotalCost(value)
-                if (value === "yes" && escrowAmount) {
-                  setTotalTransactionAmount(escrowAmount)
+                if (value === "yes") {
+                  if (escrowAmount) {
+                    setTotalTransactionAmount(escrowAmount)
+                  }
+                  setPaymentMethod("")
+                  setPaymentDescription("")
                 }
                 resetValidationMessages()
               }}

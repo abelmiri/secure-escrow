@@ -34,7 +34,7 @@ const API_URLS = {
   }: {
     brokerId: string | number
     id: number
-  }) => `v1/${brokerId}/deals/p/${id}/workflow-action`,
+  }) => `v1/deals/${brokerId}/p/${id}/workflow-actions`,
   dealWorkflowActionDetails: ({
     id,
     transitionId,
