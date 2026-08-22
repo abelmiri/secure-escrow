@@ -27,6 +27,7 @@ export interface Property {
   unit: string | null
   regex_pattern: string | null
   is_required: boolean
+  should_show: boolean
   display_page: number
   options: (string | PropertyOption)[]
 }

@@ -5,11 +5,10 @@ import {
   getPartyMobileNumber,
   type DealDetail,
   type DealItem,
+  type DealParty,
 } from "@/hooks/deals/useDeal"
 import type { UploadedDealDocument } from "@/hooks/documents/useDealDocuments"
-import IranLocationPicker, {
-  isMapLocationValue,
-} from "./IranLocationPicker"
+import IranLocationPicker, { isMapLocationValue } from "./IranLocationPicker"
 import styles from "./styles/TransactionFormDetails.module.scss"
 
 const roleLabels: Record<string, string> = {
@@ -56,16 +55,17 @@ const getDocumentMeta = (document: UploadedDealDocument) => {
       ? new Intl.DateTimeFormat("fa-IR").format(parsedDate)
       : rawDate || ""
 
-  return [fileType, size, date, document.uploader]
-    .filter(Boolean)
-    .join(" • ")
+  return [fileType, size, date, document.uploader].filter(Boolean).join(" • ")
 }
 
 const formatPropertyValue = (value: unknown) => {
   if (typeof value === "boolean") return value ? "دارد" : "ندارد"
   if (Array.isArray(value)) return value.join("، ")
+  if (typeof value === "string") return value.replace(/[،,]\s*$/g, "").trim()
   return `${value}`
 }
+
+const formatPropertyLabel = (label: string) => label.replace(/_/g, " — ")
 
 const renderPropertyValue = (value: unknown) =>
   isMapLocationValue(value) ? (
@@ -88,9 +88,15 @@ const isPhoneNumber = (value: ReactNode) => {
   if (typeof value !== "string") return false
 
   const normalizedValue = value.replace(/[\s-]/g, "")
-  return /^(?:09[0-9]{9}|\+989[0-9]{9}|00989[0-9]{9})$/.test(
-    normalizedValue,
-  )
+  return /^(?:09[0-9]{9}|\+989[0-9]{9}|00989[0-9]{9})$/.test(normalizedValue)
+}
+
+const getPartnerName = (party?: DealParty) => {
+  if (!party?.partner) return ""
+  if (typeof party.partner === "object") {
+    return party.partner.name || String(party.partner.id || "")
+  }
+  return String(party.partner)
 }
 
 interface DealReviewProps {
@@ -150,30 +156,65 @@ export default function DealReview({
   paymentMethod,
   localDocuments,
 }: DealReviewProps) {
-  const item = deal?.items?.[0]
-  const currentRole =
-    deal?.parties?.find((party) => getPartyMobileNumber(party) === userMobile)
-      ?.role || role
+  const item = deal?.item
+  const currentParty = deal?.parties?.find(
+    (party) => getPartyMobileNumber(party) === userMobile,
+  )
+  const currentRole = role === "broker" ? "broker" : currentParty?.role || role
+  const broker = deal?.parties?.find((party) => party.role === "broker")
+  const buyer = deal?.parties?.find((party) => party.role === "customer")
+  const seller = deal?.parties?.find((party) => party.role === "beneficiary")
   const counterparty = deal?.parties?.find(
-    (party) => party.role && party.role !== currentRole,
+    (party) =>
+      party.role && party.role !== currentRole && party.role !== "broker",
   )
   const counterpartyRoleLabel = counterparty?.role
     ? roleLabels[counterparty.role] || "طرف مقابل"
     : "طرف مقابل"
   const counterpartyMobile = getPartyMobileNumber(counterparty)
   const itemProperties = item?.properties
-    ? Object.entries(item.properties).filter(([, value]) => value !== "")
+    ? Object.entries(item.properties).filter(
+        ([, value]) => value !== "" && value !== null && value !== undefined,
+      )
     : []
   const escrowValue = item?.escrow_price ?? escrowAmount
   const totalValue = item?.price ?? (totalTransactionAmount || escrowValue)
   const remainingPayment =
     item?.remaining_price_payment_method || paymentMethod || ""
+  const partyRows =
+    currentRole === "broker"
+      ? [
+          {
+            label: "شماره موبایل خریدار:",
+            value: getPartyMobileNumber(buyer),
+          },
+          {
+            label: "شماره موبایل فروشنده:",
+            value: getPartyMobileNumber(seller),
+          },
+          {
+            label: "کارگزار:",
+            value: getPartnerName(broker),
+          },
+        ]
+      : [
+          {
+            label: `شماره موبایل ${counterpartyRoleLabel}:`,
+            value: counterpartyMobile,
+          },
+          {
+            label: `نماینده ${roleLabels[currentRole] || "طرف معامله"}:`,
+            value: currentParty?.is_representative ? "بله" : "خیر",
+          },
+        ]
 
   return (
     <>
       <ReviewSection
         title="اطلاعات پایه"
         rows={[
+          { label: "شناسه معامله:", value: deal?.label },
+          { label: "کد پیگیری:", value: deal?.trace_number },
           {
             label: "نقش شما:",
             value: roleLabels[currentRole] || roleLabels[role] || currentRole,
@@ -184,6 +225,7 @@ export default function DealReview({
           },
           { label: "عنوان:", value: item?.name || title },
           { label: "توضیحات:", value: item?.description || description },
+          { label: "وضعیت معامله:", value: deal?.sub_state || deal?.state },
         ]}
       />
 
@@ -192,16 +234,9 @@ export default function DealReview({
         rows={[
           { label: "نوع کالا:", value: getItemSubcategory(item) },
           { label: "نام کالا:", value: item?.name || title },
-          {
-            label: "وضعیت:",
-            value:
-              itemProperties[0]?.[1] === undefined
-                ? ""
-                : renderPropertyValue(itemProperties[0][1]),
-          },
           { label: "تعداد:", value: item?.quantity?.toString() },
-          ...itemProperties.slice(1).map(([key, value]) => ({
-            label: `${key}:`,
+          ...itemProperties.map(([key, value]) => ({
+            label: `${formatPropertyLabel(key)}:`,
             value: renderPropertyValue(value),
           })),
         ].filter((row) => row.value)}
@@ -238,17 +273,12 @@ export default function DealReview({
       /> */}
 
       <ReviewSection
-        title={`اطلاعات ${counterpartyRoleLabel}`}
-        rows={[
-          {
-            label: `شماره موبایل ${counterpartyRoleLabel}:`,
-            value: counterpartyMobile,
-          },
-          {
-            label: "نماینده فروشنده:",
-            value: currentRole === "broker" ? "بله" : "خیر",
-          },
-        ]}
+        title={
+          currentRole === "broker"
+            ? "اطلاعات طرفین معامله"
+            : `اطلاعات ${counterpartyRoleLabel}`
+        }
+        rows={partyRows}
       />
 
       <section className={styles.reviewSection}>

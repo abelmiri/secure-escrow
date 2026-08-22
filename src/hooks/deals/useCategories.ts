@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import useSWR from "swr"
 import request from "@/request/request"
 import API_URLS from "@/constants/urls/API_URLS"
 
@@ -6,37 +6,32 @@ export interface SubCategory {
   id: number
   name: string
   slug: string
-  description?: string
+  description?: string | null
 }
 
 export interface Category {
   id: number
   name: string
   slug: string
-  description: string
+  description: string | null
   sub_categories: SubCategory[]
 }
 
+function normalizeCategories(data: unknown): Category[] {
+  if (Array.isArray(data)) return data as Category[]
+
+  if (data && typeof data === "object" && "collection" in data) {
+    const collection = (data as { collection?: unknown }).collection
+    if (Array.isArray(collection)) return collection as Category[]
+  }
+
+  return []
+}
+
 export function useCategories() {
-  const [categories, setCategories] = useState<Category[]>([])
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<any>(null)
+  const { data, error, isLoading } = useSWR(API_URLS.categories, (url) =>
+    request.get({ url }),
+  )
 
-  useEffect(() => {
-    setIsLoading(true)
-    request
-      .get({ url: API_URLS.categories })
-      .then(({ collection }) => {
-        setCategories(collection)
-        setError(null)
-      })
-      .catch((err) => {
-        setError(err)
-      })
-      .finally(() => {
-        setIsLoading(false)
-      })
-  }, [])
-
-  return { categories, isLoading, error }
+  return { categories: normalizeCategories(data), isLoading, error }
 }

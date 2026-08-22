@@ -1,5 +1,8 @@
 import { Box, Typography } from "@mui/material"
 import type { Deal } from "@/constants/deals"
+import IranLocationPicker, {
+  isMapLocationValue,
+} from "@/components/Transactions/CreateTransactionForm/IranLocationPicker"
 import styles from "./styles/TransactionDetail.module.scss"
 
 function DetailRow({
@@ -14,9 +17,7 @@ function DetailRow({
   if (!value) return null
 
   return (
-    <Box
-      className={`${styles.detailRow} ${full ? styles.detailRowFull : ""}`}
-    >
+    <Box className={`${styles.detailRow} ${full ? styles.detailRowFull : ""}`}>
       <Typography className={styles.detailLabel}>{label}</Typography>
       <Typography className={styles.detailValue}>{value}</Typography>
     </Box>
@@ -24,6 +25,8 @@ function DetailRow({
 }
 
 export default function TransactionDetailsTab({ deal }: { deal: Deal }) {
+  const location = deal.details?.location
+
   return (
     <Box className={styles.detailsContainer}>
       <DetailRow label="شناسه معامله" value={deal.id} />
@@ -35,7 +38,16 @@ export default function TransactionDetailsTab({ deal }: { deal: Deal }) {
         <>
           <DetailRow label="دسته‌بندی" value={deal.details.category} />
           <DetailRow label="توضیحات" value={deal.details.description} />
-          <DetailRow label="مکان" value={deal.details.location} />
+          {isMapLocationValue(location) ? (
+            <Box className={`${styles.detailRow} ${styles.detailRowFull}`}>
+              <Typography className={styles.detailLabel}>مکان</Typography>
+              <Box className={styles.detailMap}>
+                <IranLocationPicker title="" value={location} readOnly />
+              </Box>
+            </Box>
+          ) : (
+            <DetailRow label="مکان" value={location} />
+          )}
           <DetailRow label="روش تحویل" value={deal.details.deliveryMethod} />
           <DetailRow
             label="دوره بازرسی"

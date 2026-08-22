@@ -23,6 +23,7 @@ interface TransactionReviewStageProps {
   totalTransactionAmount: string
   paymentMethod: string
   localDocuments: File[]
+  submitLabel?: string
   onTermsAcceptedChange: (accepted: boolean) => void
   onPrevious?: () => void
   onSubmit: () => void
@@ -47,6 +48,7 @@ export default function TransactionReviewStage({
   totalTransactionAmount,
   paymentMethod,
   localDocuments,
+  submitLabel,
   onTermsAcceptedChange,
   onPrevious,
   onSubmit,
@@ -115,7 +117,7 @@ export default function TransactionReviewStage({
           {isSubmitting ? (
             <CircularProgress size={24} color="inherit" />
           ) : (
-            `ارسال برای تایید ${confirmationRecipient}`
+            submitLabel || `ارسال برای تایید ${confirmationRecipient}`
           )}
         </Button>
       </div>

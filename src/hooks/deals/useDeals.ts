@@ -13,7 +13,7 @@ export interface Deal {
   title: string
   status: string
   state: string
-  subState: number | null
+  subState: number | string | null
   amount: number
   created_at: string
   parties: DealParty[]
@@ -39,10 +39,10 @@ interface DealResult {
   created_at: string
   id: number
   label: string
-  items: DealItem[]
+  item: DealItem
   parties: DealParty[]
   state: string
-  sub_state: number | null
+  sub_state: number | string | null
   total_amount: number | string | null
   trace_number: string
   updated_at?: string
@@ -66,8 +66,7 @@ interface UseDealsProps {
 }
 
 const resolveDealTitle = (deal: DealResult) => {
-  const firstItem = deal.items?.[0]
-  return firstItem?.name || firstItem?.description || "معامله بدون عنوان"
+  return deal.item?.name || deal.item?.description || "معامله بدون عنوان"
 }
 
 const resolveDealAmount = (deal: DealResult) => {
@@ -76,12 +75,7 @@ const resolveDealAmount = (deal: DealResult) => {
     return Number.isFinite(totalAmount) ? totalAmount : 0
   }
 
-  return (
-    deal.items?.reduce(
-      (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1),
-      0,
-    ) || 0
-  )
+  return Number(deal.item?.price || 0) * Number(deal.item?.quantity || 1)
 }
 
 export function useDeals({
@@ -92,19 +86,15 @@ export function useDeals({
   offset = 0,
 }: UseDealsProps = {}) {
   const normalizedSearch = search.trim()
-  const normalizedBrokerId =
-    brokerId !== null && brokerId !== undefined ? String(brokerId) : ""
   const { data, error, isLoading } = useSWR<DealsResponse>(
     [
-      API_URLS.deals,
+      brokerId ? API_URLS.brokerDeals({ brokerId }) : API_URLS.deals,
       normalizedSearch,
       role || "",
-      normalizedBrokerId,
       limit,
       offset,
     ],
-    ([url, searchValue, roleValue, brokerIdValue, pageLimit, pageOffset]: [
-      string,
+    ([url, searchValue, roleValue, pageLimit, pageOffset]: [
       string,
       string,
       string,
@@ -116,7 +106,6 @@ export function useDeals({
         params: {
           ...(searchValue ? { search: searchValue } : {}),
           ...(roleValue ? { role: roleValue } : {}),
-          ...(brokerIdValue ? { broker_id: brokerIdValue } : {}),
           limit: pageLimit,
           offset: pageOffset,
         },

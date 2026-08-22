@@ -21,6 +21,15 @@ const API_URLS = {
   profile: "v1/auth/profile",
   dashboardStats: "v1/deals/dashboard-stats",
   deals: "v1/deals/u",
+  brokerDeals: ({ brokerId }: { brokerId: string | number }) =>
+    `v1/deals/${brokerId}/p`,
+  brokerDeal: ({
+    brokerId,
+    id,
+  }: {
+    brokerId: string | number
+    id: number
+  }) => `v1/deals/${brokerId}/p/${id}`,
   deal: ({ id }: { id: number }) => `v1/deals/u/${id}`,
   dealWorkflowActions: ({ id }: { id: number }) =>
     `v1/deals/u/${id}/workflow-actions`,
@@ -49,7 +58,7 @@ const API_URLS = {
   subCategories: ({ id }: { id: number }) =>
     `v1/deals/categories/sub-category/${id}`,
   documentRequirements: ({ id }: { id: number }) =>
-    `v1/documents/sub-category/${id}/document-requirements`,
+    `v1/documents/deals/${id}/document-requirements`,
   documentUpload: () => `v1/documents/upload`,
   partnershipRequest: "v1/partners/request",
   partnerProfile: ({ brokerId }: { brokerId: string | number }) =>

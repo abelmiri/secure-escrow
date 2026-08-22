@@ -12,7 +12,6 @@ import type {
 import { toastManager } from "@/lib/toastManager"
 import { getRequestErrorMessage } from "@/lib/errorHelpers"
 import handleUnauthorized from "@/helpers/auth/handleUnauthorized"
-import refreshAccessToken from "@/helpers/auth/refreshAccessToken"
 
 type RequestResult = Awaited<ReturnType<Body["json"]>>
 
@@ -337,23 +336,13 @@ function _successHandler({
   }
 }
 
-function _serverErrorHandler({
-  data,
-  status,
-  callback,
-  canRefreshToken,
-}: RequestErrorType) {
-  if (status === 401 && canRefreshToken) {
-    return refreshAccessToken().then(callback, (refreshError) => {
-      handleUnauthorized()
-      throw refreshError
-    })
-  } else if (status === 401 || status === 403) {
+function _serverErrorHandler({ data, status }: RequestErrorType) {
+  if (status === 401 || status === 403) {
     handleUnauthorized()
     throw { status, data }
-  } else {
-    throw { status, data }
   }
+
+  throw { status, data }
 }
 
 function _networkErrorHandler({

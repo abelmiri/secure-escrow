@@ -80,7 +80,10 @@ const statusLabels: Record<string, string> = {
   Rejected: "رد شده",
 }
 
-const resolveStatusLabel = (state: string, subState: number | null) => {
+const resolveStatusLabel = (
+  state: string,
+  subState: number | string | null,
+) => {
   if (state === "Created" && subState === 1) return "ایجاد شده"
   return statusLabels[state] || state || "نامشخص"
 }

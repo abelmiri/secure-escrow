@@ -284,13 +284,21 @@ export default function TransactionFormDetails({
   } = useSubCategories(selectedSubCategoryId)
 
   const { documentRequirements, isLoading: isDocumentRequirementsLoading } =
-    useDocumentRequirements(stageNumber === 2 ? selectedSubCategoryId : null)
-  const { deal, isLoading: isDealLoading } = useDeal(dealId || null)
+    useDocumentRequirements(stageNumber === 2 ? dealId || null : null)
+  const { deal, isLoading: isDealLoading } = useDeal(
+    dealId || null,
+    (stageNumber === 2 || stageNumber === 3) && role === "broker"
+      ? selectedBrokerId
+      : null,
+  )
   const { documents: dealDocuments, isLoading: isDealDocumentsLoading } =
     useDealDocuments(stageNumber === 3 ? dealId || null : null)
 
   const stageProperties = properties.filter(
-    (prop) => prop.display_page === stageNumber && prop.field_type !== "file",
+    (prop) =>
+      prop.display_page === stageNumber &&
+      prop.field_type !== "file" &&
+      prop.should_show !== false,
   )
 
   const applicableDocumentRequirements = documentRequirements.filter(
@@ -311,14 +319,14 @@ export default function TransactionFormDetails({
     stageNumber === 2
       ? applicableDocumentRequirements.length > 0
       : stageProperties.length > 0
-  const currentDealItemId = dealItemId || deal?.items?.[0]?.id || null
+  const currentDealItemId = dealItemId || deal?.item?.id || null
 
   useEffect(() => {
     if (!dealId || !deal || dealPrefillAppliedRef.current === dealId) return
     if (categories.length === 0) return
 
     const currentUserMobile = authState.user?.mobile_number
-    const firstItem = deal.items?.[0]
+    const firstItem = deal.item
     const itemSubcategory = firstItem?.subcategory
     const subcategorySlug =
       typeof itemSubcategory === "object" ? itemSubcategory.slug : undefined
@@ -407,7 +415,7 @@ export default function TransactionFormDetails({
   useEffect(() => {
     if (!dealId || !deal || properties.length === 0) return
 
-    const itemProperties = deal.items?.[0]?.properties
+    const itemProperties = deal.item?.properties
     if (!itemProperties) return
 
     setPropertyValues((currentValues) => {
@@ -460,6 +468,7 @@ export default function TransactionFormDetails({
         const isMissingRequiredValue =
           property.is_required && isEmptyValue(value)
         const isMissingConditionalValue =
+          property.is_required &&
           isConditionalPropertyType(property.field_type) &&
           (value === true || value === "")
 
@@ -681,30 +690,109 @@ export default function TransactionFormDetails({
     resetValidationMessages()
   }
 
+  const getPropertiesPayload = () => {
+    const propertiesData: Record<string, unknown> = {}
+
+    properties
+      .filter((prop) => prop.field_type !== "file")
+      .forEach((prop) => {
+        const value = normalizePropertyInputValue(
+          prop,
+          propertyValues[prop.slug],
+        )
+
+        if (
+          prop.field_type === "integer" ||
+          prop.field_type === "boolean_integer"
+        ) {
+          if (value === false || value === undefined) {
+            propertiesData[prop.slug] = value ?? ""
+            return
+          }
+
+          const integerValue =
+            value === "" || value === true ? "" : Number(value)
+          propertiesData[prop.slug] = Number.isFinite(integerValue)
+            ? integerValue
+            : ""
+        } else {
+          propertiesData[prop.slug] = value ?? ""
+        }
+      })
+
+    return propertiesData
+  }
+
+  const getEditedPartiesPayload = (): DealPartyPayload[] =>
+    role === "broker" && selectedBrokerId
+      ? [
+          { partner: selectedBrokerId, role: "broker" },
+          { user: buyerMobile.trim(), role: "customer" },
+          { user: sellerMobile.trim(), role: "beneficiary" },
+        ]
+      : [
+          {
+            user: authState.user?.mobile_number,
+            role,
+            is_representative: isRepresentative,
+          },
+          {
+            user: counterpartyMobile.trim(),
+            role: role === "beneficiary" ? "customer" : "beneficiary",
+          },
+        ].filter((party) => party.user)
+
+  const reviewAction =
+    (workflowAction
+      ? deal?.next_available_actions?.find(
+          (action) => action.action.toLowerCase() === workflowAction,
+        )
+      : undefined) ||
+    deal?.next_available_actions?.find((action) =>
+      ["join", "accept"].includes(action.action.toLowerCase()),
+    ) ||
+    deal?.next_available_actions?.find(
+      (action) => action.action.toLowerCase() !== "form",
+    ) ||
+    deal?.next_available_actions?.[0]
+
   const handleContinue = async () => {
     if (stageNumber === 3) {
       if (!isTermsAccepted) return
       if (!dealId) return
 
-      const reviewAction =
-        (workflowAction
-          ? deal?.next_available_actions?.find(
-              (action) => action.action.toLowerCase() === workflowAction,
-            )
-          : undefined) ||
-        deal?.next_available_actions?.find((action) =>
-          ["join", "accept"].includes(action.action.toLowerCase()),
-        ) ||
-        deal?.next_available_actions?.find(
-          (action) => action.action.toLowerCase() !== "form",
-        ) ||
-        deal?.next_available_actions?.[0]
-
       try {
         if (reviewAction) {
-          await submitWorkflowAction(dealId, {
-            transition_id: reviewAction.transition_id,
-          })
+          const isEditAction =
+            reviewAction.action.toLowerCase() === "edit" ||
+            workflowAction === "edit"
+          const editedParties = getEditedPartiesPayload()
+
+          await submitWorkflowAction(
+            dealId,
+            {
+              transition_id: reviewAction.transition_id,
+              ...(isEditAction
+                ? {
+                    deal: {
+                      item: {
+                        ...(currentDealItemId ? { id: currentDealItemId } : {}),
+                        subcategory: selectedSubCategory?.slug || "",
+                        name: title,
+                        description,
+                        remaining_price_payment_method: paymentMethod,
+                        remaining_price_payment_description: paymentDescription,
+                        escrow_price: Number(escrowAmount),
+                        price: Number(totalTransactionAmount || escrowAmount),
+                        properties: getPropertiesPayload(),
+                      },
+                      parties: editedParties,
+                    },
+                  }
+                : {}),
+            },
+            role === "broker" ? selectedBrokerId : null,
+          )
         }
 
         router.push(`/dashboard/${dealId}`)
@@ -780,33 +868,7 @@ export default function TransactionFormDetails({
 
     setIsSubmitting(true)
 
-    const propertiesData: Record<string, unknown> = {}
-    properties
-      .filter((prop) => prop.field_type !== "file")
-      .forEach((prop) => {
-        const value = normalizePropertyInputValue(
-          prop,
-          propertyValues[prop.slug],
-        )
-
-        if (
-          prop.field_type === "integer" ||
-          prop.field_type === "boolean_integer"
-        ) {
-          if (value === false || value === undefined) {
-            propertiesData[prop.slug] = value ?? ""
-            return
-          }
-
-          const integerValue =
-            value === "" || value === true ? "" : Number(value)
-          propertiesData[prop.slug] = Number.isFinite(integerValue)
-            ? integerValue
-            : ""
-        } else {
-          propertiesData[prop.slug] = value ?? ""
-        }
-      })
+    const propertiesData = getPropertiesPayload()
 
     const primaryParty: DealPartyPayload =
       role === "broker" && selectedBrokerId
@@ -843,30 +905,35 @@ export default function TransactionFormDetails({
     try {
       if (stageNumber === 1) {
         const payload = {
-          items: [
-            {
-              ...(dealId && currentDealItemId ? { id: currentDealItemId } : {}),
-              subcategory: selectedSubCategory?.slug || "",
-              name: title,
-              description,
-              remaining_price_payment_method: paymentMethod,
-              escrow_price: Number(escrowAmount),
-              price: Number(totalTransactionAmount || escrowAmount),
-              properties: propertiesData,
-            },
-          ],
+          item: {
+            ...(dealId && currentDealItemId ? { id: currentDealItemId } : {}),
+            subcategory: selectedSubCategory?.slug || "",
+            name: title,
+            description,
+            remaining_price_payment_method: paymentMethod,
+            remaining_price_payment_description: paymentDescription,
+            escrow_price: Number(escrowAmount),
+            price: Number(totalTransactionAmount || escrowAmount),
+            properties: propertiesData,
+          },
           parties,
         }
 
         if (dealId) {
-          await updateDeal(dealId, payload, {
-            successMessage: "اطلاعات معامله با موفقیت به‌روزرسانی شد",
-            failMessage: "خطا در به‌روزرسانی معامله",
-          })
+          if (workflowAction !== "edit") {
+            await updateDeal(dealId, payload, {
+              successMessage: "اطلاعات معامله با موفقیت به‌روزرسانی شد",
+              failMessage: "خطا در به‌روزرسانی معامله",
+              brokerId: role === "broker" ? selectedBrokerId : null,
+            })
+          }
           onDealCreated?.(dealId, null)
         } else {
           const response = await request.post({
-            url: API_URLS.deals,
+            url:
+              role === "broker" && selectedBrokerId
+                ? API_URLS.brokerDeals({ brokerId: selectedBrokerId })
+                : API_URLS.deals,
             data: payload,
             successMessage: "معامله با موفقیت ثبت شد",
             failMessage: "خطا در ثبت معامله",
@@ -879,9 +946,8 @@ export default function TransactionFormDetails({
               ? ((responseData as { id?: number }).id ?? null)
               : null
           const createdItemId =
-            responseData && "items" in responseData
-              ? ((responseData as { items?: Array<{ id?: number }> }).items?.[0]
-                  ?.id ?? null)
+            responseData && "item" in responseData
+              ? ((responseData as { item?: { id?: number } }).item?.id ?? null)
               : null
           if (createdDealId && onDealCreated) {
             onDealCreated(createdDealId, createdItemId)
@@ -892,10 +958,13 @@ export default function TransactionFormDetails({
           parties,
         }
 
-        await updateDeal(dealId, patchPayload, {
-          successMessage: "اطلاعات با موفقیت به‌روزرسانی شد",
-          failMessage: "خطا در به‌روزرسانی اطلاعات",
-        })
+        if (workflowAction !== "edit") {
+          await updateDeal(dealId, patchPayload, {
+            successMessage: "اطلاعات با موفقیت به‌روزرسانی شد",
+            failMessage: "خطا در به‌روزرسانی اطلاعات",
+            brokerId: role === "broker" ? selectedBrokerId : null,
+          })
+        }
 
         if (shouldReturnToDealAfterCompletion) {
           router.push(`/dashboard/${dealId}`)
@@ -961,6 +1030,24 @@ export default function TransactionFormDetails({
         : "اطلاعات دقیق محصول یا دارایی مورد معامله را وارد کنید"
   const displayedTotalAmountError =
     totalAmountError || getTotalAmountValidationMessage()
+  const reviewDeal =
+    workflowAction === "edit" && deal
+      ? {
+          ...deal,
+          item: {
+            ...deal.item,
+            subcategory: selectedSubCategory?.slug || deal.item?.subcategory,
+            name: title,
+            description,
+            remaining_price_payment_method: paymentMethod,
+            remaining_price_payment_description: paymentDescription,
+            escrow_price: Number(escrowAmount),
+            price: Number(totalTransactionAmount || escrowAmount),
+            properties: getPropertiesPayload(),
+          },
+          parties: getEditedPartiesPayload(),
+        }
+      : deal
 
   return (
     <div className={styles.container}>
@@ -1088,7 +1175,7 @@ export default function TransactionFormDetails({
 
       {stageNumber === 3 && (
         <TransactionReviewStage
-          deal={deal}
+          deal={reviewDeal}
           contractDocument={null}
           documents={dealDocuments}
           isDealLoading={isDealLoading}
@@ -1106,6 +1193,7 @@ export default function TransactionFormDetails({
           totalTransactionAmount={totalTransactionAmount}
           paymentMethod={paymentMethod}
           localDocuments={uploadedDocuments}
+          submitLabel={reviewAction?.action_text}
           onTermsAcceptedChange={setIsTermsAccepted}
           onPrevious={onPrevious}
           onSubmit={handleContinue}

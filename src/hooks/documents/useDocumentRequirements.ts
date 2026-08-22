@@ -34,9 +34,9 @@ function normalizeDocumentRequirements(data: unknown): DocumentRequirement[] {
   return []
 }
 
-export function useDocumentRequirements(subCategoryId: number | null) {
+export function useDocumentRequirements(dealId: number | null) {
   const { data, error, isLoading } = useSWR(
-    subCategoryId ? API_URLS.documentRequirements({ id: subCategoryId }) : null,
+    dealId ? API_URLS.documentRequirements({ id: dealId }) : null,
     (url: string) => request.get({ url }),
   )
 

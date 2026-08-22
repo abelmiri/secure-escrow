@@ -1,6 +1,6 @@
 "use client"
 
-import { useContext, useState } from "react"
+import { useContext, useEffect, useState } from "react"
 import { Box, Typography, CircularProgress } from "@mui/material"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -12,6 +12,11 @@ import type { DealNextAction } from "@/hooks/deals/useDeal"
 import { useDealWorkflowAction } from "@/hooks/deals/useDealWorkflowAction"
 import { useDealDocuments } from "@/hooks/documents/useDealDocuments"
 import { useDealMessages } from "@/hooks/chat/useDealMessages"
+import {
+  getSelectedRepresentedPartner,
+  profileSelectionChangedEvent,
+  type SelectedRepresentedPartner,
+} from "@/helpers/auth/profileSelection"
 import RequiredAction from "./RequiredAction"
 import PaymentSummary from "./PaymentSummary"
 import TransactionParties from "./TransactionParties"
@@ -25,13 +30,28 @@ import styles from "./styles/TransactionDetail.module.scss"
 export default function TransactionDetail({ id }: { id: string }) {
   const router = useRouter()
   const { authState } = useContext(authContext)
+  const [selectedProfile, setSelectedProfile] =
+    useState<SelectedRepresentedPartner | null>(() =>
+      getSelectedRepresentedPartner(),
+    )
   const staticDeal = dealsData.find((deal) => deal.id === id)
   const numericId = Number(id)
   const apiDealId =
     !staticDeal && Number.isInteger(numericId) && numericId > 0
       ? numericId
       : null
-  const { deal: apiDeal, isLoading, error } = useDeal(apiDealId)
+  const selectedBrokerId =
+    selectedProfile?.type === "partner" &&
+    authState.user?.represented_partners?.some(
+      (partner) => String(partner.id) === String(selectedProfile.id),
+    )
+      ? selectedProfile.id
+      : null
+  const {
+    deal: apiDeal,
+    isLoading,
+    error,
+  } = useDeal(apiDealId, selectedBrokerId)
   const { documents: apiDocuments, isLoading: isDocumentsLoading } =
     useDealDocuments(apiDealId)
   const {
@@ -47,6 +67,27 @@ export default function TransactionDetail({ id }: { id: string }) {
   } = useDealMessages(apiDealId)
   const { submitWorkflowAction, isSubmitting: isSubmittingWorkflowAction } =
     useDealWorkflowAction()
+
+  useEffect(() => {
+    const handleProfileSelectionChange = () => {
+      setSelectedProfile(getSelectedRepresentedPartner())
+    }
+
+    window.addEventListener(
+      profileSelectionChangedEvent,
+      handleProfileSelectionChange,
+    )
+    window.addEventListener("storage", handleProfileSelectionChange)
+
+    return () => {
+      window.removeEventListener(
+        profileSelectionChangedEvent,
+        handleProfileSelectionChange,
+      )
+      window.removeEventListener("storage", handleProfileSelectionChange)
+    }
+  }, [])
+
   const deal =
     staticDeal ||
     (apiDeal
@@ -55,6 +96,7 @@ export default function TransactionDetail({ id }: { id: string }) {
           dealsData[0],
           authState.user?.mobile_number,
           apiDocuments,
+          selectedBrokerId,
         )
       : undefined)
   const hasOnlyOneParty = apiDeal?.parties?.length === 1
@@ -128,11 +170,15 @@ export default function TransactionDetail({ id }: { id: string }) {
     }
 
     try {
-      await submitWorkflowAction(apiDealId, {
-        transition_id: action.transition_id,
-        form: formData,
-        files,
-      })
+      await submitWorkflowAction(
+        apiDealId,
+        {
+          transition_id: action.transition_id,
+          form: formData,
+          files,
+        },
+        selectedBrokerId,
+      )
     } catch {
       // The request layer displays the API error
     }

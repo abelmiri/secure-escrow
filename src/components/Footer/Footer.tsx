@@ -55,7 +55,7 @@ export default function Footer() {
               <Box className={styles.contactItem}>
                 <EmailIcon fontSize="small" />
                 <Typography className={styles.contactItemText}>
-                  support@secureescrow.com
+                  support@@amanyar.ir
                 </Typography>
               </Box>
               <Box className={styles.contactItem}>
