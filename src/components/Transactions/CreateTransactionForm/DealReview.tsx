@@ -7,9 +7,7 @@ import {
   type DealItem,
 } from "@/hooks/deals/useDeal"
 import type { UploadedDealDocument } from "@/hooks/documents/useDealDocuments"
-import IranLocationPicker, {
-  isMapLocationValue,
-} from "./IranLocationPicker"
+import IranLocationPicker, { isMapLocationValue } from "./IranLocationPicker"
 import styles from "./styles/TransactionFormDetails.module.scss"
 
 const roleLabels: Record<string, string> = {
@@ -56,9 +54,7 @@ const getDocumentMeta = (document: UploadedDealDocument) => {
       ? new Intl.DateTimeFormat("fa-IR").format(parsedDate)
       : rawDate || ""
 
-  return [fileType, size, date, document.uploader]
-    .filter(Boolean)
-    .join(" • ")
+  return [fileType, size, date, document.uploader].filter(Boolean).join(" • ")
 }
 
 const formatPropertyValue = (value: unknown) => {
@@ -88,9 +84,7 @@ const isPhoneNumber = (value: ReactNode) => {
   if (typeof value !== "string") return false
 
   const normalizedValue = value.replace(/[\s-]/g, "")
-  return /^(?:09[0-9]{9}|\+989[0-9]{9}|00989[0-9]{9})$/.test(
-    normalizedValue,
-  )
+  return /^(?:09[0-9]{9}|\+989[0-9]{9}|00989[0-9]{9})$/.test(normalizedValue)
 }
 
 interface DealReviewProps {
@@ -150,7 +144,7 @@ export default function DealReview({
   paymentMethod,
   localDocuments,
 }: DealReviewProps) {
-  const item = deal?.items?.[0]
+  const item = deal?.item
   const currentRole =
     deal?.parties?.find((party) => getPartyMobileNumber(party) === userMobile)
       ?.role || role

@@ -114,7 +114,7 @@ export interface DealNextAction {
 export interface DealDetail {
   id: number
   label?: string
-  items?: DealItem[]
+  item?: DealItem
   parties?: DealParty[]
   documents?: DealDocument[]
   state?: number | string

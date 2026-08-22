@@ -4,7 +4,7 @@ import API_URLS from "@/constants/urls/API_URLS"
 import request from "@/request/request"
 
 export interface UpdateDealPayload {
-  items?: Array<Record<string, unknown>>
+  item?: Record<string, unknown>
   parties?: Array<{
     role: string
     user?: string

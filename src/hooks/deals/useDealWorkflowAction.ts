@@ -5,6 +5,7 @@ import request from "@/request/request"
 
 export interface WorkflowActionSubmission {
   transition_id: number
+  deal?: Record<string, unknown>
   form?: Record<string, unknown>
   files?: Record<string, File[]>
 }
@@ -17,6 +18,22 @@ export function useDealWorkflowAction() {
       setIsSubmitting(true)
 
       try {
+        if (!submission.files || Object.keys(submission.files).length === 0) {
+          const response = await request.post({
+            url: API_URLS.dealWorkflowActions({ id: dealId }),
+            data: {
+              transition_id: submission.transition_id,
+              ...(submission.form ? { form: submission.form } : {}),
+              ...(submission.deal ? { deal: submission.deal } : {}),
+            },
+            successMessage: "اقدام با موفقیت ثبت شد.",
+            failMessage: "ثبت اقدام با خطا مواجه شد.",
+          })
+
+          await mutate(API_URLS.deal({ id: dealId }))
+          return response
+        }
+
         const formData = new FormData()
         formData.append("transition_id", submission.transition_id.toString())
 
@@ -25,13 +42,19 @@ export function useDealWorkflowAction() {
           formData.append("form", JSON.stringify(submission.form))
         }
 
+        if (submission.deal) {
+          formData.append("deal", JSON.stringify(submission.deal))
+        }
+
         // Add files
         if (submission.files) {
-          Object.entries(submission.files).forEach(([documentTypeCode, files]) => {
-            files.forEach((file) => {
-              formData.append(documentTypeCode, file)
-            })
-          })
+          Object.entries(submission.files).forEach(
+            ([documentTypeCode, files]) => {
+              files.forEach((file) => {
+                formData.append(documentTypeCode, file)
+              })
+            },
+          )
         }
 
         const response = await request.post({

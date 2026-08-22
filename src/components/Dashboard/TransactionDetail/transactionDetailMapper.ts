@@ -121,9 +121,7 @@ const getDocumentFileName = (document: DealDocument | UploadedDealDocument) =>
     ? document.file_name
     : document.name || document.title || document.file || document.url || ""
 
-const getDocumentFileType = (
-  document: DealDocument | UploadedDealDocument,
-) => {
+const getDocumentFileType = (document: DealDocument | UploadedDealDocument) => {
   const directType = "file_type" in document ? document.file_type : undefined
   if (directType) return directType.trim().toLowerCase().replace(/^\./, "")
 
@@ -184,16 +182,14 @@ const resolveAmount = (apiDeal: DealDetail) => {
     return totalAmount
   }
 
-  return (apiDeal.items || []).reduce(
-    (sum, item) =>
-      sum +
-      Number(item.price || item.total_price || 0) * Number(item.quantity || 1),
-    0,
-  )
+  const item = apiDeal.item
+  return item
+    ? Number(item.price || item.total_price || 0) * Number(item.quantity || 1)
+    : 0
 }
 
 const resolveEscrowAmount = (apiDeal: DealDetail) => {
-  const escrowAmount = Number(apiDeal.items?.[0]?.escrow_price)
+  const escrowAmount = Number(apiDeal.item?.escrow_price)
   if (Number.isFinite(escrowAmount)) return escrowAmount
 
   return resolveAmount(apiDeal)
@@ -279,7 +275,8 @@ const mapHistoryItemToProgress = (
   currentWorkflow?: DealWorkflow | null,
 ): Deal["progress"][number] => {
   const isCurrentWorkflowItem =
-    Boolean(currentWorkflow?.group) && item.group_name === currentWorkflow?.group
+    Boolean(currentWorkflow?.group) &&
+    item.group_name === currentWorkflow?.group
   const status = item.state
     ? mapHistoryStateToProgressStatus(item.state, isCurrentWorkflowItem)
     : currentStep && item.to_step_name === currentStep
@@ -358,7 +355,7 @@ export const mapApiDealToUi = (
   currentUserMobile?: string,
   documents?: UploadedDealDocument[],
 ): Deal => {
-  const firstItem = apiDeal.items?.[0]
+  const firstItem = apiDeal.item
   const status = resolveStatus(apiDeal.state)
   const currentParty = currentUserMobile
     ? apiDeal.parties?.find(
