@@ -62,6 +62,7 @@ export interface DealItem {
   properties?: Record<string, unknown>
   remaining_price_payment_description?: string | null
   remaining_price_payment_method?: string
+  version?: number
 }
 
 export interface DealDocument {
@@ -139,10 +140,18 @@ function normalizeDeal(data: unknown): DealDetail | null {
   return data as DealDetail
 }
 
-export function useDeal(dealId: number | null) {
-  const { data, error, isLoading, mutate } = useSWR(
-    dealId ? API_URLS.deal({ id: dealId }) : null,
-    (url: string) => request.get({ url }),
+export function useDeal(
+  dealId: number | null,
+  brokerId: string | number | null = null,
+) {
+  const dealUrl = dealId
+    ? brokerId
+      ? API_URLS.brokerDeal({ brokerId, id: dealId })
+      : API_URLS.deal({ id: dealId })
+    : null
+
+  const { data, error, isLoading, mutate } = useSWR(dealUrl, (url: string) =>
+    request.get({ url }),
   )
 
   return {

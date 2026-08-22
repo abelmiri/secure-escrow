@@ -16,6 +16,7 @@ export interface UpdateDealPayload {
 interface UpdateDealOptions {
   successMessage?: string
   failMessage?: string
+  brokerId?: string | number | null
 }
 
 export function useUpdateDeal() {
@@ -32,14 +33,17 @@ export function useUpdateDeal() {
       setError(null)
 
       try {
+        const dealUrl = options.brokerId
+          ? API_URLS.brokerDeal({ brokerId: options.brokerId, id: dealId })
+          : API_URLS.deal({ id: dealId })
         const response = await request.patch({
-          url: API_URLS.deal({ id: dealId }),
+          url: dealUrl,
           data,
           successMessage: options.successMessage,
           failMessage: options.failMessage,
         })
 
-        await mutate(API_URLS.deal({ id: dealId }))
+        await mutate(dealUrl)
         return response
       } catch (updateError) {
         setError(updateError)

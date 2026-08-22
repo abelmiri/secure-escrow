@@ -30,6 +30,11 @@ export interface Document {
   uploadedBy: string
 }
 
+export interface DealLocation {
+  lat: number
+  lng: number
+}
+
 export interface Deal {
   id: string
   title: string
@@ -56,7 +61,7 @@ export interface Deal {
   details?: {
     category?: string
     description?: string
-    location?: string
+    location?: string | DealLocation
     deliveryMethod?: string
     inspectionPeriod?: string
     terms?: string

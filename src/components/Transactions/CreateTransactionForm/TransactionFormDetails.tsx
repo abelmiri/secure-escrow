@@ -285,7 +285,12 @@ export default function TransactionFormDetails({
 
   const { documentRequirements, isLoading: isDocumentRequirementsLoading } =
     useDocumentRequirements(stageNumber === 2 ? dealId || null : null)
-  const { deal, isLoading: isDealLoading } = useDeal(dealId || null)
+  const { deal, isLoading: isDealLoading } = useDeal(
+    dealId || null,
+    (stageNumber === 2 || stageNumber === 3) && role === "broker"
+      ? selectedBrokerId
+      : null,
+  )
   const { documents: dealDocuments, isLoading: isDealDocumentsLoading } =
     useDealDocuments(stageNumber === 3 ? dealId || null : null)
 
@@ -737,24 +742,24 @@ export default function TransactionFormDetails({
           },
         ].filter((party) => party.user)
 
+  const reviewAction =
+    (workflowAction
+      ? deal?.next_available_actions?.find(
+          (action) => action.action.toLowerCase() === workflowAction,
+        )
+      : undefined) ||
+    deal?.next_available_actions?.find((action) =>
+      ["join", "accept"].includes(action.action.toLowerCase()),
+    ) ||
+    deal?.next_available_actions?.find(
+      (action) => action.action.toLowerCase() !== "form",
+    ) ||
+    deal?.next_available_actions?.[0]
+
   const handleContinue = async () => {
     if (stageNumber === 3) {
       if (!isTermsAccepted) return
       if (!dealId) return
-
-      const reviewAction =
-        (workflowAction
-          ? deal?.next_available_actions?.find(
-              (action) => action.action.toLowerCase() === workflowAction,
-            )
-          : undefined) ||
-        deal?.next_available_actions?.find((action) =>
-          ["join", "accept"].includes(action.action.toLowerCase()),
-        ) ||
-        deal?.next_available_actions?.find(
-          (action) => action.action.toLowerCase() !== "form",
-        ) ||
-        deal?.next_available_actions?.[0]
 
       try {
         if (reviewAction) {
@@ -763,27 +768,31 @@ export default function TransactionFormDetails({
             workflowAction === "edit"
           const editedParties = getEditedPartiesPayload()
 
-          await submitWorkflowAction(dealId, {
-            transition_id: reviewAction.transition_id,
-            ...(isEditAction
-              ? {
-                  deal: {
-                    item: {
-                      ...(currentDealItemId ? { id: currentDealItemId } : {}),
-                      subcategory: selectedSubCategory?.slug || "",
-                      name: title,
-                      description,
-                      remaining_price_payment_method: paymentMethod,
-                      remaining_price_payment_description: paymentDescription,
-                      escrow_price: Number(escrowAmount),
-                      price: Number(totalTransactionAmount || escrowAmount),
-                      properties: getPropertiesPayload(),
+          await submitWorkflowAction(
+            dealId,
+            {
+              transition_id: reviewAction.transition_id,
+              ...(isEditAction
+                ? {
+                    deal: {
+                      item: {
+                        ...(currentDealItemId ? { id: currentDealItemId } : {}),
+                        subcategory: selectedSubCategory?.slug || "",
+                        name: title,
+                        description,
+                        remaining_price_payment_method: paymentMethod,
+                        remaining_price_payment_description: paymentDescription,
+                        escrow_price: Number(escrowAmount),
+                        price: Number(totalTransactionAmount || escrowAmount),
+                        properties: getPropertiesPayload(),
+                      },
+                      parties: editedParties,
                     },
-                    parties: editedParties,
-                  },
-                }
-              : {}),
-          })
+                  }
+                : {}),
+            },
+            role === "broker" ? selectedBrokerId : null,
+          )
         }
 
         router.push(`/dashboard/${dealId}`)
@@ -915,6 +924,7 @@ export default function TransactionFormDetails({
             await updateDeal(dealId, payload, {
               successMessage: "اطلاعات معامله با موفقیت به‌روزرسانی شد",
               failMessage: "خطا در به‌روزرسانی معامله",
+              brokerId: role === "broker" ? selectedBrokerId : null,
             })
           }
           onDealCreated?.(dealId, null)
@@ -952,6 +962,7 @@ export default function TransactionFormDetails({
           await updateDeal(dealId, patchPayload, {
             successMessage: "اطلاعات با موفقیت به‌روزرسانی شد",
             failMessage: "خطا در به‌روزرسانی اطلاعات",
+            brokerId: role === "broker" ? selectedBrokerId : null,
           })
         }
 
@@ -1182,6 +1193,7 @@ export default function TransactionFormDetails({
           totalTransactionAmount={totalTransactionAmount}
           paymentMethod={paymentMethod}
           localDocuments={uploadedDocuments}
+          submitLabel={reviewAction?.action_text}
           onTermsAcceptedChange={setIsTermsAccepted}
           onPrevious={onPrevious}
           onSubmit={handleContinue}

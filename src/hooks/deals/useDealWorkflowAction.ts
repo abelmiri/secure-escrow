@@ -14,8 +14,15 @@ export function useDealWorkflowAction() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const submitWorkflowAction = useCallback(
-    async (dealId: number, submission: WorkflowActionSubmission) => {
+    async (
+      dealId: number,
+      submission: WorkflowActionSubmission,
+      brokerId: string | number | null = null,
+    ) => {
       setIsSubmitting(true)
+      const dealUrl = brokerId
+        ? API_URLS.brokerDeal({ brokerId, id: dealId })
+        : API_URLS.deal({ id: dealId })
 
       try {
         if (!submission.files || Object.keys(submission.files).length === 0) {
@@ -30,7 +37,7 @@ export function useDealWorkflowAction() {
             failMessage: "ثبت اقدام با خطا مواجه شد.",
           })
 
-          await mutate(API_URLS.deal({ id: dealId }))
+          await mutate(dealUrl)
           return response
         }
 
@@ -64,7 +71,7 @@ export function useDealWorkflowAction() {
           failMessage: "ثبت اقدام با خطا مواجه شد.",
         })
 
-        await mutate(API_URLS.deal({ id: dealId }))
+        await mutate(dealUrl)
         return response
       } finally {
         setIsSubmitting(false)

@@ -36,7 +36,10 @@ interface NeshanMarker {
   addTo: (map: NeshanMap) => NeshanMarker
   setLatLng: (latLng: [number, number] | NeshanLatLng) => NeshanMarker
   getLatLng: () => NeshanLatLng
-  on: (eventName: "dragend", handler: (event: NeshanMarkerEvent) => void) => void
+  on: (
+    eventName: "dragend",
+    handler: (event: NeshanMarkerEvent) => void,
+  ) => void
 }
 
 interface NeshanMap {
@@ -78,6 +81,12 @@ const neshanScriptId = "neshan-leaflet-script"
 let neshanLoader: Promise<NeshanLeaflet> | null = null
 
 const roundCoordinate = (value: number) => Math.round(value * 100000) / 100000
+
+const formatCoordinate = (value: number) =>
+  value.toLocaleString("fa-IR", {
+    maximumFractionDigits: 6,
+    useGrouping: false,
+  })
 
 const normalizeLocation = (location: NeshanLatLng): MapLocationValue => ({
   lat: roundCoordinate(location.lat),
@@ -140,9 +149,7 @@ const loadNeshanLeaflet = () => {
   return neshanLoader
 }
 
-export function isMapLocationValue(
-  value: unknown,
-): value is MapLocationValue {
+export function isMapLocationValue(value: unknown): value is MapLocationValue {
   if (typeof value !== "object" || value === null) return false
 
   const location = value as Partial<MapLocationValue>
@@ -274,7 +281,7 @@ export default function IranLocationPicker({
 
       <div className={styles.mapSelectedText}>
         {selectedLocation
-          ? `${readOnly ? "موقعیت ثبت‌شده" : "موقعیت انتخاب‌شده"}: ${selectedLocation.lat.toLocaleString("fa-IR")}، ${selectedLocation.lng.toLocaleString("fa-IR")}`
+          ? `${readOnly ? "موقعیت ثبت‌شده" : "موقعیت انتخاب‌شده"}: ${formatCoordinate(selectedLocation.lat)}، ${formatCoordinate(selectedLocation.lng)}`
           : readOnly
             ? "موقعیتی ثبت نشده است."
             : "برای انتخاب موقعیت، روی نقشه کلیک کنید یا نشانگر را جابه‌جا کنید."}

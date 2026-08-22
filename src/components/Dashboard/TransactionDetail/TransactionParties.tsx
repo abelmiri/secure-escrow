@@ -45,8 +45,10 @@ const getPartyName = (party: DealParty) => {
   const lastName = user?.last_name || party.last_name || ""
   const fullName =
     user?.full_name || party.full_name || `${firstName} ${lastName}`.trim()
+  const partnerName =
+    typeof party.partner === "object" ? party.partner.name : undefined
 
-  return fullName || getPartyMobileNumber(party) || "نامشخص"
+  return fullName || partnerName || getPartyMobileNumber(party) || "نامشخص"
 }
 
 const getPartyRoleLabel = (party: DealParty) =>
@@ -54,7 +56,7 @@ const getPartyRoleLabel = (party: DealParty) =>
 
 const isPartyVerified = (party: DealParty) => {
   const user = getUser(party)
-  return party.is_verified ?? user?.is_verified ?? true
+  return party.is_verified ?? user?.is_verified ?? false
 }
 
 const sortParties = (parties: DealParty[]) => {
@@ -111,7 +113,8 @@ export default function TransactionParties({
               {getPartyName(party)}
             </Typography>
             <Typography className={styles.partyMobile}>
-              {getPartyMobileNumber(party) || "شماره ثبت نشده"}
+              {getPartyMobileNumber(party) ||
+                (party.partner ? "حساب کارگزاری" : "شماره ثبت نشده")}
             </Typography>
           </Box>
         ))}

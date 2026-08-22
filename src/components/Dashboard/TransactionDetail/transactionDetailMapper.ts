@@ -1,5 +1,5 @@
 import type { Deal } from "@/constants/deals"
-import { getPartyMobileNumber } from "@/hooks/deals/useDeal"
+import { getPartyMobileNumber, getPartyPartnerId } from "@/hooks/deals/useDeal"
 import type {
   DealDetail,
   DealDocument,
@@ -90,7 +90,10 @@ const formatDetailValue = (value: unknown): string | null => {
   if (value === null || value === undefined || value === "") return null
   if (typeof value === "number") return value.toLocaleString("fa-IR")
   if (typeof value === "boolean") return value ? "بله" : "خیر"
-  if (typeof value === "string") return propertyValueLabels[value] || value
+  if (typeof value === "string") {
+    const normalizedValue = value.replace(/[،,]\s*$/g, "").trim()
+    return propertyValueLabels[normalizedValue] || normalizedValue
+  }
   if (Array.isArray(value)) {
     const values = value
       .map(formatDetailValue)
@@ -105,16 +108,28 @@ const formatDetailValue = (value: unknown): string | null => {
   }
 }
 
+const isLocationValue = (value: unknown) => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false
+
+  const { lat, lng } = value as { lat?: unknown; lng?: unknown }
+  return typeof lat === "number" && typeof lng === "number"
+}
+
+const findLocationProperty = (item?: DealItem) =>
+  Object.entries(item?.properties || {}).find(([, value]) =>
+    isLocationValue(value),
+  )
+
 const resolveLocation = (item?: DealItem) => {
-  const location = item?.properties?.["sample-map-prop"]
-  if (!location || typeof location !== "object" || Array.isArray(location)) {
-    return undefined
-  }
+  const location = findLocationProperty(item)?.[1]
+  if (!isLocationValue(location)) return undefined
 
   const { lat, lng } = location as { lat?: unknown; lng?: unknown }
-  if (typeof lat !== "number" || typeof lng !== "number") return undefined
-  return `${lat.toLocaleString("fa-IR")}، ${lng.toLocaleString("fa-IR")}`
+  return { lat: Number(lat), lng: Number(lng) }
 }
+
+const formatPropertyLabel = (label: string) =>
+  (propertyLabels[label] || label).replace(/_/g, " — ")
 
 const getDocumentFileName = (document: DealDocument | UploadedDealDocument) =>
   "file_name" in document
@@ -148,6 +163,8 @@ const resolveAdditionalDetails = (
   }
 
   addDetail("کد پیگیری", apiDeal.trace_number)
+  addDetail("مرحله فعلی", apiDeal.current_workflow?.step || apiDeal.sub_state)
+  addDetail("نسخه اطلاعات معامله", item?.version)
   addDetail("تعداد تصاویر", resolveImageDocumentsCount(documents))
   addDetail("مبلغ واحد (ریال)", item?.price)
   addDetail("مبلغ امانی (ریال)", item?.escrow_price)
@@ -163,9 +180,10 @@ const resolveAdditionalDetails = (
     item?.remaining_price_payment_description,
   )
 
+  const locationPropertyKey = findLocationProperty(item)?.[0]
   Object.entries(item?.properties || {}).forEach(([key, value]) => {
-    if (key !== "sample-map-prop") {
-      addDetail(propertyLabels[key] || key, value)
+    if (key !== locationPropertyKey) {
+      addDetail(formatPropertyLabel(key), value)
     }
   })
 
@@ -204,9 +222,11 @@ const mapParty = (party?: DealParty) => {
   const lastName = user?.last_name || party.last_name || ""
   const fullName =
     user?.full_name || party.full_name || `${firstName} ${lastName}`.trim()
+  const partnerName =
+    typeof party.partner === "object" ? party.partner.name : undefined
 
   return {
-    name: fullName || identifier || "نامشخص",
+    name: fullName || partnerName || identifier || "نامشخص",
     email: party.email || identifier,
     isVerified: false,
   }
@@ -246,7 +266,7 @@ const mapHistoryStateToProgressStatus = (
     normalizedState === "not-started" ||
     normalizedState === "not started"
   ) {
-    return "pending"
+    return isCurrentWorkflowItem ? "in_progress" : "pending"
   }
 
   if (normalizedState === "in_progress" || normalizedState === "current") {
@@ -354,25 +374,31 @@ export const mapApiDealToUi = (
   staticTemplate: Deal,
   currentUserMobile?: string,
   documents?: UploadedDealDocument[],
+  selectedBrokerId?: string | number | null,
 ): Deal => {
   const firstItem = apiDeal.item
   const status = resolveStatus(apiDeal.state)
-  const currentParty = currentUserMobile
+  const currentParty = selectedBrokerId
     ? apiDeal.parties?.find(
         (party) =>
-          getPartyMobileNumber(party) === currentUserMobile ||
-          party.mobile_number === currentUserMobile,
+          party.role === "broker" &&
+          getPartyPartnerId(party) === String(selectedBrokerId),
       )
-    : undefined
+    : currentUserMobile
+      ? apiDeal.parties?.find(
+          (party) =>
+            getPartyMobileNumber(party) === currentUserMobile ||
+            party.mobile_number === currentUserMobile,
+        )
+      : undefined
   const buyer = apiDeal.parties?.find((party) => party.role === "customer")
   const seller = apiDeal.parties?.find((party) => party.role === "beneficiary")
-  const counterparty = currentUserMobile
-    ? apiDeal.parties?.find(
-        (party) =>
-          getPartyMobileNumber(party) !== currentUserMobile &&
-          party.mobile_number !== currentUserMobile,
-      )
-    : apiDeal.parties?.[0]
+  const counterparty =
+    currentParty?.role === "customer"
+      ? seller
+      : currentParty?.role === "beneficiary"
+        ? buyer
+        : undefined
   const escrowAmount = resolveEscrowAmount(apiDeal).toLocaleString("fa-IR")
   const totalAmount = resolveAmount(apiDeal).toLocaleString("fa-IR")
   const acceptAction = apiDeal.next_available_actions?.find(
@@ -388,9 +414,12 @@ export const mapApiDealToUi = (
     role: currentParty?.role
       ? roleLabels[currentParty.role] || staticTemplate.role
       : "نامشخص",
-    participant: counterparty
-      ? `طرف مقابل: ${mapParty(counterparty)?.name}`
-      : "طرف مقابل ثبت نشده",
+    participant:
+      currentParty?.role === "broker"
+        ? `خریدار: ${mapParty(buyer)?.name || "ثبت نشده"}، فروشنده: ${mapParty(seller)?.name || "ثبت نشده"}`
+        : counterparty
+          ? `طرف مقابل: ${mapParty(counterparty)?.name}`
+          : "طرف مقابل ثبت نشده",
     date: apiDeal.created_at
       ? new Date(apiDeal.created_at).toLocaleDateString("fa-IR")
       : "",

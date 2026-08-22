@@ -13,7 +13,7 @@ export interface Deal {
   title: string
   status: string
   state: string
-  subState: number | null
+  subState: number | string | null
   amount: number
   created_at: string
   parties: DealParty[]
@@ -42,7 +42,7 @@ interface DealResult {
   item: DealItem
   parties: DealParty[]
   state: string
-  sub_state: number | null
+  sub_state: number | string | null
   total_amount: number | string | null
   trace_number: string
   updated_at?: string
