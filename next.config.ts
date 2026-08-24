@@ -20,10 +20,6 @@ const nextConfig: NextConfig = {
       },
     ]
   },
-  env: {
-    PHASE: process.env.PHASE,
-    DEV_USER: process.env.DEV_USER,
-  },
 }
 
 export default nextConfig

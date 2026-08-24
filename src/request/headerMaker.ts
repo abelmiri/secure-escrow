@@ -3,11 +3,6 @@ import decodeJWT from "@/helpers/auth/decodeJWT"
 import getToken from "@/request/getToken"
 
 const getRequestUsername = () => {
-  const temporaryUsername =
-    process.env.NEXT_PUBLIC_DEV_USER || process.env.DEV_USER
-
-  if (temporaryUsername) return temporaryUsername
-
   if (typeof window !== "undefined") {
     const stateUsername = window.authState?.user?.username
     if (stateUsername) return stateUsername
