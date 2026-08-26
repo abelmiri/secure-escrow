@@ -153,6 +153,17 @@
   gap: 16px;
 }
 
+.trustSeal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 160px;
+
+  @media (max-width: 768px) {
+    align-self: center;
+  }
+}
+
 .newsletterTitle {
   font-size: 18px;
   font-weight: 600;

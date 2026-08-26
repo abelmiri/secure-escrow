@@ -10,6 +10,9 @@ import Link from "next/link"
 import IconSvg from "@/media/svg/IconSvg"
 import styles from "./styles/Footer.module.scss"
 
+const enamadTrustSeal =
+  "<a referrerpolicy='origin' target='_blank' href='https://trustseal.enamad.ir/?id=7132909&Code=HhSl1WIJkSxfciKADdw292yEtmhFLFkN'><img referrerpolicy='origin' src='https://trustseal.enamad.ir/logo.aspx?id=7132909&Code=HhSl1WIJkSxfciKADdw292yEtmhFLFkN' alt='' style='cursor:pointer' code='HhSl1WIJkSxfciKADdw292yEtmhFLFkN'></a>"
+
 const footerLinks = {
   products: [
     "خدمات امان یار",
@@ -147,6 +150,11 @@ export default function Footer() {
               <Button className={styles.subscribeButton}>عضویت</Button>
             </Box>
           </Box>
+
+          <Box
+            className={styles.trustSeal}
+            dangerouslySetInnerHTML={{ __html: enamadTrustSeal }}
+          />
         </Box>
 
         <Box className={styles.divider} />
