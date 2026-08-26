@@ -4,6 +4,7 @@ import API_URLS from "@/constants/urls/API_URLS"
 
 export interface WorkflowField {
   id: number
+  name?: string | null
   slug: string
   property_name: string
   label: string

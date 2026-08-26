@@ -264,6 +264,7 @@ export default function RequiredAction({
     const commonTextFieldProps = {
       fullWidth: true,
       label: field.label,
+      placeholder: field.name || undefined,
       required: field.required,
       error: Boolean(error),
       helperText: error,
