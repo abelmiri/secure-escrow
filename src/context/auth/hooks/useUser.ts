@@ -11,14 +11,21 @@ interface UpdateUserProps {
 
 function useUser() {
   const { authState, authDispatch } = use(authContext) || {}
-  const { user } = authState || {}
+  const { user, partnerProfiles = [] } = authState || {}
   const isLoggedIn = !!user
 
   function updateUser({ data, cancelToken, progress }: UpdateUserProps) {
     return authActions.updateUser({ data, cancelToken, authDispatch, progress })
   }
 
-  return { user, isLoggedIn, updateUser, authDispatch, authState }
+  return {
+    user,
+    partnerProfiles,
+    isLoggedIn,
+    updateUser,
+    authDispatch,
+    authState,
+  }
 }
 
 export default useUser

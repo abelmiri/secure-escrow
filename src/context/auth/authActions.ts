@@ -1,10 +1,10 @@
 import OAUTH from "@/constants/auth/OAUTH"
 import API_URLS from "@/constants/urls/API_URLS"
 import COOKIE_VALUES from "@/constants/storage/COOKIE_VALUES"
-import LOCAL_STORAGE_VALUES from "@/constants/storage/LOCAL_STORAGE_VALUES"
 import type {
   AuthActionType,
   LoginType,
+  PartnerProfileType,
   UpdateUserType,
   UserType,
 } from "@/context/auth/AuthType"
@@ -15,6 +15,7 @@ import getToken from "@/request/getToken"
 import request from "@/request/request"
 import refreshAccessToken from "@/helpers/auth/refreshAccessToken"
 import storeAuthTokens from "@/helpers/auth/storeAuthTokens"
+import normalizePartnerProfile from "@/helpers/partners/normalizePartnerProfile"
 
 function getProfile({
   authDispatch,
@@ -26,13 +27,54 @@ function getProfile({
   authDispatch({ type: "SET_GETTING_USER", payload: { isLoading: true } })
   return request
     .get({ url: API_URLS.profile, cancelToken, dontToast: true })
-    .then((user: UserType) => {
+    .then(async (user: UserType) => {
+      const partnerProfiles = await getPartnerProfiles({ user, cancelToken })
+      setPartnerProfiles({ partnerProfiles, authDispatch })
       setUser({ data: { user }, authDispatch })
     })
     .catch((err) => {
       authDispatch({ type: "SET_GETTING_USER", payload: { isLoading: false } })
       throw err
     })
+}
+
+async function getPartnerProfiles({
+  user,
+  cancelToken,
+}: {
+  user: UserType
+  cancelToken?: RefObject<AbortController | null>
+}) {
+  const partners = user.represented_partners ?? []
+
+  if (!partners.length) return []
+
+  const responses = await Promise.all(
+    partners.map((partner) =>
+      request.get({
+        url: API_URLS.partnerProfile({ brokerId: partner.id }),
+        cancelToken,
+        dontToast: true,
+      }),
+    ),
+  )
+
+  return responses
+    .map(normalizePartnerProfile)
+    .filter((profile): profile is PartnerProfileType => profile !== null)
+}
+
+function setPartnerProfiles({
+  partnerProfiles,
+  authDispatch,
+}: {
+  partnerProfiles: PartnerProfileType[]
+  authDispatch: Dispatch<AuthActionType>
+}) {
+  authDispatch({
+    type: "SET_PARTNER_PROFILES",
+    payload: { partnerProfiles },
+  })
 }
 
 function updateUser({
@@ -92,7 +134,6 @@ function setUser({
   data: { user: UserType }
   authDispatch: Dispatch<AuthActionType>
 }) {
-  localStorage.setItem(LOCAL_STORAGE_VALUES.ACCOUNT.user, JSON.stringify(user))
   authDispatch({ type: "SET_USER", payload: { user } })
 }
 
@@ -156,8 +197,10 @@ function logout() {
 
 const authActions = {
   getProfile,
+  getPartnerProfiles,
   updateUser,
   setUser,
+  setPartnerProfiles,
   refreshToken,
   verifyOAUTH,
   logout,

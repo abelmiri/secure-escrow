@@ -3,6 +3,36 @@ export interface RepresentedPartnerType {
   name: string
 }
 
+export interface PartnerProfileMemberType {
+  first_name?: string
+  last_name?: string
+  national_code?: string
+  mobile_number?: string
+}
+
+export interface PartnerProfileType {
+  id: number
+  actor_id: string
+  name: string
+  registered_name: string
+  id_number: string
+  economic_number: string
+  registration_number: string
+  image: string | null
+  phone_number: string
+  email: string
+  shaba_number: string
+  city: number
+  province: number
+  postal_code: string
+  full_address: string | null
+  members: PartnerProfileMemberType[]
+  is_active: boolean
+  is_profile_complete: boolean
+  are_documents_sent: boolean
+  is_allowed_as_broker: boolean
+}
+
 export interface UserType {
   id?: string | number
   actor_id: string | number
@@ -50,11 +80,17 @@ export interface LoginType {
 export interface AuthStateType {
   isLoading: boolean
   user: null | UserType
+  partnerProfiles: PartnerProfileType[]
 }
 
 export interface SetUserActionType {
   type: "SET_USER"
   payload: { user: UserType }
+}
+
+export interface SetPartnerProfilesActionType {
+  type: "SET_PARTNER_PROFILES"
+  payload: { partnerProfiles: PartnerProfileType[] }
 }
 
 export interface ResetDataActionType {
@@ -68,4 +104,7 @@ export interface SetGettingUserActionType {
 }
 
 export type AuthActionType =
-  SetUserActionType | ResetDataActionType | SetGettingUserActionType
+  | SetUserActionType
+  | SetPartnerProfilesActionType
+  | ResetDataActionType
+  | SetGettingUserActionType

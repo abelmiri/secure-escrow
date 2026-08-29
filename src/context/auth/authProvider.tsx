@@ -64,15 +64,15 @@ function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   useEffect(() => {
-    if (authState?.user || getToken()) {
+    if (authState?.user || getToken() || getToken({ useRefreshToken: true })) {
       authActions.getProfile({ authDispatch, cancelToken })
     }
   }, [])
 
   useLayoutEffect(() => {
-    window.authState = authState
+    // Required by the popup OAuth flow. Profile data is not exposed globally.
     window.authDispatch = authDispatch
-  }, [authState])
+  }, [authDispatch])
 
   useEffect(() => {
     function onResetData({

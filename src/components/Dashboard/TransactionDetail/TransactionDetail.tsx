@@ -47,6 +47,11 @@ export default function TransactionDetail({ id }: { id: string }) {
     )
       ? selectedProfile.id
       : null
+  const selectedActorId = selectedBrokerId
+    ? (authState.partnerProfiles.find(
+        (profile) => String(profile.id) === String(selectedBrokerId),
+      )?.actor_id ?? null)
+    : (authState.user?.actor_id ?? null)
   const {
     deal: apiDeal,
     isLoading,
@@ -64,7 +69,7 @@ export default function TransactionDetail({ id }: { id: string }) {
     isLoading: isMessagesLoading,
     isLoadingPrevious: isLoadingPreviousMessages,
     isSending: isSendingMessage,
-  } = useDealMessages(apiDealId, authState.user?.actor_id ?? null)
+  } = useDealMessages(apiDealId, selectedActorId)
   const { submitWorkflowAction, isSubmitting: isSubmittingWorkflowAction } =
     useDealWorkflowAction()
 

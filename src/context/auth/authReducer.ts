@@ -4,26 +4,28 @@ import type { AuthActionType, AuthStateType } from "@/context/auth/AuthType"
 import clearLocalStorage from "@/helpers/storage/clearLocalStorage"
 import cookieHelper from "@/helpers/storage/cookieHelper"
 
-const initialState: AuthStateType = { isLoading: true, user: null }
+const initialState: AuthStateType = {
+  isLoading: true,
+  user: null,
+  partnerProfiles: [],
+}
 
 export function authInit({ isReset }: { isReset: boolean }) {
   if (isReset) {
     return { ...initialState, isLoading: false }
   } else {
     if (typeof window !== "undefined") {
+      // Remove profile data persisted by older app versions.
+      localStorage.removeItem("user")
+      localStorage.removeItem("partner_profiles")
+
       const token = cookieHelper.getItem(COOKIE_VALUES.ACCOUNT.token)
       const refresh_token = cookieHelper.getItem(
         COOKIE_VALUES.ACCOUNT.refresh_token,
       )
-      const user = localStorage.getItem(LOCAL_STORAGE_VALUES.ACCOUNT.user)
-      if (token && refresh_token && user) {
-        try {
-          return { ...initialState, user: JSON.parse(user), isLoading: true }
-        } catch (_) {
-          return { ...initialState, isLoading: false }
-        }
-      } else if (token || refresh_token) {
-        // If we have tokens but no user data yet, we should be in loading state
+      if (token || refresh_token) {
+        // Profile data is intentionally kept out of browser storage and fetched
+        // again when an authenticated session is restored.
         return { ...initialState, isLoading: true }
       } else {
         // No tokens found, not loading anymore
@@ -44,6 +46,10 @@ function authReducer(
     case "SET_USER": {
       const { user } = action.payload
       return { ...state, user, isLoading: false }
+    }
+    case "SET_PARTNER_PROFILES": {
+      const { partnerProfiles } = action.payload
+      return { ...state, partnerProfiles }
     }
     case "RESET_DATA": {
       const { isAfterLogin } = action.payload
