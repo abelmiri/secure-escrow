@@ -64,7 +64,7 @@ export default function TransactionDetail({ id }: { id: string }) {
     isLoading: isMessagesLoading,
     isLoadingPrevious: isLoadingPreviousMessages,
     isSending: isSendingMessage,
-  } = useDealMessages(apiDealId)
+  } = useDealMessages(apiDealId, authState.user?.actor_id ?? null)
   const { submitWorkflowAction, isSubmitting: isSubmittingWorkflowAction } =
     useDealWorkflowAction()
 
@@ -206,7 +206,6 @@ export default function TransactionDetail({ id }: { id: string }) {
               apiDealId={apiDealId}
               apiDocuments={apiDocuments}
               apiMessages={apiMessages}
-              currentUserId={authState.user?.id}
               isDocumentsLoading={isDocumentsLoading}
               isMessagesLoading={isMessagesLoading}
               isLoadingPreviousMessages={isLoadingPreviousMessages}

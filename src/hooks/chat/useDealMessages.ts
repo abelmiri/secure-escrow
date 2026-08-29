@@ -102,7 +102,10 @@ function resolveNextOffset(data: unknown) {
   return offset !== null && Number.isFinite(offset) ? offset : null
 }
 
-export function useDealMessages(dealId: number | null) {
+export function useDealMessages(
+  dealId: number | null,
+  actorId: string | number | null,
+) {
   const [messages, setMessages] = useState<DealChatMessage[]>([])
   const [messageText, setMessageText] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -127,12 +130,13 @@ export function useDealMessages(dealId: number | null) {
 
   const startPolling = useCallback(
     async (generation: number) => {
-      if (!dealId || lastMessageId.current === null) return
+      if (!dealId || actorId === null || lastMessageId.current === null) return
 
       while (pollGeneration.current === generation) {
         try {
           const data = await pollDealMessages({
             dealId,
+            actorId,
             afterId: lastMessageId.current,
             cancelToken: requestCancelToken,
           })
@@ -153,7 +157,7 @@ export function useDealMessages(dealId: number | null) {
         }
       }
     },
-    [dealId],
+    [actorId, dealId],
   )
 
   const restartPolling = useCallback(() => {
@@ -169,7 +173,7 @@ export function useDealMessages(dealId: number | null) {
   }, [])
 
   useEffect(() => {
-    if (!dealId) {
+    if (!dealId || actorId === null) {
       stopCurrentRequest()
       setMessages([])
       setMessageText("")
@@ -189,6 +193,7 @@ export function useDealMessages(dealId: number | null) {
 
     getDealMessages({
       dealId,
+      actorId,
       limit: DEAL_MESSAGES_PAGE_LIMIT,
       offset: 0,
       cancelToken: requestCancelToken,
@@ -218,28 +223,24 @@ export function useDealMessages(dealId: number | null) {
       stopCurrentRequest()
       stopPageRequest()
     }
-  }, [dealId, startPolling, stopCurrentRequest, stopPageRequest])
+  }, [actorId, dealId, startPolling, stopCurrentRequest, stopPageRequest])
 
   const submitMessage = useCallback(async () => {
     const content = messageText.trim().slice(0, DEAL_MESSAGE_MAX_LENGTH)
-    if (!dealId || !content || isSending) return
+    if (!dealId || actorId === null || !content || isSending) return
 
     setIsSending(true)
     setError(null)
 
     try {
-      const data = await sendDealMessage({ dealId, content })
+      const data = await sendDealMessage({ dealId, actorId, content })
       const sentMessage = normalizeDealChatMessages(data)[0]
 
       if (sentMessage) {
-        const currentUserMessage = {
-          ...sentMessage,
-          is_current_user: true,
-        }
         setMessages((currentMessages) =>
-          mergeMessages(currentMessages, [currentUserMessage]),
+          mergeMessages(currentMessages, [sentMessage]),
         )
-        lastMessageId.current = currentUserMessage.id
+        lastMessageId.current = sentMessage.id
         restartPolling()
       }
 
@@ -249,10 +250,17 @@ export function useDealMessages(dealId: number | null) {
     } finally {
       setIsSending(false)
     }
-  }, [dealId, isSending, messageText, restartPolling])
+  }, [actorId, dealId, isSending, messageText, restartPolling])
 
   const loadPreviousMessages = useCallback(async () => {
-    if (!dealId || isLoadingPrevious || nextOffset.current === null) return
+    if (
+      !dealId ||
+      actorId === null ||
+      isLoadingPrevious ||
+      nextOffset.current === null
+    ) {
+      return
+    }
 
     setIsLoadingPrevious(true)
     setError(null)
@@ -260,6 +268,7 @@ export function useDealMessages(dealId: number | null) {
     try {
       const data = await getDealMessages({
         dealId,
+        actorId,
         limit: DEAL_MESSAGES_PAGE_LIMIT,
         offset: nextOffset.current,
         cancelToken: pageRequestCancelToken,
@@ -277,7 +286,7 @@ export function useDealMessages(dealId: number | null) {
     } finally {
       setIsLoadingPrevious(false)
     }
-  }, [dealId, isLoadingPrevious])
+  }, [actorId, dealId, isLoadingPrevious])
 
   return {
     messages,

@@ -2,17 +2,9 @@ import type { RefObject } from "react"
 import API_URLS from "@/constants/urls/API_URLS"
 import request from "@/request/request"
 
-export interface DealChatUser {
-  id?: string | number
-  first_name?: string
-  last_name?: string
-  full_name?: string
-  name?: string
-  username?: string
-  mobile_number?: string
-  is_current_user?: boolean
-  isCurrentUser?: boolean
-  is_mine?: boolean
+export interface DealChatSender {
+  display_name: string
+  is_current_user: boolean
 }
 
 export interface DealChatMessage {
@@ -21,23 +13,18 @@ export interface DealChatMessage {
   content?: string
   text?: string
   message?: string
-  sender?: DealChatUser | string | number | null
-  sender_name?: string
-  senderName?: string
-  user?: DealChatUser | string | number | null
+  sender?: DealChatSender | null
   is_system?: boolean
   created_at?: string
   updated_at?: string
   sent_at?: string
   date?: string
-  is_current_user?: boolean
-  isCurrentUser?: boolean
-  is_mine?: boolean
   [key: string]: unknown
 }
 
 export interface SendDealMessageBody {
   content: string
+  actor_id: string | number
 }
 
 export interface PaginatedDealChatMessagesResponse {
@@ -49,11 +36,13 @@ export interface PaginatedDealChatMessagesResponse {
 
 export function getDealMessages({
   dealId,
+  actorId,
   limit,
   offset,
   cancelToken,
 }: {
   dealId: number
+  actorId: string | number
   limit?: number
   offset?: number
   cancelToken?: RefObject<AbortController | null>
@@ -61,6 +50,7 @@ export function getDealMessages({
   return request.get({
     url: API_URLS.dealMessages({ id: dealId }),
     params: {
+      actor_id: actorId,
       ...(limit !== undefined ? { limit } : {}),
       ...(offset !== undefined ? { offset } : {}),
     },
@@ -71,15 +61,18 @@ export function getDealMessages({
 
 export function pollDealMessages({
   dealId,
+  actorId,
   afterId,
   cancelToken,
 }: {
   dealId: number
+  actorId: string | number
   afterId: string | number
   cancelToken?: RefObject<AbortController | null>
 }) {
   return request.get({
-    url: API_URLS.dealMessagesPoll({ id: dealId, afterId }),
+    url: API_URLS.dealMessagesPoll({ id: dealId }),
+    params: { after_id: afterId, actor_id: actorId },
     cancelToken,
     dontToast: true,
   })
@@ -87,14 +80,16 @@ export function pollDealMessages({
 
 export function sendDealMessage({
   dealId,
+  actorId,
   content,
 }: {
   dealId: number
+  actorId: string | number
   content: string
 }) {
   return request.post({
     url: API_URLS.dealMessageSend({ id: dealId }),
-    data: { content } satisfies SendDealMessageBody,
+    data: { content, actor_id: actorId } satisfies SendDealMessageBody,
     dontToast: true,
   })
 }

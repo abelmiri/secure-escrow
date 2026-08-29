@@ -47,14 +47,8 @@ const API_URLS = {
   dealDocuments: ({ id }: { id: number }) =>
     `v1/documents/deals/${id}/documents`,
   dealMessages: ({ id }: { id: number }) => `v1/chat/deals/${id}/messages`,
-  dealMessagesPoll: ({
-    id,
-    afterId,
-  }: {
-    id: number
-    afterId: string | number
-  }) =>
-    `v1/chat/deals/${id}/messages/poll?after_id=${encodeURIComponent(afterId)}`,
+  dealMessagesPoll: ({ id }: { id: number }) =>
+    `v1/chat/deals/${id}/messages/poll`,
   dealMessageSend: ({ id }: { id: number }) => `v1/chat/deals/${id}/send`,
   categories: "v1/deals/categories",
   subCategories: ({ id }: { id: number }) =>

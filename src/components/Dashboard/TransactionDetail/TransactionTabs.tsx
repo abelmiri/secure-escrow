@@ -17,7 +17,6 @@ interface TransactionTabsProps {
   apiDealId: number | null
   apiDocuments: UploadedDealDocument[]
   apiMessages: DealChatMessage[]
-  currentUserId?: string | number
   isDocumentsLoading: boolean
   isMessagesLoading: boolean
   isLoadingPreviousMessages: boolean
@@ -42,7 +41,6 @@ export default function TransactionTabs({
   apiDealId,
   apiDocuments,
   apiMessages,
-  currentUserId,
   isDocumentsLoading,
   isMessagesLoading,
   isLoadingPreviousMessages,
@@ -119,7 +117,6 @@ export default function TransactionTabs({
         <TransactionMessagesTab
           deal={deal}
           apiMessages={apiDealId ? apiMessages : undefined}
-          currentUserId={currentUserId}
           isLoadingMessages={apiDealId ? isMessagesLoading : false}
           isLoadingPreviousMessages={isLoadingPreviousMessages}
           isSendingMessage={isSendingMessage}

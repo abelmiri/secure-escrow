@@ -5,6 +5,7 @@ export interface RepresentedPartnerType {
 
 export interface UserType {
   id?: string | number
+  actor_id: string | number
   first_name: string
   last_name: string
   mobile_number: string
@@ -26,6 +27,7 @@ export interface UserType {
 
 export interface UpdateUserType extends Omit<
   UserType,
+  | "actor_id"
   | "image"
   | "mobile_number"
   | "username"

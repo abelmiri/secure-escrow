@@ -17,7 +17,6 @@ import styles from "./styles/TransactionDetail.module.scss"
 interface TransactionMessagesTabProps {
   deal: Deal
   apiMessages?: DealChatMessage[]
-  currentUserId?: string | number
   isLoadingMessages?: boolean
   isLoadingPreviousMessages?: boolean
   isSendingMessage?: boolean
@@ -29,21 +28,7 @@ interface TransactionMessagesTabProps {
 }
 
 function resolveSenderName(message: DealChatMessage) {
-  if (message.senderName) return message.senderName
-  if (message.sender_name) return message.sender_name
-
-  const sender = message.sender || message.user
-  if (typeof sender === "string") return sender
-  if (typeof sender === "number") return "شما"
-  if (sender && typeof sender === "object") {
-    const fullName =
-      sender.full_name ||
-      sender.name ||
-      [sender.first_name, sender.last_name].filter(Boolean).join(" ")
-    return fullName || sender.username || sender.mobile_number || "کاربر"
-  }
-
-  return "کاربر"
+  return message.sender?.display_name || "کاربر"
 }
 
 function resolveDate(message: DealChatMessage) {
@@ -65,48 +50,23 @@ function resolveDate(message: DealChatMessage) {
   })
 }
 
-function resolveIsCurrentUser(
-  message: DealChatMessage,
-  currentUserId?: string | number,
-) {
-  if (message.is_current_user || message.is_mine || message.isCurrentUser) {
-    return true
-  }
-
-  const sender = message.sender || message.user
-  if (
-    sender &&
-    typeof sender === "object" &&
-    (sender.is_current_user || sender.is_mine || sender.isCurrentUser)
-  ) {
-    return true
-  }
-
-  if (currentUserId === undefined) return false
-
-  const senderId =
-    typeof sender === "object" && sender !== null ? sender.id : sender
-
-  return senderId !== undefined && String(senderId) === String(currentUserId)
+function resolveIsCurrentUser(message: DealChatMessage) {
+  return message.sender?.is_current_user ?? false
 }
 
-function mapApiMessageToUi(
-  message: DealChatMessage,
-  currentUserId?: string | number,
-): Message {
+function mapApiMessageToUi(message: DealChatMessage): Message {
   return {
     id: String(message.id),
     senderName: resolveSenderName(message),
     date: resolveDate(message),
     text: message.content || message.text || message.message || "",
-    isCurrentUser: resolveIsCurrentUser(message, currentUserId),
+    isCurrentUser: resolveIsCurrentUser(message),
   }
 }
 
 export default function TransactionMessagesTab({
   deal,
   apiMessages,
-  currentUserId,
   isLoadingMessages,
   isLoadingPreviousMessages,
   isSendingMessage,
@@ -124,7 +84,7 @@ export default function TransactionMessagesTab({
     scrollTop: number
   } | null>(null)
   const messages = apiMessages
-    ? apiMessages.map((message) => mapApiMessageToUi(message, currentUserId))
+    ? apiMessages.map(mapApiMessageToUi)
     : deal.messages
   const lastMessageId = messages?.[messages.length - 1]?.id
 
