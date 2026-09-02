@@ -153,15 +153,25 @@
   gap: 16px;
 }
 
-.trustSeal {
+.trustSeals {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 160px;
+  gap: 24px;
 
   @media (max-width: 768px) {
     align-self: center;
   }
+
+  @media (max-width: 480px) {
+    flex-wrap: wrap;
+  }
+}
+
+.trustSeal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .newsletterTitle {
