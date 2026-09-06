@@ -172,12 +172,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
+
+  :global(img) {
+    max-height: 145px;
+    width: auto;
+  }
 }
 
 .irannsrTrustSeal {
   :global(img) {
     display: block;
     width: 120px;
+    max-width: 100%;
     height: auto;
     cursor: pointer;
   }
