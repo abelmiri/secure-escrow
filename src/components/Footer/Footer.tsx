@@ -16,6 +16,9 @@ const enamadTrustSeal =
 const associationTrustSeal =
   '<a referrerpolicy="origin" target="_blank" href="https://eanjoman.ir/member/zKXB6POzgnX4RpS9ei5vkqeVm"><img src="https://eanjoman.ir/api/script?code=zKXB6POzgnX4RpS9ei5vkqeVm" alt="انجمن صنفی کارفرمایی فروشگاه های اینترنتی شهر تهران(کسب و کار های اینترنتی)" title="انجمن صنفی کارفرمایی فروشگاه های اینترنتی شهر تهران(کسب و کار های اینترنتی)"></a>'
 
+const irannsrTrustSeal =
+  '<a referrerpolicy="origin" target="_blank" href="https://tehran.irannsr.org/fa/trade_unit/3513027/swd_id/104366/%D8%A7%D8%B9%D8%B6%D8%A7%DB%8C-%D8%AD%D9%82%D9%88%D9%82%DB%8C-%D8%AA%D9%88%D8%B3%D8%B9%D9%87-%D8%AA%D8%AC%D8%A7%D8%B1%D8%AA-%D9%87%D9%88%D8%B4%D9%85%D9%86%D8%AF-%D8%A8%D8%A7%D9%86.html"><img src="https://tomanpay.com/wp-content/uploads/2024/11/f0c6526b-c1e8-452f-b733-885f3ee52dca-300x239.png" alt="عضویت در سازمان نظام صنفی رایانه‌ای استان تهران" title="عضویت در سازمان نظام صنفی رایانه‌ای استان تهران"></a>'
+
 const footerLinks = {
   products: [
     "خدمات امان یار",
@@ -162,6 +165,10 @@ export default function Footer() {
             <Box
               className={styles.trustSeal}
               dangerouslySetInnerHTML={{ __html: associationTrustSeal }}
+            />
+            <Box
+              className={`${styles.trustSeal} ${styles.irannsrTrustSeal}`}
+              dangerouslySetInnerHTML={{ __html: irannsrTrustSeal }}
             />
           </Box>
         </Box>
