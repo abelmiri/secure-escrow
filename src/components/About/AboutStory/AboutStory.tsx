@@ -43,6 +43,12 @@ export default function AboutStory() {
           امان یار با بهره‌گیری از فن‌آوری‌های پیشرفته ، به دنبال تبدیل شدن به
           پلتفرم پیشرو در حوزه پرداخت‌های امن آنلاین در ایران و فراتر از آن است.
         </Typography>
+
+        <Typography variant="body1" className={styles.text}>
+          امان‌یار پلتفرم پرداخت امن در معاملات آنلاین، متعلق به شرکت توسعه تجارت
+          هوشمند بان (سهامی خاص)، به شماره ثبت ۶۷۶۹۱۰ و شناسه ملی ۱۴۰۱۵۴۹۹۸۱۵
+          میباشد.
+        </Typography>
       </Box>
 
       <Box className={styles.imageWrapper}>
