@@ -69,6 +69,9 @@ export interface UpdateUserType extends Omit<
   image: File | string | null
 }
 
+export type ProfileUpdatePayload = Pick<UserType, "actor_id"> &
+  Partial<UpdateUserType>
+
 export interface LoginType {
   access_token: string
   refresh_token: string

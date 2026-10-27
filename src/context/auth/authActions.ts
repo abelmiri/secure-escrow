@@ -5,6 +5,7 @@ import type {
   AuthActionType,
   LoginType,
   PartnerProfileType,
+  ProfileUpdatePayload,
   UpdateUserType,
   UserType,
 } from "@/context/auth/AuthType"
@@ -27,10 +28,16 @@ function getProfile({
   authDispatch({ type: "SET_GETTING_USER", payload: { isLoading: true } })
   return request
     .get({ url: API_URLS.profile, cancelToken, dontToast: true })
-    .then(async (user: UserType) => {
-      const partnerProfiles = await getPartnerProfiles({ user, cancelToken })
-      setPartnerProfiles({ partnerProfiles, authDispatch })
+    .then((user: UserType) => {
       setUser({ data: { user }, authDispatch })
+      // Partner details are optional for loading the personal account. Pages
+      // that need one can fetch it independently through usePartnerProfile.
+      void getPartnerProfiles({ user, cancelToken })
+        .then((partnerProfiles) =>
+          setPartnerProfiles({ partnerProfiles, authDispatch }),
+        )
+        .catch(() => setPartnerProfiles({ partnerProfiles: [], authDispatch }))
+      return user
     })
     .catch((err) => {
       authDispatch({ type: "SET_GETTING_USER", payload: { isLoading: false } })
@@ -82,11 +89,13 @@ function updateUser({
   cancelToken,
   authDispatch,
   progress,
+  dontToast,
 }: {
-  data: Partial<UpdateUserType>
+  data: ProfileUpdatePayload
   cancelToken?: RefObject<AbortController | null>
   authDispatch: Dispatch<AuthActionType>
   progress?: (progress: number) => void
+  dontToast?: boolean
 }) {
   const isFormData = Object.values(data).some((value) => value instanceof File)
 
@@ -106,11 +115,13 @@ function updateUser({
         cancelToken,
         method: "patch",
         progress,
+        dontToast,
         successMessage: "اطلاعات با موفقیت بروزرسانی شد",
         failMessage: "بروزرسانی اطلاعات با شکست مواجه شد",
       })
       .then((user: UserType) => {
         setUser({ data: { user }, authDispatch })
+        return user
       })
   }
 
@@ -119,11 +130,13 @@ function updateUser({
       url: API_URLS.profile,
       data,
       cancelToken,
+      dontToast,
       successMessage: "اطلاعات با موفقیت بروزرسانی شد",
       failMessage: "بروزرسانی اطلاعات با شکست مواجه شد",
     })
     .then((user: UserType) => {
       setUser({ data: { user }, authDispatch })
+      return user
     })
 }
 

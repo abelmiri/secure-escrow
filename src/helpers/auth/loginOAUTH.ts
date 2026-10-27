@@ -18,50 +18,28 @@ export function getTokenAfterRedirect({
   code: string
   authDispatch: Dispatch<AuthActionType>
 }): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const redirectUrl = sessionStorage.getItem(
-      SESSION_STORAGE_VALUES.redirectUrl,
-    )
-    const codeVerifier = sessionStorage.getItem(
-      SESSION_STORAGE_VALUES.codeVerifier,
-    )
+  const redirectUrl = sessionStorage.getItem(SESSION_STORAGE_VALUES.redirectUrl)
+  const codeVerifier = sessionStorage.getItem(
+    SESSION_STORAGE_VALUES.codeVerifier,
+  )
 
-    const { state } = parseQueryString()
-    const { isLoginByTab } = parseQueryString({
-      query: decodeURIComponent(atob(typeof state === "string" ? state : "")),
+  if (!redirectUrl || !codeVerifier) {
+    return Promise.reject(new Error("OAuth session data is missing"))
+  }
+
+  return authActions
+    .verifyOAUTH({
+      data: {
+        code,
+        code_verifier: codeVerifier,
+        redirect_uri: redirectUrl,
+      },
+      authDispatch,
     })
-
-    if (redirectUrl && codeVerifier) {
-      authActions
-        .verifyOAUTH({
-          data: {
-            code,
-            code_verifier: codeVerifier,
-            redirect_uri: redirectUrl,
-          },
-          authDispatch,
-        })
-        .then(() => {
-          // removeQueries({params})
-          resolve()
-        })
-        .catch(() => {
-          // removeQueries({params})
-          reject()
-        })
-        .finally(() => {
-          sessionStorage.removeItem(SESSION_STORAGE_VALUES.redirectUrl)
-          sessionStorage.removeItem(SESSION_STORAGE_VALUES.codeVerifier)
-        })
-    } else {
-      if (isLoginByTab) {
-        // removeQueries({params})
-        loginOAUTH({ redirect: true })
-      } else {
-        resolve()
-      }
-    }
-  })
+    .finally(() => {
+      sessionStorage.removeItem(SESSION_STORAGE_VALUES.redirectUrl)
+      sessionStorage.removeItem(SESSION_STORAGE_VALUES.codeVerifier)
+    })
 }
 
 function getTokenAfterTabLogin(props: { data?: { code?: string } }) {

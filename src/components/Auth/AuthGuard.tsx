@@ -46,7 +46,6 @@ export default function AuthGuard({
 
   const shouldSelectProfile =
     typeof window !== "undefined" &&
-    !authState?.isLoading &&
     isLoggedIn &&
     !skipProfileSelection &&
     pathname !== profileSelectionPath &&
@@ -56,7 +55,12 @@ export default function AuthGuard({
 
   useEffect(() => {
     if (shouldSelectProfile) {
-      const returnTo = `${window.location.pathname}${window.location.search}`
+      const search = new URLSearchParams(window.location.search)
+      for (const key of ["code", "state", "session_state", "iss"]) {
+        search.delete(key)
+      }
+      const query = search.toString()
+      const returnTo = `${window.location.pathname}${query ? `?${query}` : ""}`
       router.replace(
         `${profileSelectionPath}?returnTo=${encodeURIComponent(returnTo)}`,
       )
@@ -64,7 +68,7 @@ export default function AuthGuard({
   }, [router, shouldSelectProfile])
 
   // Keep protected content hidden while authentication or redirect is pending.
-  if (authState?.isLoading || !isLoggedIn || shouldSelectProfile) {
+  if (!isLoggedIn || shouldSelectProfile) {
     return (
       <Box
         display="flex"

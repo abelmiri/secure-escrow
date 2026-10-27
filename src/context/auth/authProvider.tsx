@@ -3,10 +3,11 @@
 import type { AuthActionType, AuthStateType } from "@/context/auth/AuthType"
 import authActions from "@/context/auth/authActions"
 import authReducer, { authInit } from "@/context/auth/authReducer"
-import { getTokenAfterRedirect } from "@/helpers/auth/loginOAUTH"
+import loginOAUTH, { getTokenAfterRedirect } from "@/helpers/auth/loginOAUTH"
 import getToken from "@/request/getToken"
 import parseQueryString from "@/helpers/query-param/parseQueryString"
 import resetDataManager from "@/helpers/storage/resetDataManager"
+import { Box, Button, Typography } from "@mui/material"
 import {
   createContext,
   type Dispatch,
@@ -33,40 +34,69 @@ function AuthProvider({ children }: { children: ReactNode }) {
     false | string
   >(setInitialIsAuthenticating)
   const cancelToken = useRef<AbortController>(null)
+  const authStartedRef = useRef(false)
+  const hadAuthCodeOnMount = useRef(Boolean(isAuthenticatingCode))
+  const [authError, setAuthError] = useState(false)
 
   function setInitialIsAuthenticating() {
-    const { code, session_state, iss } = parseQueryString()
-    return !authState.user &&
-      code &&
-      typeof code === "string" &&
-      session_state &&
-      iss
-      ? code
-      : false
+    const { code } = parseQueryString()
+    return !authState.user && typeof code === "string" ? code : false
   }
 
   useEffect(() => {
-    if (isAuthenticatingCode) {
-      if (window.opener) {
-        window.opener.postMessage(
-          { code: isAuthenticatingCode },
-          window.location.origin,
-        )
-        window.close()
-      } else {
-        // probably, deep link from TWA got the redirect, or regular comeback from SSO
-        getTokenAfterRedirect({
-          code: isAuthenticatingCode,
-          authDispatch,
-        }).then(() => setIsAuthenticatingCode(false))
-      }
+    if (!isAuthenticatingCode || authStartedRef.current) return
+    authStartedRef.current = true
+
+    if (window.opener) {
+      window.opener.postMessage(
+        { code: isAuthenticatingCode },
+        window.location.origin,
+      )
+      window.close()
+      return
     }
-  }, [])
+
+    void getTokenAfterRedirect({
+      code: isAuthenticatingCode,
+      authDispatch,
+    })
+      .catch(async () => {
+        // A callback URL can remain open after the code was already exchanged.
+        // In that case the session cookie is the source of truth.
+        if (getToken() || getToken({ useRefreshToken: true })) {
+          try {
+            await authActions.getProfile({ authDispatch, cancelToken })
+            return
+          } catch {
+            // Show a recoverable error below if the saved session is invalid.
+          }
+        }
+        setAuthError(true)
+        authDispatch({
+          type: "SET_GETTING_USER",
+          payload: { isLoading: false },
+        })
+      })
+      .finally(() => {
+        const url = new URL(window.location.href)
+        for (const key of ["code", "state", "session_state", "iss"]) {
+          url.searchParams.delete(key)
+        }
+        window.history.replaceState(
+          window.history.state,
+          "",
+          `${url.pathname}${url.search}${url.hash}`,
+        )
+        setIsAuthenticatingCode(false)
+      })
+  }, [isAuthenticatingCode, authDispatch])
 
   useEffect(() => {
-    if (authState?.user || getToken() || getToken({ useRefreshToken: true })) {
-      authActions.getProfile({ authDispatch, cancelToken })
-    }
+    if (hadAuthCodeOnMount.current) return
+    if (!getToken() && !getToken({ useRefreshToken: true })) return
+    void authActions.getProfile({ authDispatch, cancelToken }).catch(() => {
+      setAuthError(true)
+    })
   }, [])
 
   useLayoutEffect(() => {
@@ -90,7 +120,27 @@ function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <authContext.Provider value={{ authState, authDispatch }}>
       {/*{(authState?.isLoading || isAuthenticatingCode) && <LoadingWrapper isFixed />}*/}
-      {!isAuthenticatingCode && children}
+      {authError ? (
+        <Box
+          display="flex"
+          flexDirection="column"
+          justifyContent="center"
+          alignItems="center"
+          minHeight="100vh"
+          gap={2}
+          dir="rtl"
+        >
+          <Typography>ورود کامل نشد. لطفاً دوباره تلاش کنید.</Typography>
+          <Button
+            variant="contained"
+            onClick={() => loginOAUTH({ redirect: true })}
+          >
+            تلاش دوباره
+          </Button>
+        </Box>
+      ) : !isAuthenticatingCode ? (
+        children
+      ) : null}
     </authContext.Provider>
   )
 }

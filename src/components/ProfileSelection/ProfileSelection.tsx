@@ -41,7 +41,11 @@ const getSafeReturnTo = () => {
     !returnTo.startsWith("//") &&
     returnTo !== "/profile/select"
   ) {
-    return returnTo
+    const url = new URL(returnTo, window.location.origin)
+    for (const key of ["code", "state", "session_state", "iss"]) {
+      url.searchParams.delete(key)
+    }
+    return `${url.pathname}${url.search}${url.hash}`
   }
 
   return "/dashboard"

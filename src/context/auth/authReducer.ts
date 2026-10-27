@@ -70,7 +70,8 @@ function authReducer(
     }
     case "SET_GETTING_USER": {
       const { isLoading } = action.payload
-      return { ...state, isLoading }
+      // A background profile refresh must not hide an already loaded account.
+      return { ...state, isLoading: isLoading && !state.user }
     }
     default: {
       throw new Error()
