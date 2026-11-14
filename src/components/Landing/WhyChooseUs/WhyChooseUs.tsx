@@ -1,11 +1,11 @@
 import { Box, Typography } from "@mui/material"
 import Image from "next/image"
-import Shield from "@/media/svg/Shield"
-import LockIcon from "@/media/svg/LockIcon"
-import BuyerSeller from "@/media/svg/BuyerSeller"
-import CircleVerified from "@/media/svg/CircleVerified"
+import BankSecurityIcon from "@/media/svg/BankSecurityIcon"
+import AgreementDocumentIcon from "@/media/svg/AgreementDocumentIcon"
+import SupportIcon from "@/media/svg/SupportIcon"
+import ShieldCheckIcon from "@/media/svg/ShieldCheckIcon"
 import CircleTime from "@/media/svg/CircleTime"
-import DollarSign from "@/media/svg/DollarSign"
+import LowFeesIcon from "@/media/svg/LowFeesIcon"
 import styles from "./styles/WhyChooseUs.module.scss"
 import laptopImg from "@/media/picture/laptop.png"
 
@@ -13,17 +13,17 @@ const features = [
   {
     title: "امنیت بانکی",
     description: "رمزنگاری پیشرفته از دارایی‌های شما محافظت می‌کند",
-    Icon: Shield,
+    Icon: BankSecurityIcon,
   },
   {
     title: "توافق شفاف",
     description: "شرایط معامله پیش از پرداخت ثبت می‌شود",
-    Icon: LockIcon,
+    Icon: AgreementDocumentIcon,
   },
   {
     title: "پشتیبانی ۲۴/۷",
     description: "تیم پشتیبانی ما همیشه آماده پاسخگویی است",
-    Icon: BuyerSeller,
+    Icon: SupportIcon,
   },
 ]
 
@@ -31,19 +31,22 @@ const bottomCards = [
   {
     title: "تراکنش‌های تایید شده",
     description: "هر تراکنش برای جلوگیری از کلاهبرداری نظارت می‌شود",
-    Icon: CircleVerified,
+    Icon: ShieldCheckIcon,
+    iconSize: 40,
     gradient: "linear-gradient(135deg, #00C950 0%, #009966 100%)",
   },
   {
     title: "قیمت‌گذاری شفاف",
     description: "هزینه‌های شفاف بدون هزینه پنهان",
-    Icon: DollarSign,
+    Icon: LowFeesIcon,
+    iconSize: 40,
     gradient: "linear-gradient(135deg, #AD46FF 0%, #9810FA 100%)",
   },
   {
     title: "پردازش سریع",
     description: "تایید و آزادسازی سریع وجه",
     Icon: CircleTime,
+    iconSize: 32,
     gradient: "linear-gradient(135deg, #2B7FFF 0%, #0092B8 100%)",
   },
 ]
@@ -67,11 +70,7 @@ export default function WhyChooseUs() {
             {features.map((feature, index) => (
               <Box key={index} className={styles.featureItem}>
                 <Box className={styles.iconWrapper}>
-                  <feature.Icon
-                    width={32}
-                    height={32}
-                    strokeColor="var(--color-secondary)"
-                  />
+                  <feature.Icon width={32} height={32} />
                 </Box>
                 <Box className={styles.featureContent}>
                   <Typography variant="h6" className={styles.featureTitle}>
@@ -106,7 +105,11 @@ export default function WhyChooseUs() {
               className={styles.cardIconWrapper}
               style={{ background: card.gradient }}
             >
-              <card.Icon width={32} height={32} strokeColor="white" />
+              <card.Icon
+                width={card.iconSize}
+                height={card.iconSize}
+                strokeColor="white"
+              />
             </Box>
             <Box className={styles.cardContent}>
               <Typography variant="h6" className={styles.cardTitle}>

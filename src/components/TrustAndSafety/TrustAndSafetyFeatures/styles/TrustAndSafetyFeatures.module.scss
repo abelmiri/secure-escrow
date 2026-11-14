@@ -41,7 +41,7 @@
   width: 56px;
   height: 56px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #155dfc 0%, #1447e6 100%);
+  background: linear-gradient(135deg, #155dfc 0%, #1447e6 50%, #1c398e 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -61,4 +61,14 @@
   font-size: 16px !important;
   line-height: 1.6;
   color: var(--color-text-secondary);
+}
+
+.iconWrapper {
+  svg [stroke]:not([stroke="none"]) {
+    stroke: #ffffff;
+  }
+
+  svg [fill]:not([fill="none"]) {
+    fill: #155dfc;
+  }
 }

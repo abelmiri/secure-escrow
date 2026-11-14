@@ -4,10 +4,10 @@ import { Box, Typography, Button } from "@mui/material"
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
 import Link from "next/link"
 import styles from "./styles/HowItWorks.module.scss"
-import BuyerSeller from "@/media/svg/BuyerSeller"
-import DollarSign from "@/media/svg/DollarSign"
-import DeliverCheck from "@/media/svg/DeliverCheck"
-import Badge from "@/media/svg/Badge"
+import AgreementIcon from "@/media/svg/AgreementIcon"
+import EscrowWalletIcon from "@/media/svg/EscrowWalletIcon"
+import DeliveryIcon from "@/media/svg/DeliveryIcon"
+import ReleaseFundsIcon from "@/media/svg/ReleaseFundsIcon"
 import { ElementType } from "react"
 import { SVGProps } from "react"
 
@@ -15,7 +15,8 @@ interface StepCardProps {
   number: string
   title: string
   description: string
-  Icon: ElementType<SVGProps<SVGSVGElement> & { strokeColor?: string }>
+  Icon: ElementType<SVGProps<SVGSVGElement>>
+  iconSize: number
 }
 
 const steps: StepCardProps[] = [
@@ -23,27 +24,31 @@ const steps: StepCardProps[] = [
     number: "۰۱",
     title: "توافق طرفین",
     description: "خریدار و فروشنده بر سر جزئیات و شرایط معامله توافق می‌کنند",
-    Icon: BuyerSeller,
+    Icon: AgreementIcon,
+    iconSize: 40,
   },
   {
     number: "۰۲",
     title: "پرداخت خریدار",
     description:
       "خریدار مبلغ را پرداخت می‌کند و وجه به صورت امن در حساب امانی نزد بانک نگهداری می‌شود",
-    Icon: DollarSign,
+    Icon: EscrowWalletIcon,
+    iconSize: 40,
   },
   {
     number: "۰۳",
     title: "تحویل کالا یا خدمت",
     description: "کالا یا خدمت از طرف فروشنده به خریدار تحویل  می‌شود",
-    Icon: DeliverCheck,
+    Icon: DeliveryIcon,
+    iconSize: 40,
   },
   {
     number: "۰۴",
     title: "آزادسازی وجه",
     description:
       "مبلغ نگهداری شده در حساب امانی پس از تایید نهایی خریدار برای فروشنده واریز می‌گردد",
-    Icon: Badge,
+    Icon: ReleaseFundsIcon,
+    iconSize: 40,
   },
 ]
 
@@ -66,7 +71,7 @@ export default function HowItWorks() {
             <Box className={styles.badge}>{step.number}</Box>
 
             <Box className={styles.iconContainer}>
-              <step.Icon width={32} height={32} strokeColor="white" />
+              <step.Icon width={step.iconSize} height={step.iconSize} />
             </Box>
 
             <Typography className={styles.cardTitle}>{step.title}</Typography>

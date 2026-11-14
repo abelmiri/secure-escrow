@@ -6,11 +6,11 @@ import { useRouter } from "next/navigation"
 import useUser from "@/context/auth/hooks/useUser"
 import loginOAUTH from "@/helpers/auth/loginOAUTH"
 import GlobeIcon from "@/media/svg/GlobeIcon"
-import TrendingUpIcon from "@/media/svg/TrendingUpIcon"
-import LightningIcon from "@/media/svg/LightningIcon"
-import Shield from "@/media/svg/Shield"
-import StarIcon from "@/media/svg/StarIcon"
-import BuyerSeller from "@/media/svg/BuyerSeller"
+import VehiclesIcon from "@/media/svg/VehiclesIcon"
+import ValuablesIcon from "@/media/svg/ValuablesIcon"
+import RealEstateIcon from "@/media/svg/RealEstateIcon"
+import OnlineGoodsIcon from "@/media/svg/OnlineGoodsIcon"
+import BusinessDealsIcon from "@/media/svg/BusinessDealsIcon"
 import styles from "./styles/PerfectTransaction.module.scss"
 
 const categories = [
@@ -22,35 +22,35 @@ const categories = [
     iconBg: "linear-gradient(135deg, #00B8DB 0%, #155DFC 100%)", // Blue
   },
   {
-    title: "وسایل نقلیه (ماشین و موتورسیکلت)",
+    title: "وسایل نقلیه (خودرو و موتورسیکلت)",
     description: "خرید و فروش وسایل نقله شخصی و تجاری با امنیت کامل",
-    Icon: TrendingUpIcon,
+    Icon: VehiclesIcon,
     iconBg: "linear-gradient(135deg, #AD46FF 0%, #E60076 100%)", // Pink/Purple
   },
   {
     title: "املاک و مستغلات",
     description: "معاملات املاک و مستغلات، با تضمین حفاظت از دارایی‌ها",
-    Icon: Shield,
+    Icon: RealEstateIcon,
     iconBg: "linear-gradient(135deg, #FF6900 0%, #E7000B 100%)", // Orange
   },
   {
     title: "کالاهای عمومی در شبکه‌های اجتماعی",
     description:
       "خرید و فروش کالاهای مختلف از طریق شبکه‌های اجتماعی، با اطمینان از حفاظت از معامله",
-    Icon: StarIcon,
+    Icon: OnlineGoodsIcon,
     iconBg: "linear-gradient(135deg, #F6339A 0%, #EC003F 100%)", // Pink
   },
   {
     title: "طلا، نقره و فلزات گرانبها",
     description:
       "خرید و فروش طلا، نقره و فلزات گرانبها، با امنیت بالا و شفافیت",
-    Icon: LightningIcon,
+    Icon: ValuablesIcon,
     iconBg: "linear-gradient(135deg, #00C950 0%, #009966 100%)", // Green
   },
   {
     title: "پرداخت‌های امن برای کسب‌وکارها",
     description: "انجام پرداخت‌ها و معاملات کسب‌وکارها، با اطمینان از شفافیت",
-    Icon: BuyerSeller,
+    Icon: BusinessDealsIcon,
     iconBg: "linear-gradient(135deg, #615FFF 0%, #9810FA 100%)", // Purple
   },
 ]
@@ -86,7 +86,13 @@ export default function PerfectTransaction() {
               className={styles.iconWrapper}
               style={{ background: category.iconBg }}
             >
-              <category.Icon width={24} height={24} strokeColor="white" />
+              <category.Icon
+                width={category.Icon === GlobeIcon ? 24 : 32}
+                height={category.Icon === GlobeIcon ? 24 : 32}
+                {...(category.Icon === GlobeIcon
+                  ? { strokeColor: "white" }
+                  : {})}
+              />
             </Box>
             <Box className={styles.cardContent}>
               <Typography variant="h6" className={styles.cardTitle}>
