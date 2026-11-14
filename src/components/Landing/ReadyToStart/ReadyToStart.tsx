@@ -63,7 +63,10 @@ export default function ReadyToStart({ howItWorks }: { howItWorks?: boolean }) {
           )}
 
           {secondaryButtonText && (
-            <Button className={styles.secondaryButton}>
+            <Button
+              className={styles.secondaryButton}
+              onClick={() => router.push("/contact")}
+            >
               {secondaryButtonText}
             </Button>
           )}

@@ -16,8 +16,8 @@ const features = [
     Icon: Shield,
   },
   {
-    title: "مجوز و نظارت قانونی",
-    description: "کاملاً منطبق با مقررات و قوانین مالی",
+    title: "توافق شفاف",
+    description: "شرایط معامله پیش از پرداخت ثبت می‌شود",
     Icon: LockIcon,
   },
   {
@@ -58,8 +58,9 @@ export default function WhyChooseUs() {
           </Typography>
 
           <Typography className={styles.description}>
-            امن‌ترین و قابل اعتمادترین پلتفرم پرداخت امن، مورد اعتماد هزاران
-            کسب‌وکار در سراسر جهان.
+            یکی از امن ترین و قابل اعتماد ترین روش های خرید در جهان، پرداخت
+            امانی و اسکرو می‌باشد که مورد اعتماد هزاران فرد و کسب و کار در سراسر
+            جهان است و امان‌یار این سرویس را در ایران ارائه می‌دهد.
           </Typography>
 
           <Box className={styles.featuresList}>

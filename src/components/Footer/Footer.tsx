@@ -2,12 +2,15 @@ import { Box, Typography, Button } from "@mui/material"
 import EmailIcon from "@mui/icons-material/Email"
 import PhoneIcon from "@mui/icons-material/Phone"
 import LocationOnIcon from "@mui/icons-material/LocationOn"
+import TelegramIcon from "@mui/icons-material/Telegram"
+import Image from "next/image"
 import FacebookIcon from "@mui/icons-material/Facebook"
 import TwitterIcon from "@mui/icons-material/Twitter"
 import LinkedInIcon from "@mui/icons-material/LinkedIn"
 import InstagramIcon from "@mui/icons-material/Instagram"
 import Link from "next/link"
 import IconSvg from "@/media/svg/IconSvg"
+import baleLogo from "@/media/brand/bale-logo.png"
 import styles from "./styles/Footer.module.scss"
 
 const enamadTrustSeal =
@@ -21,26 +24,21 @@ const irannsrTrustSeal =
 
 const footerLinks = {
   products: [
-    "خدمات امان یار",
-    "نام‌های دامنه",
-    "وب‌سایت‌ها",
+    "خدمات حساب امانی",
+    "دامنه، وب‌سایت و اپلیکیشن",
     "وسایل نقلیه",
+    "املاک و مستغلات",
     "کالاهای عمومی",
-    "محاسبه‌گر کارمزد",
   ],
   company: [
+    { label: "نحوه عملکرد", href: "/how-it-works" },
     { label: "درباره ما", href: "/about" },
-    { label: "چگونه کار می‌کند", href: "/how-it-works" },
-    { label: "اعتماد و ایمنی", href: "/trust-and-safety" },
-    { label: "فرصت‌های شغلی" },
-    { label: "تماس با ما" },
+    { label: "تماس با ما", href: "/contact" },
   ],
   support: [
-    "مرکز راهنما",
-    "سوالات متداول",
-    "قوانین و مقررات",
-    "حریم خصوصی",
-    "قوانین کوکی",
+    { label: "سوالات متداول", href: "/faq" },
+    { label: "قوانین و مقررات", href: "/terms-and-conditions" },
+    { label: "اعتماد و ایمنی", href: "/trust-and-safety" },
   ],
 }
 
@@ -63,15 +61,65 @@ export default function Footer() {
             <Box className={styles.contactInfo}>
               <Box className={styles.contactItem}>
                 <EmailIcon fontSize="small" />
-                <Typography className={styles.contactItemText}>
-                  support@amanyar.ir
-                </Typography>
+                <Box className={styles.contactValues}>
+                  <a
+                    href="mailto:info@amanyar.ir"
+                    className={styles.contactItemText}
+                    dir="ltr"
+                  >
+                    info@amanyar.ir
+                  </a>
+                  <a
+                    href="mailto:support@amanyar.ir"
+                    className={styles.contactItemText}
+                    dir="ltr"
+                  >
+                    support@amanyar.ir
+                  </a>
+                </Box>
               </Box>
               <Box className={styles.contactItem}>
                 <PhoneIcon fontSize="small" />
-                <Typography className={styles.contactItemText}>
-                  09190071219
-                </Typography>
+                <Box className={styles.contactValues}>
+                  <a
+                    href="tel:+989190071219"
+                    className={styles.contactItemText}
+                    dir="ltr"
+                  >
+                    ۰۹۱۹۰۰۷۱۲۱۹
+                  </a>
+                  <a
+                    href="tel:+982191697304"
+                    className={styles.contactItemText}
+                    dir="ltr"
+                  >
+                    ۰۲۱۹۱۶۹۷۳۰۴
+                  </a>
+                </Box>
+              </Box>
+              <Box className={styles.contactItem}>
+                <TelegramIcon fontSize="small" />
+                <a
+                  href="https://t.me/Amanyar_Support"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.contactItemText}
+                  dir="ltr"
+                >
+                  @amanyar_support
+                </a>
+              </Box>
+              <Box className={styles.contactItem}>
+                <Image src={baleLogo} alt="" width={20} height={20} />
+                <a
+                  href="https://ble.ir/amanyarsupport"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.contactItemText}
+                  dir="ltr"
+                >
+                  @amanyarsupport
+                </a>
               </Box>
               <Box className={styles.contactItem}>
                 <LocationOnIcon fontSize="small" />
@@ -122,17 +170,11 @@ export default function Footer() {
           <Box className={styles.column}>
             <Typography className={styles.columnTitle}>پشتیبانی</Typography>
             <Box className={styles.linkList}>
-              {footerLinks.support.map((link) =>
-                link === "قوانین و مقررات" ? (
-                  <Link key={link} href="/terms-and-conditions">
-                    <Typography className={styles.link}>{link}</Typography>
-                  </Link>
-                ) : (
-                  <Typography key={link} className={styles.link}>
-                    {link}
-                  </Typography>
-                ),
-              )}
+              {footerLinks.support.map((link) => (
+                <Link key={link.label} href={link.href}>
+                  <Typography className={styles.link}>{link.label}</Typography>
+                </Link>
+              ))}
             </Box>
           </Box>
         </Box>
@@ -176,8 +218,7 @@ export default function Footer() {
         <Box className={styles.divider} />
 
         <Typography className={styles.copyright}>
-          © ۱۴۰۴ امان یار. تمامی حقوق محفوظ است. سرویس امان یار تحت مجوز رسمی و
-          نظارت قانونی فعالیت می‌کند.
+          © ۱۴۰۴ امان یار. تمامی حقوق محفوظ است.
         </Typography>
       </Box>
     </Box>

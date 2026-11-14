@@ -1,5 +1,5 @@
 import React from "react"
-import { Box, Typography } from "@mui/material"
+import { Typography } from "@mui/material"
 import Shield from "@/media/svg/Shield"
 import CircleVerified from "@/media/svg/CircleVerified"
 import CircleWatch from "@/media/svg/CircleWatch"
@@ -11,7 +11,7 @@ const features = [
     icon: <Shield width={32} height={32} strokeColor="white" />,
     title: "پرداخت امن",
     description:
-      "تمام پرداخت‌ها در حساب‌های امانی جداگانه و بیمه‌شده نگهداری می‌شوند.",
+      "وجه معامله تا زمان انجام شرایط توافق‌شده در حساب امانی نگهداری می‌شود.",
   },
   {
     icon: <CircleVerified width={32} height={32} strokeColor="white" />,

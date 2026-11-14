@@ -42,7 +42,7 @@ const resources = [
   { label: "سوالات متداول", href: "/faq" },
   { label: "اعتماد و امنیت", href: "/trust-and-safety" },
   { label: "نحوه‌ی عملکرد", href: "/how-it-works" },
-  { label: "درباره ما", href: "/about" },
+  // { label: "درباره ما", href: "/about" },
   { label: "قوانین و مقررات", href: "/terms-and-conditions" },
   // { label: "وبلاگ", href: "#" },
   // { label: "مرکز راهنما", href: "#" },
@@ -51,14 +51,14 @@ const resources = [
   // { label: "امنیت", href: "#" },
 ]
 
-const solutions = [
-  "امان یار برای دامنه‌ها",
-  "امان یار برای وسایل نقلیه",
-  "امان یار برای کالاها",
-  "معاملات مرحله‌ای",
-  "معاملات کارگزاری",
-  "نگهداشت عنوان",
-]
+// const solutions = [
+//   "امان یار برای دامنه‌ها",
+//   "امان یار برای وسایل نقلیه",
+//   "امان یار برای کالاها",
+//   "معاملات مرحله‌ای",
+//   "معاملات کارگزاری",
+//   "نگهداشت عنوان",
+// ]
 
 const getInitial = (name: string) => {
   return Array.from(name.trim())[0] || "پ"
@@ -70,8 +70,8 @@ export default function Header() {
   const router = useRouter()
   const [anchorElResources, setAnchorElResources] =
     useState<null | HTMLElement>(null)
-  const [anchorElSolutions, setAnchorElSolutions] =
-    useState<null | HTMLElement>(null)
+  // const [anchorElSolutions, setAnchorElSolutions] =
+  //   useState<null | HTMLElement>(null)
   const [anchorElBrokers, setAnchorElBrokers] = useState<null | HTMLElement>(
     null,
   )
@@ -80,7 +80,7 @@ export default function Header() {
   )
   const [mobileOpen, setMobileOpen] = useState(false)
   const [mobileResourcesOpen, setMobileResourcesOpen] = useState(false)
-  const [mobileSolutionsOpen, setMobileSolutionsOpen] = useState(false)
+  // const [mobileSolutionsOpen, setMobileSolutionsOpen] = useState(false)
   const [mobileBrokersOpen, setMobileBrokersOpen] = useState(false)
   const [selectedProfile, setSelectedProfile] =
     useState<SelectedRepresentedPartner | null>(() =>
@@ -119,13 +119,13 @@ export default function Header() {
     setAnchorElResources(null)
   }
 
-  const handleOpenSolutions = (event: MouseEvent<HTMLElement>) => {
-    setAnchorElSolutions(event.currentTarget)
-  }
+  // const handleOpenSolutions = (event: MouseEvent<HTMLElement>) => {
+  //   setAnchorElSolutions(event.currentTarget)
+  // }
 
-  const handleCloseSolutions = () => {
-    setAnchorElSolutions(null)
-  }
+  // const handleCloseSolutions = () => {
+  //   setAnchorElSolutions(null)
+  // }
 
   const handleOpenBrokers = (event: MouseEvent<HTMLElement>) => {
     setAnchorElBrokers(event.currentTarget)
@@ -156,9 +156,9 @@ export default function Header() {
     setMobileResourcesOpen(!mobileResourcesOpen)
   }
 
-  const handleMobileSolutionsToggle = () => {
-    setMobileSolutionsOpen(!mobileSolutionsOpen)
-  }
+  // const handleMobileSolutionsToggle = () => {
+  //   setMobileSolutionsOpen(!mobileSolutionsOpen)
+  // }
 
   const handleMobileBrokersToggle = () => {
     setMobileBrokersOpen(!mobileBrokersOpen)
@@ -299,7 +299,9 @@ export default function Header() {
                 ورود
               </Button>
 
-              <Typography className={styles.navItem}>تماس با ما</Typography>
+              <Link href="/contact" className={styles.navLink}>
+                <Typography className={styles.navItem}>تماس با ما</Typography>
+              </Link>
 
               <Link
                 href="/about"
@@ -321,7 +323,7 @@ export default function Header() {
                 <KeyboardArrowDownIcon fontSize="small" />
               </Box>
 
-              <Typography className={styles.navItem}>قیمت گذاری</Typography>
+              {/* <Typography className={styles.navItem}>قیمت گذاری</Typography> */}
 
               <Box
                 className={styles.navItem}
@@ -336,7 +338,7 @@ export default function Header() {
                 <KeyboardArrowDownIcon fontSize="small" />
               </Box>
 
-              <Box
+              {/* <Box
                 className={styles.navItem}
                 onClick={handleOpenSolutions}
                 aria-controls={
@@ -347,7 +349,7 @@ export default function Header() {
               >
                 راهکارها
                 <KeyboardArrowDownIcon fontSize="small" />
-              </Box>
+              </Box> */}
             </>
           )}
         </Box>
@@ -432,7 +434,7 @@ export default function Header() {
         </Link>
       </Menu>
 
-      <Menu
+      {/* <Menu
         id="solutions-menu"
         anchorEl={anchorElSolutions}
         open={Boolean(anchorElSolutions)}
@@ -450,7 +452,7 @@ export default function Header() {
             {item}
           </MenuItem>
         ))}
-      </Menu>
+      </Menu> */}
 
       <Menu
         id="profile-menu"
@@ -664,12 +666,18 @@ export default function Header() {
           ) : (
             <>
               <ListItem disablePadding className={styles.drawerItem}>
-                <ListItemButton>
-                  <ListItemText
-                    primary="تماس با ما"
-                    className={styles.drawerItemText}
-                  />
-                </ListItemButton>
+                <Link
+                  href="/contact"
+                  className={styles.navLink}
+                  onClick={handleDrawerToggle}
+                >
+                  <ListItemButton>
+                    <ListItemText
+                      primary="تماس با ما"
+                      className={styles.drawerItemText}
+                    />
+                  </ListItemButton>
+                </Link>
               </ListItem>
 
               <ListItem disablePadding className={styles.drawerItem}>
@@ -726,14 +734,14 @@ export default function Header() {
                 </List>
               </Collapse>
 
-              <ListItem disablePadding className={styles.drawerItem}>
+              {/* <ListItem disablePadding className={styles.drawerItem}>
                 <ListItemButton>
                   <ListItemText
                     primary="قیمت گذاری"
                     className={styles.drawerItemText}
                   />
                 </ListItemButton>
-              </ListItem>
+              </ListItem> */}
 
               <ListItem disablePadding className={styles.drawerItem}>
                 <ListItemButton onClick={handleMobileBrokersToggle}>
@@ -764,7 +772,7 @@ export default function Header() {
                 </List>
               </Collapse>
 
-              <ListItem disablePadding className={styles.drawerItem}>
+              {/* <ListItem disablePadding className={styles.drawerItem}>
                 <ListItemButton onClick={handleMobileSolutionsToggle}>
                   <ListItemText
                     primary="راهکارها"
@@ -787,7 +795,7 @@ export default function Header() {
                     </ListItem>
                   ))}
                 </List>
-              </Collapse>
+              </Collapse> */}
             </>
           )}
 

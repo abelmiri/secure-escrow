@@ -22,7 +22,7 @@ const categories = [
     iconBg: "linear-gradient(135deg, #00B8DB 0%, #155DFC 100%)", // Blue
   },
   {
-    title: "وسایل نقلیه (ماشین و خودرو)",
+    title: "وسایل نقلیه (ماشین و موتورسیکلت)",
     description: "خرید و فروش وسایل نقله شخصی و تجاری با امنیت کامل",
     Icon: TrendingUpIcon,
     iconBg: "linear-gradient(135deg, #AD46FF 0%, #E60076 100%)", // Pink/Purple
@@ -75,7 +75,7 @@ export default function PerfectTransaction() {
           مناسب برای هر نوع معامله
         </Typography>
         <Typography className={styles.subtitle}>
-          خدمات پرداخت امن (Escrow) برای صنایع مختلف
+          خدمات پرداخت امانی (Escrow) برای صنایع مختلف
         </Typography>
       </Box>
 
