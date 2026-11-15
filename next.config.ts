@@ -9,10 +9,6 @@ const nextConfig: NextConfig = {
         source: "/:file.txt",
         headers: [
           {
-            key: "Content-Disposition",
-            value: "attachment",
-          },
-          {
             key: "Content-Type",
             value: "text/plain; charset=utf-8",
           },
