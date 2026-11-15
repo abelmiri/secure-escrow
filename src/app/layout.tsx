@@ -11,12 +11,8 @@ import { DOMAIN_URL } from "@/constants/urls/SERVER_URLS"
 
 export const metadata: Metadata = {
   metadataBase: new URL(DOMAIN_URL),
-  // Temporary title for Enamad domain verification. Restore after approval.
-  title: "14897288",
+  title: "امان یار | امن و حرفه‌ای",
   description: "امان یار - مورد اعتمادترین",
-  other: {
-    enamad: "14897288",
-  },
 }
 
 export default function RootLayout({ children }: { children: ReactNode }) {

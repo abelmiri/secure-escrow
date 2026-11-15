@@ -14,7 +14,7 @@ import baleLogo from "@/media/brand/bale-logo.png"
 import styles from "./styles/Footer.module.scss"
 
 const enamadTrustSeal =
-  "<a referrerpolicy='origin' target='_blank' href='https://trustseal.enamad.ir/?id=7132909&Code=HhSl1WIJkSxfciKADdw292yEtmhFLFkN'><img referrerpolicy='origin' src='https://trustseal.enamad.ir/logo.aspx?id=7132909&Code=HhSl1WIJkSxfciKADdw292yEtmhFLFkN' alt='' style='cursor:pointer' code='HhSl1WIJkSxfciKADdw292yEtmhFLFkN'></a>"
+  "<a referrerpolicy='origin' target='_blank' href='https://trustseal.enamad.ir/?id=8718686&Code=A2CpjxW10XP774NdHK4KiUIbjH3DNS8g'><img referrerpolicy='origin' src='https://trustseal.enamad.ir/logo.aspx?id=8718686&Code=A2CpjxW10XP774NdHK4KiUIbjH3DNS8g' alt='' style='cursor:pointer' code='A2CpjxW10XP774NdHK4KiUIbjH3DNS8g'></a>"
 
 const associationTrustSeal =
   '<a referrerpolicy="origin" target="_blank" href="https://eanjoman.ir/member/zKXB6POzgnX4RpS9ei5vkqeVm"><img src="https://eanjoman.ir/api/script?code=zKXB6POzgnX4RpS9ei5vkqeVm" alt="انجمن صنفی کارفرمایی فروشگاه های اینترنتی شهر تهران(کسب و کار های اینترنتی)" title="انجمن صنفی کارفرمایی فروشگاه های اینترنتی شهر تهران(کسب و کار های اینترنتی)"></a>'
