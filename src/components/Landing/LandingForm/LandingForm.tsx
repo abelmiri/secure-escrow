@@ -13,7 +13,6 @@ import {
 import { useRouter } from "next/navigation"
 import useUser from "@/context/auth/hooks/useUser"
 import loginOAUTH from "@/helpers/auth/loginOAUTH"
-import SmallArrow from "@/media/svg/SmallArrow"
 import { useCategories } from "@/hooks/deals/useCategories"
 import {
   buildTransactionCreateUrl,
@@ -149,7 +148,6 @@ export default function LandingForm() {
         variant="contained"
         fullWidth
         className={styles.submitButton}
-        endIcon={<SmallArrow strokeColor="#fff" className={styles.arrowIcon} />}
         onClick={handleSubmit}
       >
         همین الان شروع کنید

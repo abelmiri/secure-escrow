@@ -4,7 +4,6 @@ import { Button, Box } from "@mui/material"
 import { useRouter } from "next/navigation"
 import useUser from "@/context/auth/hooks/useUser"
 import loginOAUTH from "@/helpers/auth/loginOAUTH"
-import SmallArrow from "@/media/svg/SmallArrow"
 import styles from "./styles/LandingStartButtons.module.scss"
 
 export default function LandingStartButtons() {
@@ -28,13 +27,6 @@ export default function LandingStartButtons() {
         onClick={handleStart}
       >
         شروع کنید
-        <Box className={styles.iconWrapper}>
-          <SmallArrow
-            width={16}
-            height={16}
-            strokeColor="var(--color-secondary)"
-          />
-        </Box>
       </Button>
       {/* <Button variant="outlined" className={styles.button}> */}
       {/* Second button content - to be specified */}

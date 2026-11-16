@@ -22,12 +22,13 @@
   position: absolute;
   inset: 0;
   z-index: -1;
+  backdrop-filter: blur(5px);
   background:
     linear-gradient(
       270deg,
-      rgba(4, 17, 45, 0.9) 0%,
-      rgba(5, 27, 68, 0.78) 44%,
-      rgba(5, 24, 57, 0.5) 100%
+      rgba(7, 31, 84, 0.9) 15%,
+      rgba(8, 43, 108, 0.6) 44%,
+      rgba(10, 48, 114, 0.5) 99%
     ),
     linear-gradient(180deg, rgba(5, 17, 47, 0.22), rgba(9, 49, 141, 0.58));
 }

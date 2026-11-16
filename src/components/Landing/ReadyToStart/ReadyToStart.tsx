@@ -1,7 +1,6 @@
 "use client"
 
 import { Box, Typography, Button } from "@mui/material"
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
 import { useRouter } from "next/navigation"
 import useUser from "@/context/auth/hooks/useUser"
 import loginOAUTH from "@/helpers/auth/loginOAUTH"
@@ -44,20 +43,11 @@ export default function ReadyToStart({ howItWorks }: { howItWorks?: boolean }) {
             <Button
               className={`${styles.primaryButton} ${styles.howItWorks}`}
               onClick={handleStart}
-              endIcon={
-                <ArrowForwardIcon sx={{ transform: "rotate(180deg)" }} />
-              }
             >
               {buttonText}
             </Button>
           ) : (
-            <Button
-              className={styles.primaryButton}
-              onClick={handleStart}
-              endIcon={
-                <ArrowForwardIcon sx={{ transform: "rotate(180deg)" }} />
-              }
-            >
+            <Button className={styles.primaryButton} onClick={handleStart}>
               {buttonText}
             </Button>
           )}

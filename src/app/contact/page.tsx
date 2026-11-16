@@ -5,6 +5,7 @@ import PhoneOutlinedIcon from "@mui/icons-material/PhoneOutlined"
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined"
 import TelegramIcon from "@mui/icons-material/Telegram"
 import ArrowBackIcon from "@mui/icons-material/ArrowBack"
+import { COMPANY_ADDRESS, COMPANY_MAP_URL } from "@/constants/companyLocation"
 // Bale logo: https://commons.wikimedia.org/wiki/File:Bale_logo.png (CC0)
 import baleLogo from "@/media/brand/bale-logo.png"
 // Photo: Vlada Karpovich / Pexels, https://www.pexels.com/photo/photo-of-person-holding-mobile-phone-4050451/
@@ -139,7 +140,15 @@ export default function ContactPage() {
                 </span>
                 <div>
                   <h3>موقعیت</h3>
-                  <p>ایران، تهران</p>
+                  <p>
+                    <a
+                      href={COMPANY_MAP_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {COMPANY_ADDRESS}
+                    </a>
+                  </p>
                 </div>
               </div>
             </div>

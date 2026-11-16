@@ -7,9 +7,8 @@ import {
   neshanMapType,
   type NeshanMap,
 } from "@/lib/neshanLeaflet"
+import { COMPANY_LOCATION } from "@/constants/companyLocation"
 import styles from "./page.module.scss"
-
-const tehranCenter: [number, number] = [35.6892, 51.389]
 
 export default function NeshanTehranMap() {
   const mapElementRef = useRef<HTMLDivElement | null>(null)
@@ -28,14 +27,16 @@ export default function NeshanTehranMap() {
       .then((leaflet) => {
         if (!isMounted || !mapElementRef.current) return
 
-        mapRef.current = new leaflet.Map(mapElementRef.current, {
+        const map = new leaflet.Map(mapElementRef.current, {
           key: neshanMapKey,
           maptype: neshanMapType,
           poi: true,
           traffic: false,
-          center: tehranCenter,
-          zoom: 10,
+          center: COMPANY_LOCATION,
+          zoom: 16,
         })
+        mapRef.current = map
+        leaflet.marker(COMPANY_LOCATION).addTo(map)
         setIsLoading(false)
       })
       .catch(() => {
@@ -57,7 +58,7 @@ export default function NeshanTehranMap() {
         ref={mapElementRef}
         className={styles.mapCanvas}
         role="img"
-        aria-label="نقشه شهر تهران در نشان"
+        aria-label="موقعیت دفتر امان‌یار در حصارک تهران"
       />
       {(isLoading || loadError) && (
         <div className={styles.mapOverlay} aria-live="polite">

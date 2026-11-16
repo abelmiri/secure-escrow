@@ -8,22 +8,22 @@ import BuyerSeller from "@/media/svg/BuyerSeller"
 
 const stats = [
   {
-    icon: <BuyerSeller strokeColor="#155DFC" width="48" height="48" />,
+    icon: <BuyerSeller strokeColor="#09318d" width="48" height="48" />,
     value: "500K+",
     label: "مشتری در سراسر جهان",
   },
   {
-    icon: <DollarSign strokeColor="#155DFC" width={48} height={48} />,
+    icon: <DollarSign strokeColor="#09318d" width={48} height={48} />,
     value: "$2.5B+",
     label: "تراکنش امن",
   },
   {
-    icon: <GlobeIcon strokeColor="#155DFC" width={48} height={48} />,
+    icon: <GlobeIcon strokeColor="#09318d" width={48} height={48} />,
     value: "150+",
     label: "کشور تحت پوشش",
   },
   {
-    icon: <Badge strokeColor="#155DFC" width={48} height={48} />,
+    icon: <Badge strokeColor="#09318d" width={48} height={48} />,
     value: "15+",
     label: "سال تجربه",
   },

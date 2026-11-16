@@ -11,7 +11,7 @@ import styles from "./styles/HowItWorksSteps.module.scss"
 const steps = [
   {
     number: 1,
-    icon: <BuyerSeller width="24" height="24" strokeColor="#155DFC" />,
+    icon: <BuyerSeller width="24" height="24" strokeColor="#09318d" />,
     title: "توافق طرفین معامله",
     description:
       "خریدار یا فروشنده معامله را آغاز می‌کنند. سپس با تکمیل صفحه پروفایل و توافق بر سر شرایط معامله، قرارداد پایه‌ای شامل شروط معامله تنظیم می‌شود و پس از تأیید طرفین، معامله آغاز خواهد شد.",
@@ -21,12 +21,12 @@ const steps = [
       "توافق نهایی بر روش ارسال کالا یا ارائه خدمات",
       "تأیید نهایی توافق از سوی طرفین معامله",
     ],
-    imageIcon: <BuyerSeller width="80" height="80" strokeColor="#155DFC" />,
+    imageIcon: <BuyerSeller width="80" height="80" strokeColor="#09318d" />,
     stepLabel: "مرحله ۱ از ۵",
   },
   {
     number: 2,
-    icon: <DollarSign width={24} height={24} strokeColor="#155DFC" />,
+    icon: <DollarSign width={24} height={24} strokeColor="#09318d" />,
     title: "پرداخت وجه از طرف خریدار",
     description:
       "خریدار مبلغ مورد توافق را به حساب امانی نزد بانک عامل واریز می‌کند و پس از آن  وجه در این حساب تا زمانی که صحت معامله  تأیید شود، بر اساس قوانین بانک مرکزی به‌صورت امن بلوکه خواهد شد.",
@@ -36,12 +36,12 @@ const steps = [
       "نگهداری وجه در حساب امانی امن و جداگانه",
       "اطلاع‌رسانی به‌موقع به طرفین معامله",
     ],
-    imageIcon: <DollarSign width={80} height={80} strokeColor="#155DFC" />,
+    imageIcon: <DollarSign width={80} height={80} strokeColor="#09318d" />,
     stepLabel: "مرحله ۲ از ۵",
   },
   {
     number: 3,
-    icon: <BoxIcon width="24" height="24" color="#155DFC" />,
+    icon: <BoxIcon width="24" height="24" color="#09318d" />,
     title: "ارسال و تحویل کالا یا خدمت از طرف فروشنده",
     description:
       "پس از تایید نهایی پرداخت، فروشنده مجاز به ارسال کالا یا انجام خدمات است. اطلاعات مربوط به فرآیند ارسال و پیگیری به‌طور همزمان به طرفین معامله ارائه می‌شود.",
@@ -51,12 +51,12 @@ const steps = [
       "پیگیری وضعیت ارسال تا زمان تحویل کالا",
       "تحویل کالا به خریدار",
     ],
-    imageIcon: <BoxIcon width="80" height="80" color="#155DFC" />,
+    imageIcon: <BoxIcon width="80" height="80" color="#09318d" />,
     stepLabel: "مرحله ۳ از ۵",
   },
   {
     number: 4,
-    icon: <CircleCheckIcon width="24" height="24" color="#155DFC" />,
+    icon: <CircleCheckIcon width="24" height="24" color="#09318d" />,
     title: "تایید نهایی شروط معامله",
     description:
       "پس از انجام تمامی مراحل پیشین، تایید نهایی شروط معامله پس از بررسی تطابق آن‌ها با شرایط توافق‌شده انجام می‌شود. در این مرحله، اطمینان حاصل می‌شود که تمامی الزامات و توافقات بین خریدار و فروشنده به‌طور کامل رعایت شده است.",
@@ -66,12 +66,12 @@ const steps = [
       "تأیید تکمیل فرآیند تحویل",
       "حل اختلاف در صورت نیاز",
     ],
-    imageIcon: <CircleCheckIcon width="80" height="80" color="#155DFC" />,
+    imageIcon: <CircleCheckIcon width="80" height="80" color="#09318d" />,
     stepLabel: "مرحله ۴ از ۵",
   },
   {
     number: 5,
-    icon: <CreditCardIcon width="24" height="24" color="#155DFC" />,
+    icon: <CreditCardIcon width="24" height="24" color="#09318d" />,
     title: "آزادسازی وجه",
     description:
       "پس از تکمیل تمامی مراحل معامله و تأیید نهایی شروط، مبلغ نگهداری شده در حساب امانی با پایان دوره بازرسی به فروشنده آزاد می‌شود. این فرآیند تضمین می‌کند که پرداخت تنها پس از رعایت کامل شرایط توافق‌شده انجام می‌شود.",
@@ -81,7 +81,7 @@ const steps = [
       "آزاد سازی وجوه به فروشنده",
       "پردازش سریع و تکمیل تراکنش",
     ],
-    imageIcon: <CreditCardIcon width="80" height="80" color="#155DFC" />,
+    imageIcon: <CreditCardIcon width="80" height="80" color="#09318d" />,
     stepLabel: "مرحله ۵ از ۵",
   },
 ]

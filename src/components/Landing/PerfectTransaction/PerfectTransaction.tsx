@@ -1,7 +1,6 @@
 "use client"
 
 import { Box, Typography, Button } from "@mui/material"
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
 import { useRouter } from "next/navigation"
 import useUser from "@/context/auth/hooks/useUser"
 import loginOAUTH from "@/helpers/auth/loginOAUTH"
@@ -106,11 +105,7 @@ export default function PerfectTransaction() {
         ))}
       </Box>
 
-      <Button
-        className={styles.viewAllButton}
-        onClick={handleStart}
-        endIcon={<ArrowForwardIcon sx={{ transform: "rotate(180deg)" }} />}
-      >
+      <Button className={styles.viewAllButton} onClick={handleStart}>
         مشاهده تمام دسته‌بندی‌ها
       </Button>
     </Box>

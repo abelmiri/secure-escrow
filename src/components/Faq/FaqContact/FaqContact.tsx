@@ -7,7 +7,7 @@ export default function FaqContact() {
   return (
     <section className={styles.container}>
       <div className={styles.iconWrapper}>
-        <ChatIcon width="64" height="64" color="#155DFC" />
+        <ChatIcon width="64" height="64" color="#09318d" />
       </div>
 
       <Typography variant="h2" className={styles.title}>

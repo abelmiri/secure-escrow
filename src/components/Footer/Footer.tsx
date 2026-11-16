@@ -11,6 +11,7 @@ import InstagramIcon from "@mui/icons-material/Instagram"
 import Link from "next/link"
 import IconSvg from "@/media/svg/IconSvg"
 import baleLogo from "@/media/brand/bale-logo.png"
+import { COMPANY_ADDRESS, COMPANY_MAP_URL } from "@/constants/companyLocation"
 import styles from "./styles/Footer.module.scss"
 
 const enamadTrustSeal =
@@ -123,9 +124,14 @@ export default function Footer() {
               </Box>
               <Box className={styles.contactItem}>
                 <LocationOnIcon fontSize="small" />
-                <Typography className={styles.contactItemText}>
-                  ایران، تهران
-                </Typography>
+                <a
+                  href={COMPANY_MAP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={styles.contactItemText}
+                >
+                  {COMPANY_ADDRESS}
+                </a>
               </Box>
             </Box>
 

@@ -5,14 +5,13 @@ import LandingHeading from "@/components/Landing/LandingHeading/LandingHeading"
 import LandingHeadingDescription from "@/components/Landing/LandingHeadingDescription/LandingHeadingDescription"
 import LandingStartButtons from "@/components/Landing/LandingStartButtons/LandingStartButtons"
 import LandingForm from "@/components/Landing/LandingForm/LandingForm"
-import heroImage from "@/media/picture/contact-workspace.jpg"
 import styles from "./styles/LandingInfo.module.scss"
 
 export default function LandingInfo() {
   return (
     <Box className={styles.landingInfo}>
       <Image
-        src={heroImage}
+        src="/media/picture/landing-security.webp"
         alt=""
         fill
         priority

@@ -4,7 +4,7 @@
   padding: clamp(24px, 3vw, 36px);
   border-radius: 28px;
   width: 100%;
-  max-width: 520px;
+  max-width: 560px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -129,18 +129,6 @@
   &:hover {
     background-color: #008c35 !important;
   }
-
-  :global(.MuiButton-endIcon) {
-    margin-right: 12px;
-    margin-left: 0;
-  }
-}
-
-.arrowIcon {
-  transform: rotate(180deg); // Pointing left for RTL or keep as is?
-  // In the image the arrow points to the left because it's RTL context but wait,
-  // looking at the image, the arrow is next to the text "همین الان شروع کنید" and points to the left.
-  // Actually, standard RTL arrow for "Next" points to left.
 }
 
 .footerText {

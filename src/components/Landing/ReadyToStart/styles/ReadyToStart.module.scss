@@ -17,8 +17,8 @@
   &.howItWorks {
     background: linear-gradient(
       135deg,
-      #09318d 18.27%,
-      #09318d 80.88%,
+      #09318d 80.27%,
+      #09318d 99.88%,
       #09318d 100%
     );
   }
@@ -52,6 +52,7 @@
 
 .buttonContainer {
   display: flex;
+  justify-content: center;
   gap: 16px;
   margin-top: 24px;
 
@@ -62,22 +63,29 @@
 }
 
 .primaryButton {
-  background-color: #ffffff !important;
-  color: var(--color-secondary) !important;
-  padding: 10px 16px 10px 6px !important;
+  background-color: #3cb95d !important;
+  color: #ffffff !important;
+  padding: 10px 24px !important;
+  justify-content: center !important;
+  border: 1px solid white !important;
   border-radius: 8px !important;
   font-weight: 500 !important;
   font-size: 14px !important;
   text-transform: none !important;
-  gap: 8px;
+  transition:
+    background-color 0.3s ease-in-out,
+    border-color 0.3s ease-in-out,
+    color 0.3s ease-in-out !important;
 
   &.howItWorks {
     background-color: #ffffff !important;
-    color: #155dfc !important;
+    color: var(--color-secondary) !important;
   }
 
   &:hover {
-    background-color: #f3f4f6 !important;
+    background-color: var(--color-secondary) !important;
+    color: #ffffff !important;
+    border-color: #ffffff !important;
   }
 }
 
@@ -90,8 +98,10 @@
   font-weight: 500 !important;
   font-size: 14px !important;
   text-transform: none !important;
+  justify-content: center !important;
 
   &:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
+    background-color: #ffffff !important;
+    color: var(--color-secondary) !important;
   }
 }

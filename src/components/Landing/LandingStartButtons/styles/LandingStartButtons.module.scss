@@ -1,5 +1,6 @@
 .buttonContainer {
   display: flex;
+  justify-content: flex-start;
   gap: 12px;
   align-items: center;
 
@@ -10,44 +11,24 @@
 }
 
 .button {
-  min-width: 120px !important;
-  height: 40px !important;
-  padding: 0 16px 0 4px !important;
-  border-color: var(--color-secondary) !important;
-  color: var(--color-secondary) !important;
-  background-color: white !important;
-  border-radius: 8px !important;
+  min-width: 144px !important;
+  min-height: 48px !important;
+  padding: 10px 24px !important;
+  justify-content: center !important;
+  border: 1px solid #3cb95d !important;
+  color: #ffffff !important;
+  background-color: #3cb95d !important;
+  border-radius: 12px !important;
   font-size: 14px !important;
-  box-shadow:
-    0px 8px 10px -6px #0000001a,
-    0px 20px 25px -5px #0000001a !important;
+  box-shadow: none !important;
 
   @media (max-width: 768px) {
     width: 100% !important;
   }
 
   &:hover {
-    border-color: var(--light-color) !important;
-    background-color: var(--color-secondary) !important;
-    color: white !important;
-    box-shadow:
-      0px 8px 10px -6px #0000001a,
-      0px 20px 25px -5px #0000001a !important;
-
-    .iconWrapper svg path {
-      stroke: white !important;
-    }
-  }
-}
-
-.iconWrapper {
-  display: flex;
-  align-items: center;
-  margin-inline: 8px;
-  transform: rotate(180deg);
-
-  svg path {
-    stroke: var(--color-secondary);
-    transition: stroke 0.2s ease;
+    border-color: #0073e6 !important;
+    background-color: #ffffff !important;
+    color: #0073e6 !important;
   }
 }

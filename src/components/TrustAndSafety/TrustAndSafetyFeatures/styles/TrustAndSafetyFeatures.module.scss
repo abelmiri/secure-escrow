@@ -41,7 +41,7 @@
   width: 56px;
   height: 56px;
   border-radius: 12px;
-  background: linear-gradient(135deg, #155dfc 0%, #1447e6 50%, #1c398e 100%);
+  background: linear-gradient(135deg, #2458a8 0%, #09318d 50%, #061b50 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -69,6 +69,6 @@
   }
 
   svg [fill]:not([fill="none"]) {
-    fill: #155dfc;
+    fill: var(--color-secondary);
   }
 }

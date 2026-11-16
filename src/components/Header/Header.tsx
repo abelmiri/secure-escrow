@@ -284,9 +284,14 @@ export default function Header() {
         {/* Desktop Navigation */}
         <Box className={styles.navContainer}>
           {isLoggedIn ? (
-            <Button className={styles.logoutButton} onClick={handleLogout}>
-              خروج
-            </Button>
+            <>
+              <Link href="/contact" className={styles.navLink}>
+                <Typography className={styles.navItem}>تماس با ما</Typography>
+              </Link>
+              <Button className={styles.logoutButton} onClick={handleLogout}>
+                خروج
+              </Button>
+            </>
           ) : (
             <>
               {!isLoggedIn && (
@@ -643,6 +648,25 @@ export default function Header() {
                   </ListItem>
                 </List>
               </Collapse>
+
+              <ListItem disablePadding className={styles.drawerItem}>
+                <Link
+                  href="/contact"
+                  style={{
+                    textDecoration: "none",
+                    color: "inherit",
+                    width: "100%",
+                  }}
+                  onClick={handleDrawerToggle}
+                >
+                  <ListItemButton>
+                    <ListItemText
+                      primary="تماس با ما"
+                      className={styles.drawerItemText}
+                    />
+                  </ListItemButton>
+                </Link>
+              </ListItem>
 
               <ListItem disablePadding className={styles.drawerItem}>
                 <Link
