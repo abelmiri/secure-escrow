@@ -40,7 +40,7 @@ const bottomCards = [
     description: "هزینه‌های شفاف بدون هزینه پنهان",
     Icon: LowFeesIcon,
     iconSize: 40,
-    gradient: "linear-gradient(135deg, #AD46FF 0%, #9810FA 100%)",
+    gradient: "linear-gradient(135deg, #3CB95D 0%, #339D50 100%)",
   },
   {
     title: "پردازش سریع",

@@ -104,21 +104,23 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 16px 10px 6px !important;
-  border: 1px solid #b2c4ff !important;
-  border-radius: 8px !important;
-  color: var(--color-secondary) !important;
+  padding: 10px 24px !important;
+  border: 1px solid #0073e6 !important;
+  border-radius: 12px !important;
+  color: #0073e6 !important;
   font-weight: 600 !important;
   font-size: 14px !important;
   background-color: transparent !important;
   cursor: pointer;
   transition:
-    background-color 0.2s ease,
-    border 0.2s ease;
+    background-color 0.3s ease-in-out,
+    border-color 0.3s ease-in-out,
+    color 0.3s ease-in-out;
 
   &:hover {
-    border: 1px solid var(--color-secondary) !important;
-    background-color: #d6ddff !important;
+    border-color: #3cb95d !important;
+    background-color: #3cb95d !important;
+    color: #ffffff !important;
   }
 }
 

@@ -1,35 +1,56 @@
 .landingInfo {
+  position: relative;
+  isolation: isolate;
   min-height: 100vh;
+  min-height: 100svh;
   width: 100%;
-  background: linear-gradient(
-    233.31deg,
-    #3e58ff 31.19%,
-    #536afb 59.79%,
-    #3e58ff 94.73%
-  );
+  overflow: hidden;
+  background-color: #071d4d;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 64px 24px 0 24px;
+  padding: 120px 24px 56px;
+}
+
+.backgroundImage {
+  z-index: -2;
+  object-fit: cover;
+  object-position: center 54%;
+}
+
+.backgroundOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(
+      270deg,
+      rgba(4, 17, 45, 0.9) 0%,
+      rgba(5, 27, 68, 0.78) 44%,
+      rgba(5, 24, 57, 0.5) 100%
+    ),
+    linear-gradient(180deg, rgba(5, 17, 47, 0.22), rgba(9, 49, 141, 0.58));
 }
 
 .contentContainer {
+  position: relative;
+  z-index: 1;
   width: 100%;
-  max-width: 1400px;
+  max-width: 1280px;
   display: flex;
   align-items: center;
-  gap: 48px;
+  gap: clamp(32px, 5vw, 72px);
 }
 
 .leftSection {
-  width: 50%;
+  width: 52%;
   display: flex;
   flex-direction: column;
-  gap: 32px;
+  gap: 28px;
 }
 
 .rightSection {
-  width: 50%;
+  width: 48%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -49,13 +70,27 @@
 }
 
 @media (max-width: 768px) {
+  .landingInfo {
+    padding: 88px 20px 40px;
+  }
+
+  .backgroundImage {
+    object-position: 58% center;
+  }
+
+  .backgroundOverlay {
+    background:
+      linear-gradient(180deg, rgba(4, 17, 45, 0.78), rgba(5, 24, 57, 0.86)),
+      linear-gradient(90deg, rgba(5, 24, 57, 0.25), rgba(9, 49, 141, 0.42));
+  }
+
   .contentContainer {
     flex-direction: column;
-    gap: 32px;
+    gap: 28px;
   }
 
   .rightSection {
-    margin-block-end: 32px;
+    margin-block-end: 0;
   }
 
   .leftSection,

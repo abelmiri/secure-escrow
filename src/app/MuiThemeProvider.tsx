@@ -18,10 +18,10 @@ const theme = createTheme({
   palette: {
     mode: "light",
     primary: {
-      main: "#1976d2",
+      main: "#09318d",
     },
     secondary: {
-      main: "#9c27b0",
+      main: "#3cb95d",
     },
   },
   typography: {

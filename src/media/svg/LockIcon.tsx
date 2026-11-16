@@ -5,7 +5,7 @@ export interface LockIconProps extends SVGProps<SVGSVGElement> {
 }
 
 export default function LockIcon({
-  strokeColor = "#9810FA",
+  strokeColor = "#3CB95D",
   width = 28,
   height = 28,
   ...props

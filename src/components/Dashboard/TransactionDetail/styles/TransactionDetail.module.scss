@@ -582,7 +582,7 @@
 }
 
 .progressIconInProgress {
-  color: #9333ea !important;
+  color: #3cb95d !important;
   font-size: 22px !important;
 }
 
@@ -742,9 +742,9 @@
 .messageAvatar {
   width: 40px !important;
   height: 40px !important;
-  background-color: #f4ebff !important;
-  color: #7f56d9 !important;
-  border: 1px solid #f4ebff;
+  background-color: #ecfdf3 !important;
+  color: #3cb95d !important;
+  border: 1px solid #ecfdf3;
 }
 
 .messageInfo {
@@ -793,7 +793,7 @@
   }
 
   .messageBubble {
-    background-color: #9333ea;
+    background-color: #3cb95d;
     border-radius: 12px 0 12px 12px;
   }
 
@@ -839,7 +839,7 @@
 }
 
 .sendButton {
-  background-color: #9333ea !important;
+  background-color: #3cb95d !important;
   color: #ffffff !important;
   padding: 10px 28px !important;
   border-radius: 8px !important;
@@ -850,7 +850,7 @@
   box-shadow: none !important;
 
   &:hover {
-    background-color: #7e22ce !important;
+    background-color: #339d50 !important;
   }
 }
 
@@ -896,7 +896,7 @@
 }
 
 .documentIcon {
-  color: #9333ea;
+  color: #3cb95d;
   font-size: 32px !important;
   flex-shrink: 0;
 }

@@ -5,7 +5,7 @@ export interface ServerRacksIconProps extends SVGProps<SVGSVGElement> {
 }
 
 export default function ServerRacksIcon({
-  strokeColor = "#9810FA",
+  strokeColor = "#3CB95D",
   width = 28,
   height = 28,
   ...props

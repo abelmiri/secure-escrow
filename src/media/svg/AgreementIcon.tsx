@@ -8,7 +8,7 @@ export default function AgreementIcon(props: SVGProps<SVGSVGElement>) {
       height={32}
       viewBox="0 0 32 32"
       fill="none"
-      stroke="#16288F"
+      stroke="#FFFFFF"
       strokeWidth="1.75"
       strokeLinecap="round"
       strokeLinejoin="round"

@@ -58,8 +58,8 @@
 }
 
 .filterButtonActive {
-  border-color: var(--color-secondary) !important;
-  background-color: rgba(130, 0, 219, 0.06) !important;
+  border-color: #3cb95d !important;
+  background-color: rgba(60, 185, 93, 0.06) !important;
 }
 
 .searchInput {
@@ -203,7 +203,7 @@
 
   &:has(:global(.Mui-checked)) {
     border-color: var(--color-secondary);
-    background-color: rgba(130, 0, 219, 0.05);
+    background-color: rgba(60, 185, 93, 0.05);
   }
 
   :global(.MuiFormControlLabel-label) {
@@ -245,7 +245,7 @@
   text-transform: none !important;
 
   &:hover {
-    background-color: #7000bd !important;
+    background-color: #339d50 !important;
     box-shadow: none !important;
   }
 }

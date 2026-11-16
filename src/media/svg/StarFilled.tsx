@@ -5,7 +5,7 @@ export interface StarFilledProps extends SVGProps<SVGSVGElement> {
 }
 
 export default function StarFilled({
-  color = "#8200DB",
+  color = "#3CB95D",
   width = 24,
   height = 24,
   ...props

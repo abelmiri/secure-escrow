@@ -1,31 +1,28 @@
 .heading {
   display: flex;
   flex-direction: column;
-  line-height: 75px;
+  gap: 2px;
 }
 
 .firstLine {
   color: white;
-  line-height: 75px;
-  font-size: 60px !important;
+  line-height: 1.3 !important;
+  font-size: clamp(2.5rem, 4.5vw, 3.75rem) !important;
   font-weight: 600 !important;
   margin: 0;
 }
 
 .secondLine {
-  color: #d4e2ff;
-  line-height: 75px;
-  font-size: 60px !important;
+  color: #e0eaff;
+  line-height: 1.3 !important;
+  font-size: clamp(2.5rem, 4.5vw, 3.75rem) !important;
   font-weight: 600 !important;
   margin: 0;
 }
 
 @media (max-width: 768px) {
-  .firstLine {
-    font-size: 46px !important;
-  }
-
+  .firstLine,
   .secondLine {
-    font-size: 46px !important;
+    font-size: clamp(2.25rem, 8vw, 3rem) !important;
   }
 }

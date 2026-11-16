@@ -17,8 +17,8 @@
 
   /* Material Design Button Colors */
   --color-first: #d4a574; /* Light brown */
-  --color-secondary: #3e58ff; /* Bold Blue */
-  --color-secondary-transparent: #3e58ffac; /* Bold Blue */
+  --color-secondary: #09318d; /* Bold Blue */
+  --color-secondary-transparent: #09318dac; /* Bold Blue */
   --color-secondary-transparent-box: #f0f7ff; /* Bold Blue */
   --color-third: #3498db; /* Flat blue */
 
@@ -29,9 +29,9 @@
     );
   --purple-gradient: background: linear-gradient(
       233.31deg,
-      #3e58ff 31.19%,
-      #536afb 59.79%,
-      #3e58ff 94.73%
+      #09318d 31.19%,
+      #09318d 59.79%,
+      #09318d 94.73%
     );
   --blue-gradient: background: linear-gradient(135deg, #2b7fff 0%, #0092b8 100%);
 

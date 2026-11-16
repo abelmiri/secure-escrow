@@ -2,14 +2,15 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.09);
+  padding: 9px 16px;
+  background: rgba(255, 255, 255, 0.12);
   border-radius: var(--border-radius-full);
-  border: 1px solid #ffffff33;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(8px);
   width: fit-content;
   cursor: default;
   user-select: none;
-  margin-block-start: 8px;
+  margin-block-start: 0;
 }
 
 .icon {
@@ -25,6 +26,6 @@
 
 @media (max-width: 768px) {
   .trustedBanner {
-    margin-block-start: 50px;
+    max-width: 100%;
   }
 }

@@ -86,7 +86,7 @@
 .profileAvatar {
   width: 38px !important;
   height: 38px !important;
-  background: linear-gradient(135deg, #3e58ff 0%, #00a66c 100%) !important;
+  background: linear-gradient(135deg, #09318d 0%, #00a66c 100%) !important;
   color: #ffffff !important;
   font-size: 20px !important;
   font-weight: 700 !important;
@@ -99,7 +99,7 @@
 }
 
 .partnerProfileAvatar {
-  background: linear-gradient(135deg, #3e58ff 0%, #00a66c 100%) !important;
+  background: linear-gradient(135deg, #09318d 0%, #00a66c 100%) !important;
 }
 
 .iconContainer {
@@ -190,14 +190,14 @@
   font-size: 15px !important;
   text-transform: none !important;
   box-shadow:
-    0px 4px 6px -4px #ad46ff4d,
-    0px 10px 15px -3px #ad46ff4d !important;
+    0px 4px 6px -4px #0000004d,
+    0px 10px 15px -3px #0000004d !important;
   transition: all 0.2s ease !important;
 
   &:hover {
-    background: #7000bd !important;
+    background: #339d50 !important;
     transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(130, 0, 219, 0.2) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
   }
 }
 
@@ -268,7 +268,7 @@
 }
 
 .partnerMenuAvatar {
-  background: linear-gradient(135deg, #3e58ff 0%, #00a66c 100%) !important;
+  background: linear-gradient(135deg, #09318d 0%, #00a66c 100%) !important;
   color: #ffffff !important;
 }
 

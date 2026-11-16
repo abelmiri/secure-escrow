@@ -5,7 +5,7 @@ export interface SmallArrowProps extends SVGProps<SVGSVGElement> {
 }
 
 export default function SmallArrow({
-  strokeColor = "#8200DB",
+  strokeColor = "#3CB95D",
   width = 16,
   height = 16,
   ...props

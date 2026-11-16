@@ -25,7 +25,7 @@ const categories = [
     title: "وسایل نقلیه (خودرو و موتورسیکلت)",
     description: "خرید و فروش وسایل نقله شخصی و تجاری با امنیت کامل",
     Icon: VehiclesIcon,
-    iconBg: "linear-gradient(135deg, #AD46FF 0%, #E60076 100%)", // Pink/Purple
+    iconBg: "linear-gradient(135deg, #3CB95D 0%, #339D50 100%)",
   },
   {
     title: "املاک و مستغلات",
@@ -51,7 +51,7 @@ const categories = [
     title: "پرداخت‌های امن برای کسب‌وکارها",
     description: "انجام پرداخت‌ها و معاملات کسب‌وکارها، با اطمینان از شفافیت",
     Icon: BusinessDealsIcon,
-    iconBg: "linear-gradient(135deg, #615FFF 0%, #9810FA 100%)", // Purple
+    iconBg: "linear-gradient(135deg, #3CB95D 0%, #339D50 100%)",
   },
 ]
 

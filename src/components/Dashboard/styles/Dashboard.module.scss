@@ -55,11 +55,11 @@
   text-transform: none !important;
   font-weight: 600 !important;
   font-size: 15px !important;
-  box-shadow: 0 4px 12px rgba(130, 0, 219, 0.2) !important;
+  box-shadow: 0 4px 12px rgba(60, 185, 93, 0.2) !important;
   height: 48px;
 
   &:hover {
-    background-color: #7000bd !important;
+    background-color: #339d50 !important;
   }
 }
 
@@ -101,14 +101,14 @@
   cursor: pointer;
 
   &:focus-visible {
-    outline: 3px solid rgba(130, 0, 219, 0.25);
+    outline: 3px solid rgba(60, 185, 93, 0.25);
     outline-offset: 2px;
   }
 }
 
 .activeStatCard {
   border-color: var(--color-secondary);
-  box-shadow: 0 0 0 3px rgba(130, 0, 219, 0.1);
+  box-shadow: 0 0 0 3px rgba(60, 185, 93, 0.1);
 }
 
 .statIconContainer {
