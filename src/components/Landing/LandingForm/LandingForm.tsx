@@ -153,14 +153,16 @@ export default function LandingForm() {
         همین الان شروع کنید
       </Button>
 
-      <Typography
-        component="button"
-        type="button"
-        onClick={handleProfile}
-        className={styles.footerText}
-      >
-        برای ادامه باید یک حساب کاربری ایجاد کنید
-      </Typography>
+      {!isLoggedIn && (
+        <Typography
+          component="button"
+          type="button"
+          onClick={handleProfile}
+          className={styles.footerText}
+        >
+          برای ادامه باید یک حساب کاربری ایجاد کنید
+        </Typography>
+      )}
     </Box>
   )
 }
