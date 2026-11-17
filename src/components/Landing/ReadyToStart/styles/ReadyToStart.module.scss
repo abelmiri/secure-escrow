@@ -78,14 +78,15 @@
     color 0.3s ease-in-out !important;
 
   &.howItWorks {
-    background-color: #ffffff !important;
-    color: var(--color-secondary) !important;
+    background-color: #3cb95d !important;
+    color: #ffffff !important;
+    border-color: #3cb95d !important;
   }
 
   &:hover {
-    background-color: var(--color-secondary) !important;
+    background-color: #339d50 !important;
     color: #ffffff !important;
-    border-color: #ffffff !important;
+    border-color: #339d50 !important;
   }
 }
 

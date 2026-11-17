@@ -43,6 +43,15 @@ const API_URLS = {
     transitionId: number
   }) =>
     `v1/deals/u/${id}/workflow-actions/details?transition_id=${transitionId}`,
+  contractSignature: ({
+    id,
+    operation,
+  }: {
+    id: number
+    operation?: "otp" | "sign" | "refresh" | "decline"
+  }) => `v1/deals/${id}/contract-signature${operation ? `/${operation}` : ""}`,
+  documentDownload: ({ id }: { id: string }) =>
+    `v1/documents/${encodeURIComponent(id)}/download`,
   dealContractPdf: ({ id }: { id: number }) => `v1/deals/u/${id}/contract-pdf`,
   dealDocuments: ({ id }: { id: number }) =>
     `v1/documents/deals/${id}/documents`,

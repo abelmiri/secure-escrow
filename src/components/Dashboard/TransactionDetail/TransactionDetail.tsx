@@ -18,6 +18,7 @@ import {
   type SelectedRepresentedPartner,
 } from "@/helpers/auth/profileSelection"
 import RequiredAction from "./RequiredAction"
+import ContractSignatureDialog from "./signing/ContractSignatureDialog"
 import PaymentSummary from "./PaymentSummary"
 import TransactionParties from "./TransactionParties"
 import TransactionHeader from "./TransactionHeader"
@@ -29,6 +30,7 @@ import styles from "./styles/TransactionDetail.module.scss"
 
 export default function TransactionDetail({ id }: { id: string }) {
   const router = useRouter()
+  const [signingIdentity, setSigningIdentity] = useState<string | null>(null)
   const { authState } = useContext(authContext)
   const [selectedProfile, setSelectedProfile] =
     useState<SelectedRepresentedPartner | null>(() =>
@@ -56,9 +58,13 @@ export default function TransactionDetail({ id }: { id: string }) {
     deal: apiDeal,
     isLoading,
     error,
+    mutate: refreshDeal,
   } = useDeal(apiDealId, selectedBrokerId)
-  const { documents: apiDocuments, isLoading: isDocumentsLoading } =
-    useDealDocuments(apiDealId)
+  const {
+    documents: apiDocuments,
+    isLoading: isDocumentsLoading,
+    mutate: refreshDocuments,
+  } = useDealDocuments(apiDealId)
   const {
     messages: apiMessages,
     messageText,
@@ -75,6 +81,7 @@ export default function TransactionDetail({ id }: { id: string }) {
 
   useEffect(() => {
     const handleProfileSelectionChange = () => {
+      setSigningIdentity(null)
       setSelectedProfile(getSelectedRepresentedPartner())
     }
 
@@ -160,6 +167,17 @@ export default function TransactionDetail({ id }: { id: string }) {
   ) => {
     if (!apiDealId) return
 
+    if (action.action.toLowerCase() === "sign") {
+      if (
+        apiDeal?.next_available_actions?.some((item) => item.action === "sign")
+      ) {
+        setSigningIdentity(
+          `${apiDealId}:${selectedBrokerId || "user"}:${selectedActorId}`,
+        )
+      }
+      return
+    }
+
     if (action.action.toLowerCase() === "complete_contract") {
       router.push(
         `/contracts/create?dealId=${apiDealId}&stage=1&returnToDeal=true`,
@@ -197,6 +215,19 @@ export default function TransactionDetail({ id }: { id: string }) {
           بازگشت به داشبورد
         </Link>
 
+        {apiDealId &&
+          signingIdentity ===
+            `${apiDealId}:${selectedBrokerId || "user"}:${selectedActorId}` && (
+            <ContractSignatureDialog
+              key={signingIdentity}
+              dealId={apiDealId}
+              identity={signingIdentity}
+              onClose={() => setSigningIdentity(null)}
+              onDealRefresh={() =>
+                Promise.all([refreshDeal(), refreshDocuments()])
+              }
+            />
+          )}
         <TransactionHeader deal={deal} />
         <WorkflowInfoAlert
           description={apiDeal?.current_workflow?.header_description}
