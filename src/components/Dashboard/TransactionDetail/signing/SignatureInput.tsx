@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react"
+import DeleteOutlineRounded from "@mui/icons-material/DeleteOutlineRounded"
+import UploadFileOutlined from "@mui/icons-material/UploadFileOutlined"
 import { Box, Button, Stack, Typography } from "@mui/material"
 import { validateSignature } from "@/hooks/deals/contractSignatureApi"
 
@@ -29,7 +31,8 @@ export default function SignatureInput({
   )
   const clear = () => {
     selection.current++
-    canvas.current?.getContext("2d")?.clearRect(0, 0, 600, 200)
+    const element = canvas.current
+    element?.getContext("2d")?.clearRect(0, 0, element.width, element.height)
     drawing.current = false
     hasInk.current = false
     setPreview("")
@@ -50,10 +53,11 @@ export default function SignatureInput({
     setPreview(URL.createObjectURL(file))
   }
   const point = (event: PointerEvent<HTMLCanvasElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect()
+    const element = event.currentTarget
+    const rect = element.getBoundingClientRect()
     return [
-      ((event.clientX - rect.left) * 600) / rect.width,
-      ((event.clientY - rect.top) * 200) / rect.height,
+      ((event.clientX - rect.left) * element.width) / rect.width,
+      ((event.clientY - rect.top) * element.height) / rect.height,
     ] as const
   }
   const start = (event: PointerEvent<HTMLCanvasElement>) => {
@@ -91,37 +95,55 @@ export default function SignatureInput({
       }, "image/png")
   }
   return (
-    <Stack spacing={1}>
-      <Typography>
-        امضا را در کادر رسم کنید یا تصویر PNG بارگذاری کنید.
-      </Typography>
+    <Stack spacing={1.25}>
+      <Stack spacing={0.25}>
+        <Typography component="h3" variant="subtitle1" fontWeight={700}>
+          رسم امضا
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          امضا را در کادر رسم کنید یا تصویر PNG بارگذاری کنید.
+        </Typography>
+      </Stack>
       <Box
-        component="canvas"
-        ref={canvas}
-        width={600}
-        height={200}
-        aria-label="کادر رسم امضا"
-        onPointerDown={start}
-        onPointerMove={move}
-        onPointerUp={end}
-        onPointerCancel={end}
         sx={{
           width: "100%",
-          height: 160,
-          border: "1px solid",
-          borderColor: "divider",
+          height: { xs: 144, sm: 176 },
+          border: "2px solid",
+          borderColor: "primary.light",
           borderRadius: 2,
+          overflow: "hidden",
           bgcolor: "white",
-          touchAction: "none",
           opacity: disabled ? 0.5 : 1,
+          "& > canvas": {
+            display: "block",
+            width: "100%",
+            height: "100%",
+            touchAction: "none",
+            cursor: disabled ? "default" : "crosshair",
+          },
         }}
-      />
-      <Stack direction="row" spacing={1}>
-        <Button disabled={disabled} onClick={clear}>
-          پاک‌کردن امضا
-        </Button>
-        <Button component="label" disabled={disabled}>
-          آپلود PNG
+      >
+        <canvas
+          ref={canvas}
+          width={600}
+          height={200}
+          aria-label="کادر رسم امضا"
+          onPointerDown={start}
+          onPointerMove={move}
+          onPointerUp={end}
+          onPointerCancel={end}
+        />
+      </Box>
+      <Stack direction="row" flexWrap="wrap" gap={1}>
+        <Button
+          component="label"
+          size="small"
+          variant="outlined"
+          sx={{ gap: 0.75 }}
+          disabled={disabled}
+        >
+          <UploadFileOutlined fontSize="small" />
+          بارگذاری PNG
           <input
             hidden
             type="file"
@@ -136,6 +158,15 @@ export default function SignatureInput({
               }
             }}
           />
+        </Button>
+        <Button
+          size="small"
+          sx={{ gap: 0.75, color: "text.secondary" }}
+          disabled={disabled}
+          onClick={clear}
+        >
+          <DeleteOutlineRounded fontSize="small" />
+          پاک‌کردن امضا
         </Button>
       </Stack>
       {preview && (

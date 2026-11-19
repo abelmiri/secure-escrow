@@ -45,12 +45,15 @@ export function useContractSignature(
     async (
       operation?: "otp" | "sign" | "refresh" | "decline",
       body?: FormData,
+      background = false,
     ) => {
       if (lock.current || !active.current) return
       lock.current = true
       setBusy(true)
-      setError("")
-      setFields({})
+      if (!background) {
+        setError("")
+        setFields({})
+      }
       const abort = new AbortController()
       controller.current = abort
       const timeout = setTimeout(() => abort.abort(), 30000)
@@ -65,6 +68,10 @@ export function useContractSignature(
         if (resolveSubmission && !isReconciling(result)) {
           unresolved.delete(key)
           setUncertain(false)
+          if (background) {
+            setError("")
+            setFields({})
+          }
         }
         if (
           result.signed_signer ||
@@ -88,6 +95,10 @@ export function useContractSignature(
         return result
       } catch (caught) {
         if (!active.current || controller.current !== abort) return
+        const accessLost =
+          caught instanceof SignatureError &&
+          (caught.status === 403 || caught.status === 404)
+        if (background && !accessLost) return
         if (caught instanceof SignatureError) {
           const pending = ["PROCESSING", "UNKNOWN"].includes(
             String(caught.data.status),
@@ -97,7 +108,7 @@ export function useContractSignature(
             setUncertain(true)
           }
           setFields(signatureFieldErrors(caught))
-          if (caught.status === 403 || caught.status === 404) {
+          if (accessLost) {
             inaccessible.current = true
             setSnapshot(null)
           }
@@ -139,20 +150,12 @@ export function useContractSignature(
 
   useEffect(() => {
     if (snapshot && isFinished(snapshot) && !uncertain) return
-    const check = () => {
+    if (!uncertain && !(snapshot && isReconciling(snapshot))) return
+    const timer = setInterval(() => {
       if (document.visibilityState !== "visible" || inaccessible.current) return
-      void run(
-        uncertain || (snapshot && isReconciling(snapshot))
-          ? "refresh"
-          : undefined,
-      )
-    }
-    const timer = setInterval(check, 20000)
-    document.addEventListener("visibilitychange", check)
-    return () => {
-      clearInterval(timer)
-      document.removeEventListener("visibilitychange", check)
-    }
+      void run("refresh", undefined, true)
+    }, 20000)
+    return () => clearInterval(timer)
   }, [run, snapshot, uncertain])
 
   return { snapshot, busy, uncertain, error, fields, run }

@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react"
-import { Alert, Box, Button, CircularProgress, Stack } from "@mui/material"
+import DownloadOutlined from "@mui/icons-material/DownloadOutlined"
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Stack,
+  Typography,
+} from "@mui/material"
 import API_URLS from "@/constants/urls/API_URLS"
 import {
   signatureErrorMessage,
@@ -60,23 +68,48 @@ export default function ContractDocument({
     )
   if (!url) return <CircularProgress size={24} aria-label="دریافت قرارداد" />
   return (
-    <Stack spacing={1}>
-      <Button
-        component="a"
-        href={url}
-        download={signed ? "signed-contract.pdf" : "contract.pdf"}
+    <Stack
+      spacing={1.5}
+      sx={{
+        p: { xs: 1.5, sm: 2 },
+        border: 1,
+        borderColor: "divider",
+        borderRadius: 2,
+        bgcolor: "background.paper",
+      }}
+    >
+      <Stack
+        direction="row"
+        flexWrap="wrap"
+        gap={1}
+        alignItems="center"
+        justifyContent="space-between"
       >
-        دانلود {signed ? "قرارداد امضاشده" : "قرارداد"}
-      </Button>
+        <Typography component="h3" variant="subtitle1" fontWeight={700}>
+          {signed ? "قرارداد امضاشده" : "متن قرارداد"}
+        </Typography>
+        <Button
+          component="a"
+          variant="outlined"
+          size="small"
+          href={url}
+          download={signed ? "signed-contract.pdf" : "contract.pdf"}
+          sx={{ gap: 0.75 }}
+        >
+          <DownloadOutlined fontSize="small" />
+          دانلود قرارداد
+        </Button>
+      </Stack>
       <Box
         component="iframe"
         src={url}
         title={signed ? "قرارداد امضاشده" : "متن قرارداد"}
         sx={{
           width: "100%",
-          height: 350,
-          border: "1px solid",
+          height: { xs: 260, sm: "clamp(300px, 42vh, 440px)" },
+          border: 1,
           borderColor: "divider",
+          borderRadius: 1.5,
         }}
       />
     </Stack>

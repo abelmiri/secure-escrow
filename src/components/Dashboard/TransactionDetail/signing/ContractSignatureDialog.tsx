@@ -1,18 +1,25 @@
 "use client"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useId, useRef, useState } from "react"
+import CloseRounded from "@mui/icons-material/CloseRounded"
+import DrawOutlined from "@mui/icons-material/DrawOutlined"
+import RefreshRounded from "@mui/icons-material/RefreshRounded"
 import {
   Alert,
+  Box,
   Button,
+  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
   Stack,
   TextField,
   Typography,
   useMediaQuery,
   useTheme,
+  type ChipProps,
 } from "@mui/material"
 import useSWR from "swr"
 import { useContractSignature } from "@/hooks/deals/useContractSignature"
@@ -40,6 +47,17 @@ const labels: Record<string, string> = {
   FAILED: "امضا ناموفق بود",
   UNKNOWN: "نتیجه در حال بررسی است",
 }
+
+const statusColors: Record<string, ChipProps["color"]> = {
+  COMPLETED: "success",
+  SIGNED: "success",
+  FAILED: "error",
+  REFUSED: "error",
+  EXPIRED: "error",
+  PROCESSING: "info",
+  UNKNOWN: "warning",
+}
+
 export default function ContractSignatureDialog({
   dealId,
   identity,
@@ -63,6 +81,7 @@ export default function ContractSignatureDialog({
   const [confirmDecline, setConfirmDecline] = useState(false)
   const submitting = useRef(false)
   const mounted = useRef(true)
+  const titleId = useId()
   const theme = useTheme()
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"))
   const signingDocument = snapshot && getSigningDocument(snapshot)
@@ -71,14 +90,9 @@ export default function ContractSignatureDialog({
     snapshot?.status === "PROCESSING" && !reconciling
       ? "PENDING"
       : snapshot?.status
-  const canSign =
-    !!snapshot?.can_sign &&
-    !uncertain &&
-    !busy &&
-    !isFinished(snapshot) &&
-    !reconciling
-  const checkCertificate =
-    !!snapshot?.can_sign && !isFinished(snapshot) && !uncertain && !reconciling
+  const showSigningForm = !!snapshot?.can_sign && !isFinished(snapshot)
+  const checkCertificate = showSigningForm && !uncertain && !reconciling
+  const canSign = checkCertificate && !busy
   const certificate = useSWR(
     checkCertificate ? ["rokh-signing-status", dealId, identity] : null,
     () =>
@@ -87,7 +101,13 @@ export default function ContractSignatureDialog({
         "status",
         AbortSignal.timeout(55000),
       ),
-    { refreshInterval: 20000, shouldRetryOnError: false },
+    {
+      refreshInterval: (status) =>
+        status?.signing_state === "ENROLLMENT_PENDING" ? 20000 : 0,
+      revalidateOnFocus: false,
+      revalidateOnReconnect: false,
+      shouldRetryOnError: false,
+    },
   )
   const signingState = certificate.data?.signing_state
   const ready =
@@ -169,16 +189,61 @@ export default function ContractSignatureDialog({
       maxWidth="md"
       fullScreen={fullScreen}
       onClose={onClose}
+      aria-labelledby={titleId}
+      slotProps={{
+        paper: {
+          sx: { borderRadius: { xs: 0, sm: 3 }, overflow: "hidden" },
+        },
+      }}
     >
-      <DialogTitle>امضای دیجیتال قرارداد</DialogTitle>
-      <DialogContent dividers>
-        <Stack spacing={2}>
-          {busy && (
+      <DialogTitle
+        component="div"
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1.5,
+          px: { xs: 2, sm: 3 },
+          py: { xs: 1.5, sm: 2 },
+        }}
+      >
+        <Box
+          sx={{
+            display: "grid",
+            placeItems: "center",
+            width: 40,
+            height: 40,
+            borderRadius: 2,
+            bgcolor: "action.hover",
+            color: "primary.main",
+          }}
+        >
+          <DrawOutlined fontSize="small" />
+        </Box>
+        <Typography
+          id={titleId}
+          component="h2"
+          variant="h6"
+          sx={{ flex: 1, fontWeight: 700 }}
+        >
+          امضای دیجیتال قرارداد
+        </Typography>
+        <IconButton aria-label="بستن" onClick={onClose}>
+          <CloseRounded />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent
+        dividers
+        sx={{
+          px: { xs: 2, sm: 3 },
+          py: { xs: 2, sm: 2.5 },
+          bgcolor: "grey.50",
+        }}
+      >
+        <Stack spacing={2.5}>
+          {busy && !snapshot && (
             <CircularProgress size={24} aria-label="در حال دریافت نتیجه" />
           )}
-          {(error || localError) && (
-            <Alert severity="error">{localError || error}</Alert>
-          )}
+          {error && !localError && <Alert severity="error">{error}</Alert>}
           {error && (
             <Typography component="a" href="/profile" color="primary">
               در صورت نقص کد ملی یا شمارهٔ همراه، پروفایل خود را تکمیل کنید.
@@ -192,30 +257,90 @@ export default function ContractSignatureDialog({
           )}
           {snapshot && (
             <>
-              <Alert
-                severity={snapshot.status === "COMPLETED" ? "success" : "info"}
+              <Stack
+                spacing={1.5}
+                sx={{
+                  p: { xs: 1.5, sm: 2 },
+                  border: 1,
+                  borderColor: "divider",
+                  borderRadius: 2,
+                  bgcolor: "background.paper",
+                }}
               >
-                {displayStatus && labels[displayStatus]}
-              </Alert>
-              {snapshot.expires_at && (
-                <Typography>
-                  مهلت امضا:{" "}
-                  {new Date(snapshot.expires_at).toLocaleString("fa-IR")}
-                </Typography>
-              )}
-              {snapshot.signers.map((signer) => (
-                <Typography key={signer.role}>
-                  {signer.role === "customer" ? "خریدار" : "فروشنده"}
-                  {signer.is_you ? " (شما)" : ""}:{" "}
-                  {labels[signer.status] || signer.status}
-                </Typography>
-              ))}
-              {!snapshot.can_sign && !isFinished(snapshot) && (
-                <Typography>
-                  در انتظار نوبت امضا یا تکمیل پردازش؛ وضعیت به‌صورت خودکار
-                  بررسی می‌شود.
-                </Typography>
-              )}
+                <Stack
+                  direction="row"
+                  flexWrap="wrap"
+                  gap={1}
+                  alignItems="center"
+                  justifyContent="space-between"
+                >
+                  <Stack
+                    direction="row"
+                    gap={1}
+                    alignItems="center"
+                    flexWrap="wrap"
+                  >
+                    <Typography
+                      component="h3"
+                      variant="subtitle2"
+                      fontWeight={700}
+                    >
+                      وضعیت امضا
+                    </Typography>
+                    {displayStatus && (
+                      <Chip
+                        size="small"
+                        label={labels[displayStatus] || displayStatus}
+                        color={statusColors[displayStatus]}
+                      />
+                    )}
+                  </Stack>
+                  {snapshot.expires_at && (
+                    <Typography variant="caption" color="text.secondary">
+                      مهلت امضا:{" "}
+                      {new Date(snapshot.expires_at).toLocaleString("fa-IR")}
+                    </Typography>
+                  )}
+                </Stack>
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: {
+                      xs: "1fr",
+                      sm: "repeat(2, minmax(0, 1fr))",
+                    },
+                    gap: 1,
+                  }}
+                >
+                  {snapshot.signers.map((signer) => (
+                    <Stack
+                      key={signer.role}
+                      direction="row"
+                      gap={1}
+                      flexWrap="wrap"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      sx={{ p: 1, borderRadius: 1.5, bgcolor: "grey.50" }}
+                    >
+                      <Typography variant="body2" fontWeight={600}>
+                        {signer.role === "customer" ? "خریدار" : "فروشنده"}
+                        {signer.is_you ? " (شما)" : ""}
+                      </Typography>
+                      <Chip
+                        size="small"
+                        variant="outlined"
+                        label={labels[signer.status] || signer.status}
+                        color={statusColors[signer.status]}
+                      />
+                    </Stack>
+                  ))}
+                </Box>
+                {!snapshot.can_sign && !isFinished(snapshot) && (
+                  <Typography variant="body2" color="text.secondary">
+                    در انتظار نوبت امضا یا تکمیل پردازش.
+                  </Typography>
+                )}
+              </Stack>
               {signingDocument?.id && (
                 <ContractDocument
                   key={signingDocument.id}
@@ -223,7 +348,7 @@ export default function ContractSignatureDialog({
                   signed={signingDocument.signed}
                 />
               )}
-              {snapshot.can_sign && !isFinished(snapshot) && (
+              {showSigningForm && (
                 <Stack spacing={2}>
                   {checkCertificate && certificate.isLoading && (
                     <CircularProgress
@@ -266,7 +391,16 @@ export default function ContractSignatureDialog({
                       </Alert>
                     )}
                   {ready && (
-                    <>
+                    <Stack
+                      spacing={2}
+                      sx={{
+                        p: { xs: 1.5, sm: 2 },
+                        border: 1,
+                        borderColor: "divider",
+                        borderRadius: 2,
+                        bgcolor: "background.paper",
+                      }}
+                    >
                       <SignatureInput
                         key={inputVersion}
                         onChange={setFile}
@@ -275,76 +409,157 @@ export default function ContractSignatureDialog({
                       {fields.signature && (
                         <Alert severity="error">{fields.signature}</Alert>
                       )}
-                      <TextField
-                        label="رمز شش‌رقمی امضا (PIN)"
-                        type="password"
-                        value={pin}
-                        autoComplete="off"
-                        disabled={!canSign}
-                        onChange={(event) =>
-                          setPin(normalizeSignatureDigits(event.target.value))
-                        }
-                        error={!!fields.pin}
-                        helperText={fields.pin}
-                        slotProps={{
-                          htmlInput: { inputMode: "numeric", maxLength: 6 },
+                      <Box
+                        sx={{
+                          display: "grid",
+                          gridTemplateColumns: {
+                            xs: "1fr",
+                            sm: "minmax(0, 2fr) minmax(0, 3fr)",
+                          },
+                          gap: 1.5,
+                          "& .MuiInputLabel-root": {
+                            left: "auto",
+                            right: 0,
+                            transformOrigin: "top right",
+                            transform: "translate(-14px, 16px) scale(1)",
+                          },
+                          "& .MuiInputLabel-shrink": {
+                            transform: "translate(-14px, -9px) scale(0.75)",
+                          },
+                          "& .MuiOutlinedInput-notchedOutline": {
+                            textAlign: "right",
+                          },
                         }}
-                      />
-                      <Button
-                        disabled={!canSign || seconds > 0}
-                        onClick={() => void sendOtp()}
                       >
-                        {" "}
-                        {seconds > 0
-                          ? `ارسال مجدد پس از ${seconds} ثانیه`
-                          : "دریافت کد پیامکی"}
-                      </Button>
+                        <TextField
+                          label="رمز شش‌رقمی امضا (PIN)"
+                          type="password"
+                          value={pin}
+                          autoComplete="off"
+                          disabled={!canSign}
+                          onChange={(event) =>
+                            setPin(normalizeSignatureDigits(event.target.value))
+                          }
+                          error={!!fields.pin}
+                          helperText={fields.pin}
+                          slotProps={{
+                            htmlInput: { inputMode: "numeric", maxLength: 6 },
+                          }}
+                        />
+                        <Stack direction="row" alignItems="flex-start" gap={1}>
+                          <TextField
+                            fullWidth
+                            label="کد پیامکی"
+                            value={otp}
+                            autoComplete="off"
+                            disabled={!canSign}
+                            onChange={(event) =>
+                              setOtp(
+                                normalizeSignatureDigits(event.target.value),
+                              )
+                            }
+                            error={!!fields.otp}
+                            helperText={fields.otp}
+                            slotProps={{
+                              htmlInput: {
+                                inputMode: "numeric",
+                                maxLength: 32,
+                              },
+                            }}
+                          />
+                          <Button
+                            variant="outlined"
+                            disabled={!canSign || seconds > 0}
+                            onClick={() => void sendOtp()}
+                            sx={{
+                              flexShrink: 0,
+                              minHeight: 56,
+                              px: { xs: 1, sm: 1.5 },
+                            }}
+                          >
+                            {seconds > 0
+                              ? `ارسال مجدد پس از ${seconds} ثانیه`
+                              : "دریافت کد پیامکی"}
+                          </Button>
+                        </Stack>
+                      </Box>
                       {seconds > 0 && (
-                        <Typography>
-                          کد پیامکی ارسال شد؛ اعتبار باقی‌مانده: {seconds} ثانیه
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          role="status"
+                        >
+                          کد پیامکی ارسال شد.
                         </Typography>
                       )}
-                      <TextField
-                        label="کد پیامکی"
-                        value={otp}
-                        autoComplete="off"
-                        disabled={!canSign}
-                        onChange={(event) =>
-                          setOtp(normalizeSignatureDigits(event.target.value))
-                        }
-                        error={!!fields.otp}
-                        helperText={fields.otp}
-                        slotProps={{
-                          htmlInput: { inputMode: "numeric", maxLength: 32 },
-                        }}
-                      />
-                      <Button
-                        variant="contained"
-                        disabled={!canSign}
-                        onClick={() => void submit()}
-                      >
-                        ثبت امضای قرارداد
-                      </Button>
-                    </>
+                    </Stack>
                   )}
-                  <Button
-                    color="error"
-                    disabled={!canSign}
-                    onClick={() => setConfirmDecline(true)}
-                  >
-                    رد امضای قرارداد
-                  </Button>
                 </Stack>
               )}
             </>
           )}
-          <Button disabled={busy} onClick={() => void run("refresh")}>
-            بررسی مجدد وضعیت
-          </Button>
         </Stack>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>بستن</Button>
+      <DialogActions
+        disableSpacing
+        sx={{
+          px: { xs: 2, sm: 3 },
+          py: 1.5,
+          gap: 1,
+          flexWrap: "wrap",
+          justifyContent: "space-between",
+        }}
+      >
+        {showSigningForm && ready && localError && (
+          <Alert severity="error" sx={{ width: "100%" }}>
+            {localError}
+          </Alert>
+        )}
+        {showSigningForm && ready && (
+          <Button
+            variant="contained"
+            disableElevation
+            disabled={!canSign}
+            onClick={() => void submit()}
+            sx={{ width: { xs: "100%", sm: "auto" }, minHeight: 44, px: 3 }}
+          >
+            ثبت امضای قرارداد
+          </Button>
+        )}
+        <Stack
+          direction="row"
+          flexWrap="wrap"
+          gap={0.5}
+          sx={{ marginInlineStart: "auto" }}
+        >
+          <Button
+            disabled={busy}
+            sx={{ gap: 0.75 }}
+            onClick={async () => {
+              const result = await run("refresh")
+              if (
+                checkCertificate &&
+                result?.can_sign &&
+                !isFinished(result) &&
+                !isReconciling(result)
+              ) {
+                await certificate.mutate().catch(() => {})
+              }
+            }}
+          >
+            <RefreshRounded fontSize="small" />
+            بررسی مجدد وضعیت
+          </Button>
+          {showSigningForm && (
+            <Button
+              color="error"
+              disabled={!canSign}
+              onClick={() => setConfirmDecline(true)}
+            >
+              رد امضای قرارداد
+            </Button>
+          )}
+        </Stack>
       </DialogActions>
       <Dialog open={confirmDecline} onClose={() => setConfirmDecline(false)}>
         <DialogTitle>رد امضای قرارداد؟</DialogTitle>
