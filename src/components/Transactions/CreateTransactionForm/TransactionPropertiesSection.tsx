@@ -6,6 +6,7 @@ interface TransactionPropertiesSectionProps {
   stageNumber: number
   isLoading: boolean
   hasItems: boolean
+  areDocumentsOptional: boolean
   subCategoryName: string
   subCategoryDescription: string
   children: ReactNode
@@ -15,6 +16,7 @@ export default function TransactionPropertiesSection({
   stageNumber,
   isLoading,
   hasItems,
+  areDocumentsOptional,
   subCategoryName,
   subCategoryDescription,
   children,
@@ -39,7 +41,9 @@ export default function TransactionPropertiesSection({
         </div>
         {isDocumentStage ? (
           <div className={styles.propertiesDescription}>
-            فایل‌های مورد نیاز برای بارگذاری را انتخاب کنید
+            {areDocumentsOptional
+              ? "بارگذاری اسناد اختیاری است."
+              : "فایل‌های مورد نیاز برای بارگذاری را انتخاب کنید"}
           </div>
         ) : (
           subCategoryDescription && (
