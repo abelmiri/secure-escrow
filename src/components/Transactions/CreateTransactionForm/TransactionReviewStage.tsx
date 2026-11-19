@@ -1,5 +1,6 @@
 import { Button, Checkbox, CircularProgress } from "@mui/material"
 import type { DealDetail } from "@/hooks/deals/useDeal"
+import type { Property } from "@/hooks/deals/useSubCategories"
 import type { UploadedDealDocument } from "@/hooks/documents/useDealDocuments"
 import DealReview from "./DealReview"
 import styles from "./styles/TransactionFormDetails.module.scss"
@@ -17,6 +18,7 @@ interface TransactionReviewStageProps {
   role: string
   categoryName?: string
   subCategoryName: string
+  properties: Property[]
   title: string
   description: string
   escrowAmount: string
@@ -42,6 +44,7 @@ export default function TransactionReviewStage({
   role,
   categoryName,
   subCategoryName,
+  properties,
   title,
   description,
   escrowAmount,
@@ -73,6 +76,7 @@ export default function TransactionReviewStage({
             role={role}
             categoryName={categoryName}
             subCategoryName={subCategoryName}
+            properties={properties}
             title={title}
             description={description}
             escrowAmount={escrowAmount}

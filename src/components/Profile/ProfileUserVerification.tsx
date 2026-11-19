@@ -32,6 +32,7 @@ export default function ProfileUserVerification({
         ? "شماره شبا شما تأیید شده است"
         : "شماره شبای خود را برای تأیید وارد کنید",
     },
+    /*
     {
       key: "email",
       title: "تأیید ایمیل",
@@ -48,6 +49,7 @@ export default function ProfileUserVerification({
         ? "هویت شما تأیید شده است"
         : "هویت شما هنوز تأیید نشده است",
     },
+    */
   ]
 
   return (

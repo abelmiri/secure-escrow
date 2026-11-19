@@ -6,7 +6,7 @@ import { Button, CircularProgress } from "@mui/material"
 import ListInput from "@/components/ListInput/ListInput"
 import { authContext } from "@/context/auth/authProvider"
 import API_URLS from "@/constants/urls/API_URLS"
-import { useCategories } from "@/hooks/deals/useCategories"
+import { useCategories, type SubCategory } from "@/hooks/deals/useCategories"
 import { useSubCategories, type Property } from "@/hooks/deals/useSubCategories"
 import { getPartyPartnerId, useDeal } from "@/hooks/deals/useDeal"
 import { useDealWorkflowAction } from "@/hooks/deals/useDealWorkflowAction"
@@ -338,24 +338,25 @@ export default function TransactionFormDetails({
     const firstItem = deal.item
     const itemSubcategory = firstItem?.subcategory
     const subcategorySlug =
-      typeof itemSubcategory === "object" ? itemSubcategory.slug : undefined
+      typeof itemSubcategory === "string"
+        ? itemSubcategory
+        : itemSubcategory?.slug
     const subcategoryName =
-      typeof itemSubcategory === "object"
-        ? itemSubcategory.name
-        : itemSubcategory
+      typeof itemSubcategory === "string"
+        ? itemSubcategory
+        : itemSubcategory?.name
+    const subcategoryId =
+      typeof itemSubcategory === "object" ? itemSubcategory?.id : undefined
+    const matchesSubCategory = (subCategory: SubCategory) =>
+      subCategory.id === subcategoryId ||
+      subCategory.slug === subcategorySlug ||
+      subCategory.name === subcategoryName
 
     const matchedCategory = categories.find((category) =>
-      category.sub_categories.some(
-        (subCategory) =>
-          subCategory.slug === subcategorySlug ||
-          subCategory.name === subcategoryName,
-      ),
+      category.sub_categories.some(matchesSubCategory),
     )
-    const matchedSubCategory = matchedCategory?.sub_categories.find(
-      (subCategory) =>
-        subCategory.slug === subcategorySlug ||
-        subCategory.name === subcategoryName,
-    )
+    const matchedSubCategory =
+      matchedCategory?.sub_categories.find(matchesSubCategory)
 
     const brokerParty = dealBrokerId
       ? deal.parties?.find(
@@ -1054,7 +1055,7 @@ export default function TransactionFormDetails({
           ...deal,
           item: {
             ...deal.item,
-            subcategory: selectedSubCategory?.slug || deal.item?.subcategory,
+            subcategory: selectedSubCategory ?? deal.item?.subcategory,
             name: title,
             description,
             remaining_price_payment_method: paymentMethod,
@@ -1200,7 +1201,9 @@ export default function TransactionFormDetails({
           deal={reviewDeal}
           contractDocument={null}
           documents={dealDocuments}
-          isDealLoading={isDealLoading}
+          isDealLoading={
+            isDealLoading || isCategoriesLoading || isPropertiesLoading
+          }
           isContractPdfLoading={false}
           isDocumentsLoading={isDealDocumentsLoading}
           isSubmitting={isSubmitting || isSubmittingWorkflowAction}
@@ -1209,6 +1212,7 @@ export default function TransactionFormDetails({
           role={role}
           categoryName={selectedCategory?.name}
           subCategoryName={subCategoryName}
+          properties={properties}
           title={title}
           description={description}
           escrowAmount={escrowAmount}

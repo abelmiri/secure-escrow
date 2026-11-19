@@ -7,6 +7,7 @@ import {
   type DealItem,
   type DealParty,
 } from "@/hooks/deals/useDeal"
+import type { Property } from "@/hooks/deals/useSubCategories"
 import type { UploadedDealDocument } from "@/hooks/documents/useDealDocuments"
 import IranLocationPicker, { isMapLocationValue } from "./IranLocationPicker"
 import styles from "./styles/TransactionFormDetails.module.scss"
@@ -75,6 +76,7 @@ const renderPropertyValue = (value: unknown) =>
   )
 
 interface ReviewRow {
+  propertyKey?: string
   label: string
   value?: ReactNode
 }
@@ -107,6 +109,7 @@ interface DealReviewProps {
   role: string
   categoryName?: string
   subCategoryName: string
+  properties: Property[]
   title: string
   description: string
   escrowAmount: string
@@ -124,7 +127,10 @@ function ReviewSection({ title, rows }: ReviewSectionProps) {
           const value = row.value || "—"
 
           return (
-            <div key={row.label} className={styles.reviewRow}>
+            <div
+              key={row.propertyKey ?? row.label}
+              className={styles.reviewRow}
+            >
               <div className={styles.reviewLabel}>{row.label}</div>
               <div
                 className={`${styles.reviewValue} ${
@@ -149,6 +155,7 @@ export default function DealReview({
   role,
   categoryName,
   subCategoryName,
+  properties,
   title,
   description,
   escrowAmount,
@@ -235,10 +242,18 @@ export default function DealReview({
           { label: "نوع کالا:", value: getItemSubcategory(item) },
           { label: "نام کالا:", value: item?.name || title },
           { label: "تعداد:", value: item?.quantity?.toString() },
-          ...itemProperties.map(([key, value]) => ({
-            label: `${formatPropertyLabel(key)}:`,
-            value: renderPropertyValue(value),
-          })),
+          ...itemProperties.map(([key, value]) => {
+            const property = properties.find(
+              ({ slug, name, property_name }) =>
+                slug === key || name === key || property_name === key,
+            )
+
+            return {
+              propertyKey: key,
+              label: `${property?.name || formatPropertyLabel(key)}:`,
+              value: renderPropertyValue(value),
+            }
+          }),
         ].filter((row) => row.value)}
       />
 
