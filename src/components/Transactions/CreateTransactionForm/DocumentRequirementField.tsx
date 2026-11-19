@@ -12,6 +12,7 @@ export interface DocumentUpload {
 
 interface DocumentRequirementFieldProps {
   requirement: DocumentRequirement
+  optional: boolean
   uploads: DocumentUpload[]
   dealId?: number | null
   error?: boolean
@@ -42,6 +43,7 @@ const formatMaximumSize = (maximumSize?: number | null) => {
 
 export default function DocumentRequirementField({
   requirement,
+  optional,
   uploads,
   dealId,
   error = false,
@@ -54,7 +56,8 @@ export default function DocumentRequirementField({
   const requirementName =
     requirement.title || requirement.name || requirementKey
   const isRequired =
-    requirement.is_required ?? requirement.requirement_type !== "optional"
+    !optional &&
+    (requirement.is_required ?? requirement.requirement_type !== "optional")
   const maxFiles = requirement.files_max || 3
   const minFiles = requirement.files_min || (isRequired ? 1 : 0)
   const canSelectMore = uploads.length < maxFiles
@@ -74,7 +77,8 @@ export default function DocumentRequirementField({
         {isRequired && " *"}
       </div>
 
-      {(requirement.description || requirement.requirement_type) && (
+      {(requirement.description ||
+        (!optional && requirement.requirement_type)) && (
         <div className={styles.fieldDescription}>
           {requirement.description ||
             (requirement.requirement_type === "conditional"
@@ -119,7 +123,7 @@ export default function DocumentRequirementField({
           </div>
           <span className={styles.fileUploadButton}>انتخاب فایل</span>
           <span className={styles.fileUploadHint}>
-            حداقل {minFiles} و حداکثر {maxFiles} فایل
+            {!optional && `حداقل ${minFiles} و `}حداکثر {maxFiles} فایل
           </span>
           {allowedFileTypesLabel && (
             <span className={styles.fileUploadHint}>

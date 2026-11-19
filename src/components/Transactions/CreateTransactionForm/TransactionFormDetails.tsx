@@ -309,6 +309,7 @@ export default function TransactionFormDetails({
   const applicableDocumentRequirements = documentRequirements.filter(
     (requirement) => isDocumentRequirementAllowedForRole(requirement, role),
   )
+  const areDocumentsOptional = role === "customer"
   const applicableRequirementIds = new Set(
     applicableDocumentRequirements.map((requirement) => requirement.id),
   )
@@ -581,23 +582,25 @@ export default function TransactionFormDetails({
         )
       }
 
-      applicableDocumentRequirements.forEach((requirement) => {
-        const isRequired =
-          requirement.is_required ?? requirement.requirement_type !== "optional"
-        const minimumFiles = requirement.files_min || (isRequired ? 1 : 0)
-        const uploadedCount = applicableDocumentUploads.filter(
-          (upload) =>
-            upload.requirementId === requirement.id &&
-            upload.status === "uploaded",
-        ).length
+      if (!areDocumentsOptional) {
+        applicableDocumentRequirements.forEach((requirement) => {
+          const isRequired =
+            requirement.is_required ?? requirement.requirement_type !== "optional"
+          const minimumFiles = requirement.files_min || (isRequired ? 1 : 0)
+          const uploadedCount = applicableDocumentUploads.filter(
+            (upload) =>
+              upload.requirementId === requirement.id &&
+              upload.status === "uploaded",
+          ).length
 
-        if (uploadedCount < minimumFiles) {
-          issues.push({
-            key: `document:${requirement.id}`,
-            label: requirement.title || requirement.name || "سند مورد نیاز",
-          })
-        }
-      })
+          if (uploadedCount < minimumFiles) {
+            issues.push({
+              key: `document:${requirement.id}`,
+              label: requirement.title || requirement.name || "سند مورد نیاز",
+            })
+          }
+        })
+      }
     }
 
     return issues
@@ -880,31 +883,6 @@ export default function TransactionFormDetails({
 
     if (!selectedSubCategoryId) return
 
-    if (stageNumber === 2) {
-      const missingRequirement = applicableDocumentRequirements.find(
-        (requirement) => {
-          const isRequired =
-            requirement.is_required ??
-            requirement.requirement_type !== "optional"
-          const minimumFiles = requirement.files_min || (isRequired ? 1 : 0)
-          const uploadedCount = applicableDocumentUploads.filter(
-            (upload) =>
-              upload.requirementId === requirement.id &&
-              upload.status === "uploaded",
-          ).length
-
-          return uploadedCount < minimumFiles
-        },
-      )
-
-      if (missingRequirement) {
-        setDocumentValidationMessage(
-          `حداقل تعداد فایل لازم برای «${missingRequirement.title || missingRequirement.name}» را بارگذاری کنید.`,
-        )
-        return
-      }
-    }
-
     setIsSubmitting(true)
 
     const propertiesData = getPropertiesPayload()
@@ -1028,6 +1006,7 @@ export default function TransactionFormDetails({
       <DocumentRequirementField
         key={requirement.id}
         requirement={requirement}
+        optional={areDocumentsOptional}
         uploads={uploads}
         dealId={dealId}
         onFilesSelected={handleDocumentFiles}
@@ -1247,6 +1226,7 @@ export default function TransactionFormDetails({
         stageNumber={stageNumber}
         isLoading={isPropertiesSectionLoading}
         hasItems={hasVisibleProperties}
+        areDocumentsOptional={areDocumentsOptional}
         subCategoryName={subCategoryName}
         subCategoryDescription={subCategoryDescription}
       >
