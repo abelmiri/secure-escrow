@@ -182,11 +182,11 @@
 }
 
 .startButton {
-  background: var(--color-secondary) !important;
+  background: #3cb95d !important;
   color: white !important;
   padding: 10px 24px !important;
   justify-content: center !important;
-  border: 1px solid var(--color-secondary) !important;
+  border: 1px solid #3cb95d !important;
   border-radius: 10px !important;
   font-weight: 600 !important;
   font-size: 15px !important;
@@ -197,8 +197,9 @@
   transition: all 0.2s ease !important;
 
   &:hover {
-    background: #ffffff !important;
-    color: var(--color-secondary) !important;
+    background: #339d50 !important;
+    color: #ffffff !important;
+    border-color: #339d50 !important;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
   }

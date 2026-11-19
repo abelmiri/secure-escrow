@@ -1,14 +1,16 @@
 "use client"
 
 import { useContext, useEffect, useState } from "react"
-import { Box, Typography, CircularProgress, Alert } from "@mui/material"
+import { Box, Typography, CircularProgress, Alert, Button } from "@mui/material"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
 import { dealsData } from "@/constants/deals"
 import { authContext } from "@/context/auth/authProvider"
-import { useDeal } from "@/hooks/deals/useDeal"
+import { getPartyMobileNumber, useDeal } from "@/hooks/deals/useDeal"
 import type { DealNextAction } from "@/hooks/deals/useDeal"
+import { isContractPdf } from "@/hooks/deals/contractSignatureApi"
+import { useContractSignatureStatus } from "@/hooks/deals/useContractSignature"
 import { useDealWorkflowAction } from "@/hooks/deals/useDealWorkflowAction"
 import { useDealDocuments } from "@/hooks/documents/useDealDocuments"
 import { useDealMessages } from "@/hooks/chat/useDealMessages"
@@ -18,6 +20,7 @@ import {
   type SelectedRepresentedPartner,
 } from "@/helpers/auth/profileSelection"
 import RequiredAction from "./RequiredAction"
+import ContractSignatureDialog from "./signing/ContractSignatureDialog"
 import PaymentSummary from "./PaymentSummary"
 import TransactionParties from "./TransactionParties"
 import TransactionHeader from "./TransactionHeader"
@@ -29,6 +32,7 @@ import styles from "./styles/TransactionDetail.module.scss"
 
 export default function TransactionDetail({ id }: { id: string }) {
   const router = useRouter()
+  const [signingIdentity, setSigningIdentity] = useState<string | null>(null)
   const { authState } = useContext(authContext)
   const [selectedProfile, setSelectedProfile] =
     useState<SelectedRepresentedPartner | null>(() =>
@@ -56,9 +60,35 @@ export default function TransactionDetail({ id }: { id: string }) {
     deal: apiDeal,
     isLoading,
     error,
+    mutate: refreshDeal,
   } = useDeal(apiDealId, selectedBrokerId)
-  const { documents: apiDocuments, isLoading: isDocumentsLoading } =
-    useDealDocuments(apiDealId)
+  const {
+    documents: apiDocuments,
+    isLoading: isDocumentsLoading,
+    mutate: refreshDocuments,
+  } = useDealDocuments(apiDealId)
+  const signatureIdentity = `${apiDealId}:${authState.user?.actor_id}`
+  const mobile = authState.user?.mobile_number
+  const isSigningParty =
+    !selectedBrokerId &&
+    !!mobile &&
+    apiDeal?.parties?.some(
+      (party) =>
+        (party.role === "customer" || party.role === "beneficiary") &&
+        getPartyMobileNumber(party) === mobile,
+    )
+  const hasSignAction = apiDeal?.next_available_actions?.some(
+    (action) => action.action.toLowerCase() === "sign",
+  )
+  const { data: signatureStatus, mutate: refreshSignatureStatus } =
+    useContractSignatureStatus(
+      isSigningParty &&
+        !hasSignAction &&
+        apiDocuments.some((document) => isContractPdf(document.description))
+        ? apiDealId
+        : null,
+      signatureIdentity,
+    )
   const {
     messages: apiMessages,
     messageText,
@@ -78,6 +108,7 @@ export default function TransactionDetail({ id }: { id: string }) {
 
   useEffect(() => {
     const handleProfileSelectionChange = () => {
+      setSigningIdentity(null)
       setSelectedProfile(getSelectedRepresentedPartner())
     }
 
@@ -119,7 +150,9 @@ export default function TransactionDetail({ id }: { id: string }) {
               }
             : action,
         )
-      : apiDeal?.next_available_actions
+      : apiDeal?.next_available_actions?.filter(
+          (action) => isSigningParty || action.action.toLowerCase() !== "sign",
+        )
   const [tabValue, setTabValue] = useState(2) // Default to Messages to match the image
 
   if (isLoading) {
@@ -163,6 +196,11 @@ export default function TransactionDetail({ id }: { id: string }) {
   ) => {
     if (!apiDealId) return
 
+    if (action.action.toLowerCase() === "sign") {
+      if (isSigningParty && hasSignAction) setSigningIdentity(signatureIdentity)
+      return
+    }
+
     if (action.action.toLowerCase() === "complete_contract") {
       router.push(
         `/contracts/create?dealId=${apiDealId}&stage=1&returnToDeal=true`,
@@ -201,6 +239,23 @@ export default function TransactionDetail({ id }: { id: string }) {
           بازگشت به داشبورد
         </Link>
 
+        {apiDealId &&
+          isSigningParty &&
+          signingIdentity === signatureIdentity && (
+            <ContractSignatureDialog
+              key={signingIdentity}
+              dealId={apiDealId}
+              identity={signingIdentity}
+              onClose={() => setSigningIdentity(null)}
+              onDealRefresh={() =>
+                Promise.all([
+                  refreshDeal(),
+                  refreshDocuments(),
+                  refreshSignatureStatus(),
+                ])
+              }
+            />
+          )}
         <TransactionHeader deal={deal} />
         {payment && payment.next_action !== "redirect" && (
           <Alert
@@ -242,6 +297,15 @@ export default function TransactionDetail({ id }: { id: string }) {
           </Box>
 
           <Box className={styles.rightColumn}>
+            {signatureStatus?.signers.some((signer) => signer.is_you) && (
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={() => setSigningIdentity(signatureIdentity)}
+              >
+                مشاهده وضعیت امضای قرارداد
+              </Button>
+            )}
             {requiredActions && requiredActions.length >= 0 && (
               <RequiredAction
                 dealId={apiDealId || undefined}
