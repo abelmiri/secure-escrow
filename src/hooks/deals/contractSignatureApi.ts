@@ -78,12 +78,23 @@ export async function signatureRequest(
   return response.json()
 }
 export const isReconciling = (snapshot: SignatureSnapshot) =>
-  snapshot.status === "PROCESSING" ||
   snapshot.signers.some(
-    (s) => s.status === "PROCESSING" || s.status === "UNKNOWN",
+    (signer) => signer.status === "PROCESSING" || signer.status === "UNKNOWN",
   )
 export const isFinished = (snapshot: SignatureSnapshot) =>
   ["COMPLETED", "REFUSED", "EXPIRED"].includes(snapshot.status)
+export const isSignedContractPdf = (description: string | null) =>
+  description === "Digitally signed deal contract PDF"
+export const isContractPdf = (description: string | null) =>
+  description === "Generated deal contract PDF" || isSignedContractPdf(description)
+
+export function getSigningDocument(snapshot: SignatureSnapshot) {
+  return {
+    id: snapshot.signed_document ?? snapshot.contract_document,
+    signed: snapshot.signed_document !== null,
+  }
+}
+
 export const normalizeSignatureDigits = (value: string) =>
   value.replace(/[۰-۹٠-٩]/g, (digit) =>
     String(
@@ -114,7 +125,37 @@ const messages: Record<string, string> = {
     "تنظیمات سرویس امضا کامل نیست؛ با پشتیبانی تماس بگیرید.",
   UNAVAILABLE_OR_INVALID_RESPONSE:
     "پاسخ سرویس امضا قابل تأیید نیست؛ وضعیت را پیگیری کنید.",
+  NEEDS_CERTIFICATE: "برای امضای قرارداد به گواهی امضای معتبر نیاز دارید.",
+  NEEDS_PIN_SETUP: "ابتدا رمز امضا را در سرویس امضا تنظیم کنید.",
+  ENROLLMENT_PENDING: "گواهی امضای شما هنوز در حال صدور است.",
+  ENROLLMENT_FAILED: "صدور گواهی امضا ناموفق بود.",
+  REVOKE_REQUIRED: "ابتدا باید گواهی امضای قبلی باطل شود.",
+  SIGNING_NOT_READY: "حساب شما در سرویس امضا آمادهٔ امضای قرارداد نیست.",
 }
+
+function validationErrorText(error: SignatureError) {
+  if (typeof error.data.error !== "string") return ""
+  return error.status === 400
+    ? error.data.error.replace(/^(?:(?:pin|otp|signature)\.)?:/, "")
+    : error.data.error
+}
+
+export function signatureFieldErrors(error: SignatureError) {
+  const fields: Record<string, string> = {}
+  for (const name of ["pin", "otp", "signature"]) {
+    const value = error.data[name]
+    if (typeof value === "string") fields[name] = value
+    else if (Array.isArray(value))
+      fields[name] = value.filter((item) => typeof item === "string").join("؛ ")
+  }
+  const flattened =
+    error.status === 400 && typeof error.data.error === "string"
+      ? /^(pin|otp|signature)\.:([\s\S]+)$/.exec(error.data.error)
+      : null
+  if (flattened) fields[flattened[1]] = flattened[2]
+  return fields
+}
+
 export function signatureErrorMessage(error: unknown) {
   if (!(error instanceof SignatureError))
     return "ارتباط برقرار نشد. وضعیت را دوباره بررسی کنید."
@@ -123,11 +164,13 @@ export function signatureErrorMessage(error: unknown) {
   const parts = [
     error.data.detail,
     error.data.message,
-    error.data.error,
+    validationErrorText(error),
   ].filter((v): v is string => typeof v === "string")
   return (
-    parts.join("؛ ") ||
-    messages[String(error.data.code)] ||
+    (typeof error.data.code === "string" && Object.hasOwn(messages, error.data.code)
+      ? messages[error.data.code]
+      : "") ||
+    parts.filter(Boolean).join("؛ ") ||
     "انجام عملیات ممکن نشد. اطلاعات و وضعیت معامله را بررسی کنید."
   )
 }

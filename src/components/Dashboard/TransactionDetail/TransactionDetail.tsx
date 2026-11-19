@@ -1,14 +1,16 @@
 "use client"
 
 import { useContext, useEffect, useState } from "react"
-import { Box, Typography, CircularProgress, Alert } from "@mui/material"
+import { Box, Typography, CircularProgress, Alert, Button } from "@mui/material"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
 import { dealsData } from "@/constants/deals"
 import { authContext } from "@/context/auth/authProvider"
-import { useDeal } from "@/hooks/deals/useDeal"
+import { getPartyMobileNumber, useDeal } from "@/hooks/deals/useDeal"
 import type { DealNextAction } from "@/hooks/deals/useDeal"
+import { isContractPdf } from "@/hooks/deals/contractSignatureApi"
+import { useContractSignatureStatus } from "@/hooks/deals/useContractSignature"
 import { useDealWorkflowAction } from "@/hooks/deals/useDealWorkflowAction"
 import { useDealDocuments } from "@/hooks/documents/useDealDocuments"
 import { useDealMessages } from "@/hooks/chat/useDealMessages"
@@ -65,6 +67,28 @@ export default function TransactionDetail({ id }: { id: string }) {
     isLoading: isDocumentsLoading,
     mutate: refreshDocuments,
   } = useDealDocuments(apiDealId)
+  const signatureIdentity = `${apiDealId}:${authState.user?.actor_id}`
+  const mobile = authState.user?.mobile_number
+  const isSigningParty =
+    !selectedBrokerId &&
+    !!mobile &&
+    apiDeal?.parties?.some(
+      (party) =>
+        (party.role === "customer" || party.role === "beneficiary") &&
+        getPartyMobileNumber(party) === mobile,
+    )
+  const hasSignAction = apiDeal?.next_available_actions?.some(
+    (action) => action.action.toLowerCase() === "sign",
+  )
+  const { data: signatureStatus, mutate: refreshSignatureStatus } =
+    useContractSignatureStatus(
+      isSigningParty &&
+        !hasSignAction &&
+        apiDocuments.some((document) => isContractPdf(document.description))
+        ? apiDealId
+        : null,
+      signatureIdentity,
+    )
   const {
     messages: apiMessages,
     messageText,
@@ -126,7 +150,9 @@ export default function TransactionDetail({ id }: { id: string }) {
               }
             : action,
         )
-      : apiDeal?.next_available_actions
+      : apiDeal?.next_available_actions?.filter(
+          (action) => isSigningParty || action.action.toLowerCase() !== "sign",
+        )
   const [tabValue, setTabValue] = useState(2) // Default to Messages to match the image
 
   if (isLoading) {
@@ -171,13 +197,7 @@ export default function TransactionDetail({ id }: { id: string }) {
     if (!apiDealId) return
 
     if (action.action.toLowerCase() === "sign") {
-      if (
-        apiDeal?.next_available_actions?.some((item) => item.action === "sign")
-      ) {
-        setSigningIdentity(
-          `${apiDealId}:${selectedBrokerId || "user"}:${selectedActorId}`,
-        )
-      }
+      if (isSigningParty && hasSignAction) setSigningIdentity(signatureIdentity)
       return
     }
 
@@ -220,15 +240,19 @@ export default function TransactionDetail({ id }: { id: string }) {
         </Link>
 
         {apiDealId &&
-          signingIdentity ===
-            `${apiDealId}:${selectedBrokerId || "user"}:${selectedActorId}` && (
+          isSigningParty &&
+          signingIdentity === signatureIdentity && (
             <ContractSignatureDialog
               key={signingIdentity}
               dealId={apiDealId}
               identity={signingIdentity}
               onClose={() => setSigningIdentity(null)}
               onDealRefresh={() =>
-                Promise.all([refreshDeal(), refreshDocuments()])
+                Promise.all([
+                  refreshDeal(),
+                  refreshDocuments(),
+                  refreshSignatureStatus(),
+                ])
               }
             />
           )}
@@ -273,6 +297,15 @@ export default function TransactionDetail({ id }: { id: string }) {
           </Box>
 
           <Box className={styles.rightColumn}>
+            {signatureStatus?.signers.some((signer) => signer.is_you) && (
+              <Button
+                variant="outlined"
+                fullWidth
+                onClick={() => setSigningIdentity(signatureIdentity)}
+              >
+                مشاهده وضعیت امضای قرارداد
+              </Button>
+            )}
             {requiredActions && requiredActions.length >= 0 && (
               <RequiredAction
                 dealId={apiDealId || undefined}

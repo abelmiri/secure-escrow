@@ -90,6 +90,52 @@ test("reconciles provider UNKNOWN even when overall status remains PENDING", () 
     assert.equal(api.isFinished({ status }), true)
 })
 
+test("uses signer statuses when the request still says PROCESSING after a failure", () => {
+  const { api } = loadApi()
+  const snapshot = {
+    status: "PROCESSING",
+    signers: [{ status: "FAILED" }, { status: "PENDING" }],
+  }
+  assert.equal(api.isReconciling(snapshot), false)
+  snapshot.signers[0].status = "PROCESSING"
+  assert.equal(api.isReconciling(snapshot), true)
+})
+
+test("shows the same PDF the backend will submit for the next signature", () => {
+  const { api } = loadApi()
+  const snapshot = { contract_document: "original", signed_document: null }
+  assert.equal(api.getSigningDocument(snapshot).id, "original")
+  assert.equal(api.getSigningDocument(snapshot).signed, false)
+  snapshot.signed_document = "signed-version"
+  assert.equal(api.getSigningDocument(snapshot).id, "signed-version")
+  assert.equal(api.getSigningDocument(snapshot).signed, true)
+  assert.equal(api.isContractPdf("Generated deal contract PDF"), true)
+  assert.equal(api.isContractPdf("Digitally signed deal contract PDF"), true)
+  assert.equal(api.isContractPdf(null), false)
+})
+
+test("reads Django's flattened validation errors as well as structured errors", async () => {
+  const { api } = loadApi(async () =>
+    new Response('{"error":"otp.:The signer must configure a signing PIN first."}', {
+      status: 400,
+    }),
+  )
+  await assert.rejects(
+    api.signatureRequest(42, new AbortController().signal, "otp"),
+    (error) => {
+      const message = "The signer must configure a signing PIN first."
+      assert.equal(api.signatureFieldErrors(error).otp, message)
+      assert.equal(api.signatureErrorMessage(error), message)
+      return true
+    },
+  )
+  const pin = new api.SignatureError(400, { pin: ["Invalid PIN"], code: "INVALID_PIN" })
+  assert.equal(api.signatureFieldErrors(pin).pin, "Invalid PIN")
+  assert.equal(api.signatureErrorMessage(pin), "رمز شش‌رقمی امضا صحیح نیست.")
+  const missingPdf = new api.SignatureError(400, { error: ":The contract PDF has not been generated yet." })
+  assert.equal(api.signatureErrorMessage(missingPdf), "The contract PDF has not been generated yet.")
+})
+
 test("sends bodyless OTP and multipart sign without overriding content-type", async () => {
   const calls = []
   const { api } = loadApi(async (url, options) => {

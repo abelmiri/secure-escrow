@@ -5,6 +5,7 @@ import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile"
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf"
 import type { Deal } from "@/constants/deals"
 import type { UploadedDealDocument } from "@/hooks/documents/useDealDocuments"
+import { isSignedContractPdf } from "@/hooks/deals/contractSignatureApi"
 import styles from "./styles/TransactionDetail.module.scss"
 
 interface TransactionDocumentsTabProps {
@@ -57,7 +58,9 @@ function ApiDocumentsList({ documents }: { documents: UploadedDealDocument[] }) 
               {getDocumentIcon(type)}
               <Box className={styles.documentDetails}>
                 <Typography className={styles.documentName}>
-                  {document.document_name}
+                  {isSignedContractPdf(document.description)
+                    ? "نسخهٔ امضاشدهٔ قرارداد"
+                    : document.document_name}
                 </Typography>
                 <Box className={styles.documentMeta}>
                   <Typography className={styles.documentType}>

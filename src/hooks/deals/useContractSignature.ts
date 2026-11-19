@@ -1,12 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from "react"
+import useSWR from "swr"
 import {
   isFinished,
   isReconciling,
   SignatureError,
   signatureErrorMessage,
+  signatureFieldErrors,
   signatureRequest,
   type SignatureSnapshot,
 } from "./contractSignatureApi"
+
+export function useContractSignatureStatus(id: number | null, identity: string) {
+  return useSWR(
+    id === null ? null : ["contract-signature-status", id, identity] as const,
+    ([, dealId]) => signatureRequest(dealId, AbortSignal.timeout(30000)),
+    { shouldRetryOnError: false },
+  )
+}
 
 // No credentials are retained here. An interrupted submission must be reconciled even after reopening.
 const unresolved = new Set<string>()
@@ -25,6 +35,7 @@ export function useContractSignature(
   const lock = useRef(false)
   const inaccessible = useRef(false)
   const controller = useRef<AbortController | null>(null)
+  const latest = useRef<SignatureSnapshot | null>(null)
   const refreshDeal = useRef(onDealRefresh)
   useEffect(() => {
     refreshDeal.current = onDealRefresh
@@ -47,19 +58,33 @@ export function useContractSignature(
         unresolved.add(key)
         setUncertain(true)
       }
+      const applySnapshot = (result: SignatureSnapshot, resolveSubmission: boolean) => {
+        const previous = latest.current
+        latest.current = result
+        setSnapshot(result)
+        if (resolveSubmission && !isReconciling(result)) {
+          unresolved.delete(key)
+          setUncertain(false)
+        }
+        if (
+          result.signed_signer ||
+          (previous
+            ? previous.status !== result.status ||
+              previous.can_sign !== result.can_sign ||
+              previous.signed_document !== result.signed_document ||
+              previous.signers.some((signer, index) =>
+                signer.status !== result.signers[index]?.status,
+              )
+            : !result.can_sign)
+        ) {
+          void refreshDeal.current().catch(() => {})
+        }
+      }
       try {
         const result = await signatureRequest(id, abort.signal, operation, body)
         if (!active.current || controller.current !== abort) return
         inaccessible.current = false
-        setSnapshot(result)
-        if (operation === "refresh" || operation === "sign") {
-          if (!isReconciling(result)) {
-            unresolved.delete(key)
-            setUncertain(false)
-          }
-        }
-        if (isFinished(result) || !result.can_sign || result.signed_signer)
-          void refreshDeal.current().catch(() => {})
+        applySnapshot(result, operation === "refresh" || operation === "sign")
         return result
       } catch (caught) {
         if (!active.current || controller.current !== abort) return
@@ -70,36 +95,24 @@ export function useContractSignature(
           if (pending) {
             unresolved.add(key)
             setUncertain(true)
-          } else if (operation === "sign" && caught.status === 400) {
-            unresolved.delete(key)
-            setUncertain(false)
           }
-          const nextFields: Record<string, string> = {}
-          for (const name of ["pin", "otp", "signature"]) {
-            const value = caught.data[name]
-            if (typeof value === "string") nextFields[name] = value
-            else if (Array.isArray(value))
-              nextFields[name] = value
-                .filter((v) => typeof v === "string")
-                .join("؛ ")
-          }
-          setFields(nextFields)
+          setFields(signatureFieldErrors(caught))
           if (caught.status === 403 || caught.status === 404) {
             inaccessible.current = true
             setSnapshot(null)
           }
           // A definitive rejection still needs a fresh permission snapshot before a new attempt.
-          if (operation === "sign" && caught.status === 400 && !pending) {
-            setSnapshot(null)
+          if (operation === "sign" && caught.status === 400) {
             try {
               const current = await signatureRequest(id, abort.signal)
               if (active.current && controller.current === abort)
-                setSnapshot(current)
+                applySnapshot(current, !pending)
             } catch {
-              // Keep the form closed until the next successful status check.
+              // Keep submission blocked until the next successful status check.
             }
           }
         }
+        if (!active.current || controller.current !== abort) return
         setError(signatureErrorMessage(caught))
         void refreshDeal.current().catch(() => {})
       } finally {

@@ -16,6 +16,7 @@ import {
 } from "@mui/material"
 import { useContractSignature } from "@/hooks/deals/useContractSignature"
 import {
+  getSigningDocument,
   isFinished,
   isReconciling,
   normalizeSignatureDigits,
@@ -59,12 +60,18 @@ export default function ContractSignatureDialog({
   const mounted = useRef(true)
   const theme = useTheme()
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"))
+  const signingDocument = snapshot && getSigningDocument(snapshot)
+  const reconciling = !!snapshot && isReconciling(snapshot)
+  const displayStatus =
+    snapshot?.status === "PROCESSING" && !reconciling
+      ? "PENDING"
+      : snapshot?.status
   const canSign =
     !!snapshot?.can_sign &&
     !uncertain &&
     !busy &&
     !isFinished(snapshot) &&
-    !isReconciling(snapshot)
+    !reconciling
   useEffect(() => {
     mounted.current = true
     return () => {
@@ -119,6 +126,7 @@ export default function ContractSignatureDialog({
       data.append("signature", file)
       setPin("")
       setOtp("")
+      setOtpUntil(0)
       await run("sign", data)
     } finally {
       submitting.current = false
@@ -146,7 +154,7 @@ export default function ContractSignatureDialog({
               در صورت نقص کد ملی یا شمارهٔ همراه، پروفایل خود را تکمیل کنید.
             </Typography>
           )}
-          {uncertain && (
+          {(uncertain || reconciling) && (
             <Alert severity="info">
               نتیجهٔ درخواست هنوز قطعی نیست. تا پایان بررسی، درخواست امضا را
               دوباره ارسال نکنید.
@@ -157,7 +165,7 @@ export default function ContractSignatureDialog({
               <Alert
                 severity={snapshot.status === "COMPLETED" ? "success" : "info"}
               >
-                {labels[snapshot.status] || snapshot.status}
+                {displayStatus && labels[displayStatus]}
               </Alert>
               {snapshot.expires_at && (
                 <Typography>
@@ -178,17 +186,11 @@ export default function ContractSignatureDialog({
                   بررسی می‌شود.
                 </Typography>
               )}
-              {snapshot.contract_document && (
+              {signingDocument?.id && (
                 <ContractDocument
-                  key={snapshot.contract_document}
-                  id={snapshot.contract_document}
-                />
-              )}
-              {snapshot.signed_document && (
-                <ContractDocument
-                  key={snapshot.signed_document}
-                  id={snapshot.signed_document}
-                  signed
+                  key={signingDocument.id}
+                  id={signingDocument.id}
+                  signed={signingDocument.signed}
                 />
               )}
               {snapshot.can_sign && !isFinished(snapshot) && (
@@ -240,7 +242,9 @@ export default function ContractSignatureDialog({
                     }
                     error={!!fields.otp}
                     helperText={fields.otp}
-                    slotProps={{ htmlInput: { inputMode: "numeric" } }}
+                    slotProps={{
+                      htmlInput: { inputMode: "numeric", maxLength: 32 },
+                    }}
                   />
                   <Button
                     variant="contained"
