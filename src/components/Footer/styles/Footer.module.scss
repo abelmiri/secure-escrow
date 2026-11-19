@@ -192,6 +192,15 @@
   }
 }
 
+.zibalTrustSeal {
+  :global(img) {
+    height: 120px !important;
+    max-height: 120px !important;
+    width: auto !important;
+    object-fit: contain;
+  }
+}
+
 .irannsrTrustSeal {
   :global(img) {
     display: block;

@@ -1,7 +1,7 @@
 "use client"
 
 import { useContext, useEffect, useState } from "react"
-import { Box, Typography, CircularProgress } from "@mui/material"
+import { Box, Typography, CircularProgress, Alert } from "@mui/material"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward"
@@ -76,8 +76,11 @@ export default function TransactionDetail({ id }: { id: string }) {
     isLoadingPrevious: isLoadingPreviousMessages,
     isSending: isSendingMessage,
   } = useDealMessages(apiDealId, selectedActorId)
-  const { submitWorkflowAction, isSubmitting: isSubmittingWorkflowAction } =
-    useDealWorkflowAction()
+  const {
+    submitWorkflowAction,
+    isSubmitting: isSubmittingWorkflowAction,
+    payment,
+  } = useDealWorkflowAction()
 
   useEffect(() => {
     const handleProfileSelectionChange = () => {
@@ -197,6 +200,7 @@ export default function TransactionDetail({ id }: { id: string }) {
         apiDealId,
         {
           transition_id: action.transition_id,
+          action: action.action,
           form: formData,
           files,
         },
@@ -229,6 +233,19 @@ export default function TransactionDetail({ id }: { id: string }) {
             />
           )}
         <TransactionHeader deal={deal} />
+        {payment && payment.next_action !== "redirect" && (
+          <Alert
+            severity={payment.status === "verified" ? "success" : "warning"}
+          >
+            {payment.message}
+            {payment.next_action === "contact_support" && (
+              <>
+                {" "}
+                <Link href="/contact">تماس با پشتیبانی</Link>
+              </>
+            )}
+          </Alert>
+        )}
         <WorkflowInfoAlert
           description={apiDeal?.current_workflow?.header_description}
         />

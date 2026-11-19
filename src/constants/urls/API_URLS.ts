@@ -50,6 +50,8 @@ const API_URLS = {
     id: number
     operation?: "otp" | "sign" | "refresh" | "decline"
   }) => `v1/deals/${id}/contract-signature${operation ? `/${operation}` : ""}`,
+  zibalPaymentStatus: ({ orderId }: { orderId: string }) =>
+    `v1/deals/payments/zibal/${encodeURIComponent(orderId)}`,
   documentDownload: ({ id }: { id: string }) =>
     `v1/documents/${encodeURIComponent(id)}/download`,
   dealContractPdf: ({ id }: { id: number }) => `v1/deals/u/${id}/contract-pdf`,
