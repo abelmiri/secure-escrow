@@ -42,13 +42,14 @@ export class SignatureError extends Error {
 export async function signatureFetch(
   url: string,
   signal: AbortSignal,
-  body?: FormData,
+  body?: FormData | string,
   method = "GET",
+  headers?: Record<string, string>,
 ) {
   const response = await fetch(urlMaker({ url }), {
     method,
     body,
-    headers: headerMaker(),
+    headers: headerMaker({ headers }),
     signal,
     cache: "no-store",
   })
@@ -77,6 +78,48 @@ export async function signatureRequest(
   )
   return response.json()
 }
+
+export type RokhLocation = { id: number; name: string }
+export type RokhSigningStatus = {
+  signing_state: string | null
+  can_request_document_otp: boolean | null
+}
+export type EnrollmentInput = {
+  given_name: string
+  surname: string
+  given_name_lat: string
+  surname_lat: string
+  province_id: number
+  city_id: number
+  cert_type: "UNAFFILIATED" | "UNAFFILIATED_M"
+  pin: string
+  otp: string
+}
+export type EnrollmentResult = {
+  status: "COMPLETED" | "PENDING"
+  job_token?: string
+}
+
+export async function certificateRequest<T>(
+  id: number,
+  path: string,
+  signal: AbortSignal,
+  submission?: { key: string; data?: EnrollmentInput },
+): Promise<T> {
+  const response = await signatureFetch(
+    `${API_URLS.contractSignature({ id })}/certificate/${path}`,
+    signal,
+    submission?.data ? JSON.stringify(submission.data) : undefined,
+    submission ? "POST" : "GET",
+    submission
+      ? {
+          "Idempotency-Key": submission.key,
+          ...(submission.data ? { "Content-Type": "application/json" } : {}),
+        }
+      : undefined,
+  )
+  return response.json()
+}
 export const isReconciling = (snapshot: SignatureSnapshot) =>
   snapshot.signers.some(
     (signer) => signer.status === "PROCESSING" || signer.status === "UNKNOWN",
@@ -86,7 +129,8 @@ export const isFinished = (snapshot: SignatureSnapshot) =>
 export const isSignedContractPdf = (description: string | null) =>
   description === "Digitally signed deal contract PDF"
 export const isContractPdf = (description: string | null) =>
-  description === "Generated deal contract PDF" || isSignedContractPdf(description)
+  description === "Generated deal contract PDF" ||
+  isSignedContractPdf(description)
 
 export function getSigningDocument(snapshot: SignatureSnapshot) {
   return {
@@ -123,6 +167,7 @@ const messages: Record<string, string> = {
   INSUFFICIENT_BALANCE: "موجودی لازم برای امضا فراهم نیست.",
   SIGNATURE_CONFIGURATION:
     "تنظیمات سرویس امضا کامل نیست؛ با پشتیبانی تماس بگیرید.",
+  SIGNATURE_SERVICE_UNAVAILABLE: "سرویس رخ موقتاً در دسترس نیست.",
   UNAVAILABLE_OR_INVALID_RESPONSE:
     "پاسخ سرویس امضا قابل تأیید نیست؛ وضعیت را پیگیری کنید.",
   NEEDS_CERTIFICATE: "برای امضای قرارداد به گواهی امضای معتبر نیاز دارید.",
@@ -167,7 +212,8 @@ export function signatureErrorMessage(error: unknown) {
     validationErrorText(error),
   ].filter((v): v is string => typeof v === "string")
   return (
-    (typeof error.data.code === "string" && Object.hasOwn(messages, error.data.code)
+    (typeof error.data.code === "string" &&
+    Object.hasOwn(messages, error.data.code)
       ? messages[error.data.code]
       : "") ||
     parts.filter(Boolean).join("؛ ") ||

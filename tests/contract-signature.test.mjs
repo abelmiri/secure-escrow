@@ -24,7 +24,10 @@ function loadApi(fetchImpl = async () => new Response("{}")) {
       },
     },
     "@/request/headerMaker": {
-      default: () => ({ Authorization: "test-token" }),
+      default: ({ headers } = {}) => ({
+        Authorization: "test-token",
+        ...headers,
+      }),
     },
     "@/request/urlMaker": {
       default: ({ url }) => `https://example.test/${url}`,
@@ -40,6 +43,37 @@ function loadApi(fetchImpl = async () => new Response("{}")) {
   })
   return { api: exports, unauthorized: () => unauthorized }
 }
+
+test("enrollment submits numeric Rokh location IDs and an idempotency key", async () => {
+  const { api } = loadApi(async (url, options) => {
+    assert.equal(
+      url,
+      "https://example.test/v1/deals/108/contract-signature/certificate/enroll",
+    )
+    assert.equal(options.method, "POST")
+    assert.equal(options.headers["Idempotency-Key"], "request-key")
+    assert.equal(options.headers["Content-Type"], "application/json")
+    assert.deepEqual(JSON.parse(options.body), {
+      province_id: 8,
+      city_id: 303,
+      otp: "012345",
+    })
+    return Response.json(
+      { status: "PENDING", job_token: "job" },
+      { status: 202 },
+    )
+  })
+  const result = await api.certificateRequest(
+    108,
+    "enroll",
+    new AbortController().signal,
+    {
+      key: "request-key",
+      data: { province_id: 8, city_id: 303, otp: "012345" },
+    },
+  )
+  assert.equal(result.job_token, "job")
+})
 
 test("normalizes Persian and Arabic digits without changing leading zeroes", () => {
   const { api } = loadApi()
@@ -115,10 +149,14 @@ test("shows the same PDF the backend will submit for the next signature", () => 
 })
 
 test("reads Django's flattened validation errors as well as structured errors", async () => {
-  const { api } = loadApi(async () =>
-    new Response('{"error":"otp.:The signer must configure a signing PIN first."}', {
-      status: 400,
-    }),
+  const { api } = loadApi(
+    async () =>
+      new Response(
+        '{"error":"otp.:The signer must configure a signing PIN first."}',
+        {
+          status: 400,
+        },
+      ),
   )
   await assert.rejects(
     api.signatureRequest(42, new AbortController().signal, "otp"),
@@ -129,11 +167,19 @@ test("reads Django's flattened validation errors as well as structured errors", 
       return true
     },
   )
-  const pin = new api.SignatureError(400, { pin: ["Invalid PIN"], code: "INVALID_PIN" })
+  const pin = new api.SignatureError(400, {
+    pin: ["Invalid PIN"],
+    code: "INVALID_PIN",
+  })
   assert.equal(api.signatureFieldErrors(pin).pin, "Invalid PIN")
   assert.equal(api.signatureErrorMessage(pin), "رمز شش‌رقمی امضا صحیح نیست.")
-  const missingPdf = new api.SignatureError(400, { error: ":The contract PDF has not been generated yet." })
-  assert.equal(api.signatureErrorMessage(missingPdf), "The contract PDF has not been generated yet.")
+  const missingPdf = new api.SignatureError(400, {
+    error: ":The contract PDF has not been generated yet.",
+  })
+  assert.equal(
+    api.signatureErrorMessage(missingPdf),
+    "The contract PDF has not been generated yet.",
+  )
 })
 
 test("sends bodyless OTP and multipart sign without overriding content-type", async () => {

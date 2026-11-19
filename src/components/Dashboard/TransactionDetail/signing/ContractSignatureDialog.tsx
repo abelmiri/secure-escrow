@@ -14,14 +14,19 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material"
+import useSWR from "swr"
 import { useContractSignature } from "@/hooks/deals/useContractSignature"
 import {
+  certificateRequest,
   getSigningDocument,
   isFinished,
   isReconciling,
   normalizeSignatureDigits,
+  signatureErrorMessage,
   validateSignature,
+  type RokhSigningStatus,
 } from "@/hooks/deals/contractSignatureApi"
+import CertificateEnrollment from "./CertificateEnrollment"
 import SignatureInput from "./SignatureInput"
 import ContractDocument from "./ContractDocument"
 
@@ -72,6 +77,31 @@ export default function ContractSignatureDialog({
     !busy &&
     !isFinished(snapshot) &&
     !reconciling
+  const checkCertificate =
+    !!snapshot?.can_sign && !isFinished(snapshot) && !uncertain && !reconciling
+  const certificate = useSWR(
+    checkCertificate ? ["rokh-signing-status", dealId, identity] : null,
+    () =>
+      certificateRequest<RokhSigningStatus>(
+        dealId,
+        "status",
+        AbortSignal.timeout(55000),
+      ),
+    { refreshInterval: 20000, shouldRetryOnError: false },
+  )
+  const signingState = certificate.data?.signing_state
+  const ready =
+    !certificate.error &&
+    signingState === "READY" &&
+    certificate.data?.can_request_document_otp === true
+  const needsEnrollment =
+    signingState != null &&
+    [
+      "NEEDS_CERTIFICATE",
+      "NEEDS_PIN_SETUP",
+      "ENROLLMENT_FAILED",
+      "ENROLLMENT_PENDING",
+    ].includes(signingState)
   useEffect(() => {
     mounted.current = true
     return () => {
@@ -102,7 +132,7 @@ export default function ContractSignatureDialog({
     }
   }
   const submit = async () => {
-    if (!canSign || submitting.current) return
+    if (!canSign || !ready || submitting.current) return
     submitting.current = true
     try {
       setLocalError("")
@@ -195,64 +225,108 @@ export default function ContractSignatureDialog({
               )}
               {snapshot.can_sign && !isFinished(snapshot) && (
                 <Stack spacing={2}>
-                  <SignatureInput
-                    key={inputVersion}
-                    onChange={setFile}
-                    disabled={!canSign}
-                  />
-                  {fields.signature && (
-                    <Alert severity="error">{fields.signature}</Alert>
+                  {checkCertificate && certificate.isLoading && (
+                    <CircularProgress
+                      size={24}
+                      aria-label="در حال بررسی گواهی رخ"
+                    />
                   )}
-                  <TextField
-                    label="رمز شش‌رقمی امضا (PIN)"
-                    type="password"
-                    value={pin}
-                    autoComplete="off"
-                    disabled={!canSign}
-                    onChange={(event) =>
-                      setPin(normalizeSignatureDigits(event.target.value))
-                    }
-                    error={!!fields.pin}
-                    helperText={fields.pin}
-                    slotProps={{
-                      htmlInput: { inputMode: "numeric", maxLength: 6 },
-                    }}
-                  />
-                  <Button
-                    disabled={!canSign || seconds > 0}
-                    onClick={() => void sendOtp()}
-                  >
-                    {" "}
-                    {seconds > 0
-                      ? `ارسال مجدد پس از ${seconds} ثانیه`
-                      : "دریافت کد پیامکی"}
-                  </Button>
-                  {seconds > 0 && (
-                    <Typography>
-                      کد پیامکی ارسال شد؛ اعتبار باقی‌مانده: {seconds} ثانیه
-                    </Typography>
+                  {checkCertificate && certificate.error && (
+                    <Alert
+                      severity="error"
+                      action={
+                        <Button
+                          onClick={() =>
+                            void certificate.mutate().catch(() => {})
+                          }
+                        >
+                          تلاش مجدد
+                        </Button>
+                      }
+                    >
+                      {signatureErrorMessage(certificate.error)}
+                    </Alert>
                   )}
-                  <TextField
-                    label="کد پیامکی"
-                    value={otp}
-                    autoComplete="off"
-                    disabled={!canSign}
-                    onChange={(event) =>
-                      setOtp(normalizeSignatureDigits(event.target.value))
-                    }
-                    error={!!fields.otp}
-                    helperText={fields.otp}
-                    slotProps={{
-                      htmlInput: { inputMode: "numeric", maxLength: 32 },
-                    }}
-                  />
-                  <Button
-                    variant="contained"
-                    disabled={!canSign}
-                    onClick={() => void submit()}
-                  >
-                    ثبت امضای قرارداد
-                  </Button>
+                  {checkCertificate && needsEnrollment && (
+                    <CertificateEnrollment
+                      dealId={dealId}
+                      identity={identity}
+                      signingState={signingState}
+                      refreshStatus={certificate.mutate}
+                    />
+                  )}
+                  {checkCertificate &&
+                    certificate.data &&
+                    !ready &&
+                    !needsEnrollment && (
+                      <Alert severity="warning">
+                        {signingState === "REVOKE_REQUIRED"
+                          ? "ابتدا باید گواهی قبلی خود را در رخ باطل کنید."
+                          : "حساب شما در رخ هنوز آمادهٔ امضای سند نیست."}
+                      </Alert>
+                    )}
+                  {ready && (
+                    <>
+                      <SignatureInput
+                        key={inputVersion}
+                        onChange={setFile}
+                        disabled={!canSign}
+                      />
+                      {fields.signature && (
+                        <Alert severity="error">{fields.signature}</Alert>
+                      )}
+                      <TextField
+                        label="رمز شش‌رقمی امضا (PIN)"
+                        type="password"
+                        value={pin}
+                        autoComplete="off"
+                        disabled={!canSign}
+                        onChange={(event) =>
+                          setPin(normalizeSignatureDigits(event.target.value))
+                        }
+                        error={!!fields.pin}
+                        helperText={fields.pin}
+                        slotProps={{
+                          htmlInput: { inputMode: "numeric", maxLength: 6 },
+                        }}
+                      />
+                      <Button
+                        disabled={!canSign || seconds > 0}
+                        onClick={() => void sendOtp()}
+                      >
+                        {" "}
+                        {seconds > 0
+                          ? `ارسال مجدد پس از ${seconds} ثانیه`
+                          : "دریافت کد پیامکی"}
+                      </Button>
+                      {seconds > 0 && (
+                        <Typography>
+                          کد پیامکی ارسال شد؛ اعتبار باقی‌مانده: {seconds} ثانیه
+                        </Typography>
+                      )}
+                      <TextField
+                        label="کد پیامکی"
+                        value={otp}
+                        autoComplete="off"
+                        disabled={!canSign}
+                        onChange={(event) =>
+                          setOtp(normalizeSignatureDigits(event.target.value))
+                        }
+                        error={!!fields.otp}
+                        helperText={fields.otp}
+                        slotProps={{
+                          htmlInput: { inputMode: "numeric", maxLength: 32 },
+                        }}
+                      />
+                      <Button
+                        variant="contained"
+                        disabled={!canSign}
+                        onClick={() => void submit()}
+                      >
+                        ثبت امضای قرارداد
+                      </Button>
+                    </>
+                  )}
                   <Button
                     color="error"
                     disabled={!canSign}
