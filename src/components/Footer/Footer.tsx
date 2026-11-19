@@ -4,6 +4,7 @@ import PhoneIcon from "@mui/icons-material/Phone"
 import LocationOnIcon from "@mui/icons-material/LocationOn"
 import TelegramIcon from "@mui/icons-material/Telegram"
 import Image from "next/image"
+import Script from "next/script"
 import FacebookIcon from "@mui/icons-material/Facebook"
 import TwitterIcon from "@mui/icons-material/Twitter"
 import LinkedInIcon from "@mui/icons-material/LinkedIn"
@@ -206,6 +207,18 @@ export default function Footer() {
           </Box>
 
           <Box className={styles.trustSeals}>
+            <Box
+              id="zibal"
+              className={`${styles.trustSeal} ${styles.zibalTrustSeal}`}
+              aria-label="پرداخت امن با زیبال"
+            >
+              <Script
+                id="zibal-trust-script"
+                src="https://zibal.ir/trust/scripts/zibal-trust-v4.js"
+                type="text/javascript"
+                strategy="afterInteractive"
+              />
+            </Box>
             <Box
               className={styles.trustSeal}
               dangerouslySetInnerHTML={{ __html: enamadTrustSeal }}

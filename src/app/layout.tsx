@@ -11,6 +11,7 @@ import { DOMAIN_URL } from "@/constants/urls/SERVER_URLS"
 
 export const metadata: Metadata = {
   metadataBase: new URL(DOMAIN_URL),
+  referrer: "strict-origin-when-cross-origin",
   title: "امان یار | امن و حرفه‌ای",
   description: "امان یار - مورد اعتمادترین",
 }
